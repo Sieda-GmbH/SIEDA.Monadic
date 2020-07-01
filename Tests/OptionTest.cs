@@ -1,0 +1,733 @@
+﻿using System;
+using MonadicTests.Tests.HelperClass;
+using NUnit.Framework;
+using SIEDA.Monadic;
+
+namespace SIEDA.MonadicTests
+{
+   [TestFixture]
+   [Description( "Prüft Verhalten von SIEDA's Option<T,E>." )]
+   public class OptionTest
+   {
+      #region Construction
+
+      [Test]
+      public void ConstructNone_ViaSomeIsNull()
+      {
+         var testValue = Option<object, object>.From( null );
+
+         Assert.That( testValue.IsSome, Is.False );
+         Assert.That( testValue.IsNone, Is.True );
+         Assert.That( testValue.IsFailure, Is.False );
+      }
+
+      [Test]
+      public void ConstructNone_ViaNullableWithoutValue()
+      {
+         var testValue = Option<int, object>.From( new int?() );
+
+         Assert.That( testValue.IsNone, Is.True );
+         Assert.That( testValue.IsSome, Is.False );
+         Assert.That( testValue.IsFailure, Is.False );
+      }
+
+      [Test]
+      public void ExplicitNullThrowsException()
+      {
+         Assert.Throws<OptionSomeConstructionException>( () => Option<string, object>.Some( null ) );
+      }
+
+      [Test]
+      public void ExplicitNullableThrowsException()
+      {
+         Assert.Throws<OptionSomeConstructionException>( () => Option<int, object>.Some( new int?() ) );
+      }
+
+      [Test]
+      public void ConstructSome_ViaActualValue()
+      {
+         var testValue = Option<object, object>.Some( new object() );
+
+         Assert.That( testValue.IsSome, Is.True );
+         Assert.That( testValue.IsNone, Is.False );
+         Assert.That( testValue.IsFailure, Is.False );
+      }
+
+      [Test]
+      public void ConstructSome_ViaActualNullableValue()
+      {
+         int? testObject = 1;
+         var testValue = Option<int, int>.Some( testObject );
+
+         Assert.That( testValue.IsSome, Is.True );
+         Assert.That( testValue.IsNone, Is.False );
+         Assert.That( testValue.IsFailure, Is.False );
+         Assert.That( testValue.Or( 2 ), Is.EqualTo( 1 ) );
+      }
+
+      [Test]
+      public void ConstructFailure_ErrorNull()
+      {
+         Assert.Throws<OptionFailureConstructionException>( () => Option<object, object>.Failure( null ) );
+      }
+
+      [Test]
+      public void ConstructFailure_ErrorNotNull()
+      {
+         var testValue = Option<object, object>.Failure( new object() );
+
+         Assert.That( testValue.IsSome, Is.False );
+         Assert.That( testValue.IsNone, Is.False );
+         Assert.That( testValue.IsFailure, Is.True );
+      }
+
+      [Test]
+      [Description( "Kann erfolgreiche Options vom Wertetyp 'Exception' konstruieren." )]
+      public void ConstructSome_ValueIsAnException()
+      {
+         //WICHTIG: Es gibt Argumente, das hier zu verbieten und analog zum Option auf ein Failure zu mappen
+         //         Es gibt aber auch Argumente, es so zu lassen wie es ist. Aktuell wurde sich für die
+         //         weniger invasive Variante entschieden, vor allem da es weniger implizite Sachen macht.
+         //         Dieser Test dient zur Dokumentation dieses Verhaltens.
+         var x = Option<Exception, string>.Some( new Exception() );
+
+         Assert.That( x.IsSome, Is.True );
+         Assert.That( x.IsNone, Is.False );
+         Assert.That( x.IsFailure, Is.False );
+      }
+
+      #endregion Construction
+
+      #region ToString
+
+      private class TestObj
+      {
+         private readonly string S;
+
+         public TestObj( string s )
+         {
+            S = s;
+         }
+
+         public override string ToString() => $"Object '{S}'";
+      }
+
+      [Test]
+      public void ToString_Some()
+      {
+         Assert.That( Option<TestObj, String>.From( new TestObj( "hallo" ) ).ToString(), Is.EqualTo( "[Option<TestObj, String>.Some: Object 'hallo']" ) );
+      }
+
+      [Test]
+      public void ToString_None()
+      {
+         Assert.That( Option<TestObj, String>.From( null ).ToString(), Is.EqualTo( "[Option<TestObj, String>.None]" ) );
+      }
+
+      [Test]
+      public void ToString_Failure()
+      {
+         Assert.That( Option<String, TestObj>.Failure( new TestObj( "evil" ) ).ToString(), Is.EqualTo( "[Option<String, TestObj>.Failure: Object 'evil']" ) );
+      }
+
+      #endregion ToString
+
+      #region Equals
+
+      [Test]
+      [Description( "Beide haben denselben Wert." )]
+      public void Equals_SomeEqual()
+      {
+         var t1 = new Tuple<string, int>( "abc", 123 );
+         var t2 = new Tuple<string, int>( "abc", 123 );
+
+         var x = Option<Tuple<string, int>, string>.Some( t1 );
+         var y = Option<Tuple<string, int>, string>.Some( t2 );
+
+         Assert.That( t1.Equals( t2 ), Is.True );
+         Assert.That( x.Equals( y ), Is.True );
+      }
+
+      [Test]
+      [Description( "Beide haben Werte, aber unterschiedlich." )]
+      public void Equals_SomeInequal()
+      {
+         var x = Option<int, string>.Some( 4 );
+         var y = Option<int, string>.Some( 5 );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Beide haben denselben Fehler." )]
+      public void Equals_FailedEqual()
+      {
+         var x = Option<object, int>.Failure( 123 );
+         var y = Option<object, int>.Failure( 123 );
+
+         Assert.That( x.Equals( y ), Is.True );
+      }
+
+      [Test]
+      [Description( "Es ist NICHT egal, welches Problem ein gescheitertes Option hat" )]
+      public void Equals_FailedInequal()
+      {
+         var x = Option<object, string>.Failure( "what a disappointment" );
+         var y = Option<object, string>.Failure( "yet another disappointment" );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Gescheitertes Option ist ungleich jedem Erfolgreichen." )]
+      public void Equals_FailedInequalToSome()
+      {
+         var x = Option<int, string>.Failure( "how appaling!" );
+         var y = Option<int, string>.Some( 0 );
+         var z = Option<Option<int, string>, string>.Some( y );
+
+         Assert.That( x.Equals( y ), Is.False );
+         Assert.That( x.Equals( z ), Is.False );
+      }
+
+      [Test]
+      [Description( "Leeres Option ist nur gleich andere leeren Options." )]
+      public void Equals_None()
+      {
+         var some = Option<string, string>.Some( "something" );
+         var fail = Option<string, string>.Failure( "inexcusable" );
+
+         Assert.That( Option<string, string>.None.Equals( some ), Is.False );
+         Assert.That( Option<string, string>.None.Equals( fail ), Is.False );
+         Assert.That( Option<string, string>.None.Equals( Option<string, string>.None ), Is.True );
+      }
+
+      [Test]
+      [Description( "Options zu unterschiedlichen Typen sind unterschiedlich." )]
+      public void Equals_DifferentTypeInequal()
+      {
+         var t1 = new Tuple<string, int>( "abc", 123 );
+         var t2 = new Tuple<string, string>( "abc", "123" );
+
+         var x = Option<Tuple<string, int>, string>.Some( t1 );
+         var y = Option<Tuple<string, string>, string>.Some( t2 );
+
+         Assert.That( t1.Equals( t2 ), Is.False );
+         Assert.That( x.Equals( y ), Is.False );
+      }
+      
+
+      [Test]
+      [Description( "Options zu unterschiedlichen Typen sind unterschiedlich - für Failure wird keine Ausnahme gemacht." )]
+      public void Equals_DifferentTypeInequalForFailure()
+      {
+         var x = Option<int, string>.Failure( "horrible" );
+         var y = Option<object, string>.Failure( "horrible" );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Options zu unterschiedlichen Typen sind unterschiedlich - für None wird keine Ausnahme gemacht." )]
+      public void Equals_DifferentTypeInequalForNone()
+      {
+         var x = Option<int, string>.None;
+         var y = Option<object, string>.None;
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+
+      #endregion Equals
+
+      #region Accessing Value
+
+      [Test]
+      public void Or_FailureOrNull()
+      {
+         Assert.That( Option<object, int>.Failure( -1 ).Or( null ), Is.Null );
+      }
+
+      [Test]
+      public void Or_FailureOrValue()
+      {
+         Assert.That( Option<int, int>.Failure( -1 ).Or( 1 ), Is.EqualTo( 1 ) );
+      }
+
+      [Test]
+      public void Or_Value()
+      {
+         Assert.That( Option<int, int>.Some( 1 ).Or( 2 ), Is.EqualTo( 1 ) );
+      }
+
+      [Test]
+      public void Error_ThrowsIfSome()
+      {
+         Assert.Throws<OptionNoFailureException>( () => Option<string, int>.Some( "HAPPY" ).FailureOrThrow() );
+      }
+
+       [Test]
+      public void Error_ReturnsFailure()
+      {
+         Assert.That( Option<string, int>.Failure( -1 ).FailureOrThrow(), Is.EqualTo( -1 ) );
+      }
+
+      [Test]
+      public void OrThrow_ThrowsIfFailure()
+      {
+         Assert.Throws<OptionFailureException>( () => Option<string, int>.Failure( -1 ).OrThrow() );
+      }
+      
+
+      [Test]
+      public void OrThrow_DoesNotThrowIfSome()
+      {
+         var testValue = ""; //to be overwritten by "happy"
+
+         Assert.DoesNotThrow( () => testValue = Option<string, int>.Some( "HAPPY" ).OrThrow() );
+         Assert.That( testValue, Is.EqualTo( "HAPPY" ) );
+      }
+
+      [Test]
+      public void OrThrowWithText_DoesThrowIfFailure()
+      {
+         Assert.Throws<OptionFailureException>( () => Option<string, int>.Failure( -1 ).OrThrow( "Test" ) );
+      }
+
+      [Test]
+      public void OrThrowWithText_DoesNotThrowIfSome()
+      {
+         var testValue = 0;
+
+         Assert.DoesNotThrow( () => testValue = Option<int, int>.Some( 1 ).OrThrow( "Test" ) );
+         Assert.That( testValue, Is.EqualTo( 1 ) );
+      }
+
+      #endregion Accessing Value
+
+      #region Subtypes
+
+      [Test]
+      public void OrWithDirectSubtype_Some()
+      {
+         var myClass = new MyClass();
+         var mySubclass = new MySubclass();
+
+         var underTest = Option<MyClass, Exception>.Some( myClass );
+         var actualValue = underTest.Or( mySubclass );
+
+         Assert.That( actualValue, Is.SameAs( myClass ) );
+      }
+
+      [Test]
+      public void OrWithDirectSubtype_None()
+      {
+         var mySubclass = new MySubclass();
+
+         var underTest = Option<MyClass, Exception>.None;
+         var actualValue = underTest.Or( mySubclass );
+
+         Assert.That( actualValue, Is.SameAs( mySubclass ) );
+      }
+
+      [Test]
+      public void OrWithDirectSubtype_Failure()
+      {
+         var mySubclass = new MySubclass();
+
+         var underTest = Option<MyClass, Exception>.Failure( new ArgumentException( "irrelevant" ) );
+         var actualValue = underTest.Or( mySubclass );
+
+         Assert.That( actualValue, Is.SameAs( mySubclass ) );
+      }
+
+      [Test]
+      public void OrWithParallelSubtype_Some()
+      {
+         var mySubclass = new MySubclass();
+         var myOtherSubclass = new MyOtherSubclass();
+
+         var underTest = Option<MyClass, Exception>.Some( mySubclass );
+         var actualValue = underTest.Or( myOtherSubclass );
+
+         Assert.That( actualValue, Is.SameAs( mySubclass ) );
+      }
+
+      [Test]
+      public void OrWithParallelSubtype_None()
+      {
+         var myOtherSubclass = new MyOtherSubclass();
+
+         var underTest = Option<MyClass, Exception>.None;
+         var actualValue = underTest.Or( myOtherSubclass );
+
+         Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );
+      }
+
+      [Test]
+      public void OrWithParallelSubtype_Failure()
+      {
+         var myOtherSubclass = new MyOtherSubclass();
+
+         var underTest = Option<MyClass, Exception>.Failure( new ArgumentException( "irrelevant" ) );
+         var actualValue = underTest.Or( myOtherSubclass );
+
+         Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );
+      }
+
+      #endregion Subtypes
+
+      #region Map and Nesting
+      [Test]
+      [Description( "Die Map-Operation wird auf Erfolge angewendet." )]
+      public void Map_Success()
+      {
+         var original = Option<string, bool>.Some( "hallo" );
+         var result = original.Map( s => s+= " welt" );
+         Assert.That( result.OrThrow, Is.EqualTo( "hallo welt" ) );
+      }
+
+      [Test]
+      [Description( "Die Map-Operation wird nicht auf Leerwerte angewendet." )]
+      public void Map_None()
+      {
+         var original = Option<string, bool>.None;
+         var result = original.Map( s => s + "!!!" );
+         Assert.That( result.IsNone, Is.True );
+      }
+
+      [Test]
+      [Description( "Die Map-Operation wird nicht auf Fehlschläge angewendet." )]
+      public void Map_Failure()
+      {
+         var original = Option<string, bool>.Failure( false );
+         var result = original.Map( s => s+= " welt" );
+         Assert.That( result.FailureOrThrow, Is.EqualTo( false ));
+      }
+
+      [Test]
+      [Description( "Die Map-Operation ist kompatibel mit Verschachtelung" )]
+      public void Map_NestingInMap()
+      {
+         var flag1 = Option<bool, string>.Some( true );
+
+         Option<Option<bool, string>, string> result = flag1.Map( _ => Option<bool, string>.Some( true ) );
+
+         Assert.That( result.Or( Option<bool, string>.Failure( "disgusting" ) ).Or( false ), Is.True );
+      }
+
+      [Test]
+      [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
+      public void Map_NestingInFlatMap()
+      {
+         var flag1 = Option<bool, string>.Some( true );
+         var flag2 = Option<bool, string>.Some( true );
+
+         var result = flag1.FlatMap( outerBoolVal => flag2.Map( boolVal => boolVal && outerBoolVal ? 3 : 2 ) );
+
+         Assert.That( result.Or( -999 ), Is.EqualTo( 3 ) );
+      }
+
+      [Test]
+      [Description( "Verschachtelte Fallunterscheidungen mit Wertübergabe mit FlatMap." )]
+      public void ValuePropagationInFlatMap()
+      {
+         var hallo = Option<string, int>.Some( "hallo" );
+         var sp = Option<string, int>.Some( " " );
+
+         var result = hallo.FlatMap( h => sp.Map( space => h + space + "welt" ) );
+
+         Assert.That( result.Or( "nix da" ), Is.EqualTo( "hallo welt" ) );
+      }
+      #endregion Map and Nesting
+
+      #region Is
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - Vergleich liefert 'true'" )]
+      public void ContainsDefinedTrue()
+      {
+         var f = Option<string, Exception>.Some( "hubba" );
+
+         Assert.That( f.Is( "hubba" ), Is.EqualTo( true ) );
+      }
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - Vergleich liefert 'false'" )]
+      public void ContainsDefinedFalse()
+      {
+         var f = Option<string, Exception>.Some( "hubba" );
+
+         Assert.That( f.Is( "whatever" ), Is.EqualTo( false ) );
+      }
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - None immer 'false'" )]
+      public void ContainsFalseWhenNone()
+      {
+         var f = Option<string, Exception>.Failure( new ArgumentException() );
+
+         Assert.That( f.Is( "hubba" ), Is.EqualTo( false ) );
+      }
+
+      #endregion Is
+
+      #region Holds
+
+      [Test]
+      [Description( "Check mittels Predikatsfunktion - Vergleich liefert 'true'" )]
+      public void Is_PredicateMatchingDefined()
+      {
+         var Option = Option<string, Exception>.Some( "hubba" );
+
+         Assert.That( Option.Holds( s => s.Equals( "hubba" ) ), Is.EqualTo( true ) );
+                                                   
+      }
+
+      [Test]
+      [Description( "Check mittels Predikatsfunktion - Vergleich liefert 'false'" )]
+      public void Is_PredicateNonMatchingDefined()
+      {
+         var Option = Option<string, Exception>.Some( "hubba" );
+
+         Assert.That( Option.Holds( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
+                                                   
+      }
+
+      [Test]
+      [Description( "Check mittels Predikatsfunktion - Vergleich findet nicht statt" )]
+      public void Is_PredicateUndefined()
+      {
+         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+
+         Assert.That( Option.Holds( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
+                                                   
+      }
+
+      #endregion Holds
+
+      #region TryGet
+
+      [Test]
+      [Description( "TryGetValue() produziert korrektes Boolean-Result bei Failure" )]
+      public void TryGet_Result_Failure()
+      {
+         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+
+         Assert.IsFalse( Option.TryGetValue( out var s ) );
+      }
+
+      [Test]
+      [Description( "TryGetValue() schreibt keinen Wert bei Failure" )]
+      public void TryGet_Value_Failure()
+      {
+         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+         Option.TryGetValue( out var s );
+
+         Assert.IsNull( s );
+      }
+
+      [Test]
+      [Description( "TryGetValue() produziert korrektes Boolean-Result bei Some" )]
+      public void TryGet_Value_Some()
+      {
+         var Option = Option<string, Exception>.Some( "blub" );
+
+         Assert.IsTrue( Option.TryGetValue( out var s ) );
+      }
+
+      [Test]
+      [Description( "TryGetValue() schreibt keinen Wert bei Some" )]
+      public void TryGet_Result_Some()
+      {
+         var Option = Option<string, Exception>.Some( "blub" );
+         Option.TryGetValue( out var s );
+
+         Assert.That( s, Is.EqualTo( "blub" ) );
+      }
+
+      [Test]
+      [Description( "TryGetValue() produziert korrektes Boolean-Result bei None" )]
+      public void TryGet_Value_None()
+      {
+         var Option = Option<string, Exception>.None;
+
+         Assert.IsFalse( Option.TryGetValue( out var s ) );
+      }
+
+      [Test]
+      [Description( "TryGetValue() schreibt keinen Wert bei None" )]
+      public void TryGet_Result_None()
+      {
+         var Option = Option<string, Exception>.None;
+         Option.TryGetValue( out var s );
+
+         Assert.IsNull( s );
+      }
+
+      #endregion TryGet
+
+      #region TryGetError
+
+      [Test]
+      [Description( "TryGetError() produziert korrektes Boolean-Result bei Some" )]
+      public void TryGet_Error_Some()
+      {
+         var Option = Option<string, Exception>.Some( "blah" );
+
+         Assert.IsFalse( Option.TryGetFailure( out var s ) );
+      }
+
+      [Test]
+      [Description( "TryGetError() schreibt keinen Wert bei Some" )]
+      public void TryGet_ErrorResult_Some()
+      {
+         var Option = Option<string, Exception>.Some( "blah" );
+         Option.TryGetFailure( out var s );
+
+         Assert.IsNull( s );
+      }
+
+      [Test]
+      [Description( "TryGetError() produziert korrektes Boolean-Result bei Failure" )]
+      public void TryGet_Error_Failure()
+      {
+         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+
+         Assert.IsTrue( Option.TryGetFailure( out var s ) );
+      }
+
+      [Test]
+      [Description( "TryGetError() schreibt Wert bei Failure" )]
+      public void TryGet_ErrorResult_Failure()
+      {
+         var Option = Option<string, Exception>.Failure( new ArgumentException("msg") );
+         Option.TryGetFailure( out var e );
+
+         Assert.That( e, Is.TypeOf<ArgumentException>() );
+         Assert.That( e.Message, Is.EqualTo("msg") );
+      }
+
+      [Test]
+      [Description( "TryGetError() produziert korrektes Boolean-Result bei None" )]
+      public void TryGet_Error_None()
+      {
+         var Option = Option<string, Exception>.None;
+
+         Assert.IsFalse( Option.TryGetFailure( out var s ) );
+      }
+
+      [Test]
+      [Description( "TryGetError() schreibt keinen Wert bei None" )]
+      public void TryGet_ErrorResult_None()
+      {
+         var Option = Option<string, Exception>.None;
+         Option.TryGetFailure( out var s );
+
+         Assert.IsNull( s );
+      }
+
+      #endregion TryGetError
+
+      #region Convert
+      
+      [Test]
+      [Description( "Some wird zu Maybe.Some konvertiert" )]
+      public void ConvertToMaybe_Some()
+      {
+         var Option = Option<string, Exception>.Some( "hallo" );
+         var maybe = Option.ToMaybe();
+
+         Assert.That( maybe.IsSome, Is.True );
+         Assert.That( maybe.OrThrow, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu Maybe.None konvertiert" )]
+      public void ConvertToMaybe_Failure()
+      {
+         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+         var maybe = Option.ToMaybe();
+
+         Assert.That( maybe.IsNone, Is.True );
+      }
+
+      [Test]
+      [Description( "None wird zu Maybe.None konvertiert" )]
+      public void ConvertToMaybe_None()
+      {
+         var Option = Option<string, Exception>.None;
+         var maybe = Option.ToMaybe();
+
+         Assert.That( maybe.IsNone, Is.True );
+      }
+
+      [Test]
+      [Description( "Some wird zu Failable.Some konvertiert" )]
+      public void ConvertToFailable_Some()
+      {
+         var Option = Option<string, ArgumentException>.Some( "hallo" );
+         var failable = Option.ToFailable( new ArgumentException() );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu Failable.Failure konvertiert" )]
+      public void ConvertToFailable_Failure()
+      {
+         var Option = Option<string, ArgumentException>.Failure( new ArgumentException("msg") );
+         Failable<string, ArgumentException> failable = Option.ToFailable( new ArgumentException("notMsg") ); //different exception text!
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+      }
+
+      [Test]
+      [Description( "None wird zu Failable.Failure konvertiert" )]
+      public void ConvertToFailable_None()
+      {
+         var Option = Option<string, ArgumentException>.None;
+         var failable = Option.ToFailable( new ArgumentException("msg") );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+      }
+
+      [Test]
+      [Description( "Some wird zu EFailable.Success konvertiert" )]
+      public void ConvertToEFailable_Some()
+      {
+         var Option = Option<string, ArgumentException>.Some( "hallo" );
+         var failable = Option.ToEFailable( new ArgumentException() );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_Failure()
+      {
+         var Option = Option<string, ArgumentException>.Failure( new ArgumentException("notMsg") );
+         EFailable<string> failable = Option.ToEFailable( new ArgumentException("msg") );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+      }
+
+      [Test]
+      [Description( "None wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_None()
+      {
+         var Option = Option<string, ArgumentException>.None;
+         var failable = Option.ToEFailable( new ArgumentException("msg") );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+      }
+      
+      #endregion Convert
+   }
+}
