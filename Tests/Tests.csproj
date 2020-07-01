@@ -21,8 +21,8 @@
       <Copyright>Copyright © 2020 SIEDA GmbH Kaiserslautern</Copyright>
 
       <!-- signing compiled output -->
-      <SignAssembly>false</SignAssembly>
-      <!--AssemblyOriginatorKeyFile>somekey.snk</AssemblyOriginatorKeyFile-->
+      <SignAssembly>true</SignAssembly>
+      <AssemblyOriginatorKeyFile>..\siedaOpenSourceKey.snk</AssemblyOriginatorKeyFile>
    </PropertyGroup>
    
    <!--#############################################################################################################################
