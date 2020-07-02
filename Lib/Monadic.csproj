@@ -46,14 +46,21 @@
                                |_|                                          
    #################################################################################################################################-->
    <PropertyGroup>
+      <Title>SIEDA.Monadic</Title>
       <Authors>SIEDA Systemhaus für intelligente EDV-Anwendungen GmbH</Authors>
       <Description>Implements several functional Monadic Types in C#, enabling better API- and contract-design</Description>
-      <PackageLicenseUrl>https://github.com/Sieda-GmbH/SIEDA.Monadic/blob/master/LICENSE</PackageLicenseUrl>
+      <RepositoryUrl>https://github.com/Sieda-GmbH/SIEDA.Monadic</RepositoryUrl>
+      <PackageLicenseFile>LICENSE</PackageLicenseFile>
+      <PackageIcon>logo.png</PackageIcon>
       <RepositoryType>git</RepositoryType>
-      <RepositoryUrl>git@github.com:Sieda-GmbH/SIEDA.Monadic.git</RepositoryUrl>
-      <PackageProjectUrl>https://github.com/Sieda-GmbH/SIEDA.Monadic</PackageProjectUrl>
+       <!-- display no weird dialogs to prevent command-line usage. License is still in effect of course! -->
+      <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
    </PropertyGroup>
-
+   <ItemGroup>
+      <!-- include non-source code files for NuGet-Package -->
+      <None Include="..\LICENSE" Pack="true" PackagePath=""/>
+      <None Include="..\logo.png" Pack="true" PackagePath=""/>
+   </ItemGroup>
 
    <!--#############################################################################################################################
     ____                            _                 _           
