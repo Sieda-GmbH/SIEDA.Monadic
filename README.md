@@ -3,10 +3,16 @@
 Implements several functional [Monadic Types](https://en.wikipedia.org/wiki/Monad_(functional_programming)) which enable clean API- and method-design.
 
 ## What is this for?
-Defining expressive method contracts, avoiding any usage of *null*-values in method calls, clearly expressing failure states and leveraging C#'s type system and overall just writing better code.
+
+Consider of your code's contracts, such as the fact that an operation could fail or that a required value might not be present. In traditional C#, these contracts are _implicit_, for example realized through an exception which might be thrown (immediately aborting the current execution path) or by _null_-values which are supposed to carry that semantic. In short, your programmers must always be aware and on the look-out for these implicitly agreed-upon contracts. Usage of _null_ is particular problematic in this context, as this overloads its semantics! A _null_ now means both _not initialized yet_ and _edge/exception-case_.
+
+Through the classes within this library, you can leverage the type system of C# to enforce the basic nature of such contracts, which means that you code does not compile until the programmer has ensured that he or she is dealing with e.g. the fact that this particular operation might fail (and what to do in this case).
+
+### TLDR; What is this for?
+Defining expressive method contracts, avoiding any usage of *null*-values in method calls, clearly expressing failure states and overall just writing better code by leveraging C#'s type system.
 
 ## What functionality is accessible?
-Contains five **functional classes** of **three basic archetypes, intended to be used in a monadic manner, described below:
+Contains five **functional classes** of **three basic archetypes**, intended to be used in a monadic manner, described below:
 
 ### Maybe
 A *Maybe* indicates that a value **may** be present, aka there is either a value or there is no value (but obviously never both). A *Maybe* is therefore either a **Some(X)** or a **None** of a type X.
@@ -23,8 +29,8 @@ An *Option* represents the combination of a *Maybe* and *Failable*, indicating t
 
 **Example:** When asking some persistence-wrapper for a DTO identified by a specific id via an appropriate method, this wrapper may return an *Option*. That *Option* is a *Some* if your id matches a datapoint in the persistence wrapped by this class (like a database), a *None* if there is nothing present for that identifier and a *Failure* if the persistence-layer encountered a technical error (like the database-connection being closed).
 
-### E-Variants
-Both *Failable* and *Option* exist in an *E*-Variant, namely *EFailable* and *EOption*. These two classes are basically similar to their regular counterparts, but with the right-side type fixed to Exception. Therefore, the two classes allow for shorter, more readable code and are the recommended way to employ these concepts, unless your use-cases differ.
+## E-Variants
+Both *Failable* and *Option* exist in an *E*-Variant, namely *EFailable* and *EOption*. These two classes are basically similar to their regular counterparts, but with the right-side type fixed to Exception. Therefore, the two classes allow for shorter, more readable code and are the recommended way to employ these concepts, unless your use-cases differ significantly from _"modelling the result of operations"_.
 
 ## Examples:
 
