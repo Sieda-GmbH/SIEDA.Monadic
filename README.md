@@ -2,6 +2,10 @@
 
 Implements several functional [Monadic Types](https://en.wikipedia.org/wiki/Monad_(functional_programming)) which enable clean API- and method-design.
 
+## Where can I get/download it?
+
+You can find a NuGet-Package at [www.nuget.org](https://www.nuget.org/packages/SIEDA.Monadic/), containing binaries for different frameworks. There are no special dependencies.
+
 ## What is this for?
 
 Consider of your code's contracts, such as the fact that an operation could fail or that a required value might not be present. In traditional C#, these contracts are _implicit_, for example realized through an exception which might be thrown (immediately aborting the current execution path) or by _null_-values which are supposed to carry that semantic. In short, your programmers must always be aware and on the look-out for these implicitly agreed-upon contracts. Usage of _null_ is particular problematic in this context, as this overloads its semantics! A _null_ now means both _not initialized yet_ and _edge/exception-case_.
