@@ -187,6 +187,13 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      public void Or_Use_Value()
+      {
+         Assert.That( Failable<int, string>.Success( 1 ).OrUse( s => -Int32.Parse(s) ), Is.EqualTo( 1 ) );
+         Assert.That( Failable<int, string>.Failure( "1" ).OrUse( s => -Int32.Parse( s ) ), Is.EqualTo( -1 ) );
+      }
+
+      [Test]
       public void Error_ThrowsIfSuccess()
       {
          Assert.Throws<FailableNoFailureException>( () => Failable<string, int>.Success( "HAPPY" ).FailureOrThrow() );
