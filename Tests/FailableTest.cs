@@ -189,7 +189,7 @@ namespace SIEDA.MonadicTests
       [Test]
       public void Or_Use_Value()
       {
-         Assert.That( Failable<int, string>.Success( 1 ).OrUse( s => -Int32.Parse(s) ), Is.EqualTo( 1 ) );
+         Assert.That( Failable<int, string>.Success( 1 ).OrUse( s => -Int32.Parse( s ) ), Is.EqualTo( 1 ) );
          Assert.That( Failable<int, string>.Failure( "1" ).OrUse( s => -Int32.Parse( s ) ), Is.EqualTo( -1 ) );
       }
 
@@ -225,7 +225,7 @@ namespace SIEDA.MonadicTests
       {
          var f = Failable<string, int>.Failure( -1 );
          var excp = Assert.Throws<FailableFailureException>( () => f.OrThrow( "test" ) );
-         Assert.That( excp.Message, Is.EqualTo( "test") );
+         Assert.That( excp.Message, Is.EqualTo( "test" ) );
       }
 
       [Test]
@@ -295,7 +295,7 @@ namespace SIEDA.MonadicTests
       public void Map_Success()
       {
          var original = Failable<string, bool>.Success( "hallo" );
-         var result = original.Map( s => s+= " welt" );
+         var result = original.Map( s => s += " welt" );
          Assert.That( result.OrThrow, Is.EqualTo( "hallo welt" ) );
       }
 
@@ -304,8 +304,18 @@ namespace SIEDA.MonadicTests
       public void Map_Failure()
       {
          var original = Failable<string, bool>.Failure( false );
-         var result = original.Map( s => s+= " welt" );
-         Assert.That( result.FailureOrThrow, Is.EqualTo( false ));
+         var result = original.Map( s => s += " welt" );
+         Assert.That( result.FailureOrThrow, Is.EqualTo( false ) );
+      }
+
+      [Test]
+      [Description( "Die Map-Operation wird nicht auf Fehlschläge angewendet." )]
+      public void Map_Failure_SideEffect()
+      {
+         var myInt = 0;
+         var original = Failable<string, bool>.Failure( false );
+         var result = original.Map( s => ++myInt );
+         Assert.That( myInt, Is.EqualTo( 0 ) );
       }
 
       [Test]

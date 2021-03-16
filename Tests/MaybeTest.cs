@@ -300,7 +300,7 @@ namespace SIEDA.MonadicTests
       /// und bei <c>return null</c> dies durch die Variante mit <see cref="Maybe{T}.FlatMap"/> ersetzen.
       /// </summary>
       [Test]
-      [Description( "In Map kann Ergebnis None sein." )]
+      [Description( "In Map wird Null als None interpretiert." )]
       public void MappingNullTreatedLikeNone()
       {
          var x = Maybe<int>.Some( 5 ).Map( _ => (object) null );
