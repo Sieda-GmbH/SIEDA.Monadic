@@ -184,7 +184,7 @@ namespace SIEDA.Monadic
       /// <summary>
       /// Writes this instance's "failed" value into the <see langword="out"/> parameter <paramref name="value"/>
       /// and returns <see langword="true"/> if <see cref="IsFailure"/> == <see langword="true"/>,
-      /// otherwise <paramref name="value"/> will be set to the <see langword="default"/> value of <typeparamref name="TValue"/>
+      /// otherwise <paramref name="value"/> will be set to the <see langword="default"/> value of <typeparamref name="TFail"/>
       /// and the method returns <see langword="false"/>.
       /// </summary>
       /// <param name="value"><see langword="out"/> parameter for this instance's "failed" value.</param>
