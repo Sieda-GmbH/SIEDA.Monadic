@@ -214,7 +214,7 @@ namespace SIEDA.Monadic
       public override bool Equals( object obj ) =>
          ( obj is Maybe<T> other )
          && ( IsSome == other.IsSome )
-         && ( !IsSome || Equals( _value, other._value ) );
+         && ( IsNone || _value.Equals( other._value ) );
 
       /// <summary>
       /// <para>Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this instance's value if any.</para>

@@ -303,18 +303,17 @@ namespace SIEDA.Monadic
                      : $"[Option<{typeof( TValue ).Name}, {typeof( TFail ).Name}>.None]";
 
       ///<summary>
-      /// Returns <see langword="true"/> iff <see cref="IsSome"/> returns the same boolean for both objects
-      /// and <see cref="IsFailure"/> also returns the same boolean for both objects
-      /// and the method <see cref="object.Equals(object, object)"/> returns <see langword="true"/>
-      /// for the two instances' values in case of <see cref="IsSome"/> being <see langword="true"/>
-      /// and for the two instances' "failed" values in case of <see cref="IsFailure"/> being <see langword="true"/>.
+      /// <para>Returns <see langword="true"/> iff <see cref="IsNone"/> return the same booleans for both objects and</para>
+      /// <para> - if <see cref="IsSome"/> being <see langword="true"/>: result of method <see cref="object.Equals(object)"/> for the two instances' "some" values</para>
+      /// <para> - if <see cref="IsNone"/> being <see langword="true"/>: (no further condition)</para>
+      /// <para> - if <see cref="IsFailure"/> being <see langword="true"/>: result of method <see cref="object.Equals(object)"/> for the two instances' "failed" values</para>
       ///</summary>
       public override bool Equals( object obj ) =>
          ( obj is Option<TValue, TFail> other )
             && ( IsSome == other.IsSome )
-            && ( IsFailure == other.IsFailure )
-            && ( IsNotSome || Equals( _value, other._value ) )
-            && ( IsNotFailure || Equals( _error, other._error ) );
+            && ( IsNone == other.IsNone )
+            && ( IsNotSome || _value.Equals ( other._value ) )
+            && ( IsNotFailure || _error.Equals ( other._error ) );
 
       /// <summary>
       /// <para>Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this instance's value,
