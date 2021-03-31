@@ -3,9 +3,11 @@
 namespace SIEDA.Monadic
 {
    /// <summary>
-   /// Represents the "result" of check that might have failed, that is an operation that either succeeds without any error
-   /// or fails with some information. Think of this as an <see cref="Failable{TValue, TFail}"/> without a value when successful. 
-   /// <typeparamref name="TFail"/> if the operation "was a failure". Never <see langword="null"/>.
+   /// <para>Represents the "result" of check that might have failed, that is an operation that either succeeds without any error
+   /// or fails with some information. <typeparamref name="TFail"/> if the operation "was a failure". Never <see langword="null"/>.</para>
+   /// <para>One can think of this as an "inverted" <see cref="Maybe{T}"/>, although this obviously comes with different intended
+   /// semantics and API restrictions. An alternative interpretion of this class is a <see cref="Failable{TValue, TFail}"/> without a 
+   /// value when it is successful.</para>
    /// </summary>
    /// <typeparam name="TFail">The type of the "failed" value.</typeparam>
    public readonly struct Validation<TFail>
@@ -19,8 +21,8 @@ namespace SIEDA.Monadic
 
       #region Construction
 
-      /// <summary>Creates a <see cref="Validation{TFail}"/> with a "successful" outcome.</summary>
-      public static Validation<TFail> Success() => new Validation<TFail>( true, default );
+      /// <summary>The <see cref="Validation{TFail}"/> with a "successful" outcome.</summary>
+      public static readonly Validation<TFail> Success = new Validation<TFail>( true, default );
 
       /// <summary>Creates a <see cref="Validation{TFail}"/> with a <paramref name="failure"/>-value, which must not be <see langword="null"/>.</summary>
       /// <exception cref="ValidationFailureConstructionException">if <paramref name="failure"/> == <see langword="null"/>.</exception>

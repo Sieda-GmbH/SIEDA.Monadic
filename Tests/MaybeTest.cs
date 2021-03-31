@@ -527,8 +527,21 @@ namespace SIEDA.MonadicTests
 
       #endregion TryGet
 
+      #region Flatten
+      [Test]
+      [Description( "Flattening - Eliminierung redundanter Schachtelungen" )]
+      public void Flatten()
+      {
+         var a = Maybe<string>.Some( "a" );
+         var b = Maybe<Maybe<string>>.Some( a );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+      }
+      #endregion Flatten
+
       #region Convert
-      
+
       [Test]
       [Description( "Definiertes Maybe wird zu Failable.Success konvertiert" )]
       public void ConvertToFailable_Some()

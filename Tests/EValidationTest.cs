@@ -13,7 +13,7 @@ namespace SIEDA.MonadicTests
       [Test]
       public void ConstructSuccess()
       {
-         var testValue = EValidation.Success(); //this must work ;-)
+         var testValue = EValidation.Success; //this must work ;-)
          Assert.That( testValue.IsSuccess, Is.True );
       }
 
@@ -65,7 +65,7 @@ namespace SIEDA.MonadicTests
       public void Equals_FailedInequalToSuccess()
       {
          var x = EValidation.Failure( new ArgumentException() );
-         var y = EValidation.Success();
+         var y = EValidation.Success;
 
          Assert.That( x.Equals( y ), Is.False );
       }
@@ -84,7 +84,7 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrThrowWithText_DoesNotThrowIfSuccess()
       {
-         Assert.Throws<EValidationNoFailureException>( () => EValidation.Success().FailureOrThrow() );
+         Assert.Throws<EValidationNoFailureException>( () => EValidation.Success.FailureOrThrow() );
       }
 
       #endregion Accessing Value
@@ -95,7 +95,7 @@ namespace SIEDA.MonadicTests
       [Description( "Success wird zu Option.None konvertiert" )]
       public void ConvertToOption_Success()
       {
-         var validation = EValidation.Success();
+         var validation = EValidation.Success;
          var option = validation.ToOption();
 
          Assert.That( option.IsNone, Is.True );
@@ -118,7 +118,7 @@ namespace SIEDA.MonadicTests
       [Description( "Success wird zu EOption.None konvertiert" )]
       public void ConvertToEOption_Success()
       {
-         var validation = EValidation.Success();
+         var validation = EValidation.Success;
          var option = validation.ToEOption();
 
          Assert.That( option.IsNone, Is.True );

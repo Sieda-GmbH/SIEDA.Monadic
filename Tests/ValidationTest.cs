@@ -13,7 +13,7 @@ namespace SIEDA.MonadicTests
       [Test]
       public void ConstructSuccess()
       {
-         var testValue = Validation<object>.Success(); //this must work ;-)
+         var testValue = Validation<object>.Success; //this must work ;-)
          Assert.That( testValue.IsSuccess, Is.True );
       }
 
@@ -90,7 +90,7 @@ namespace SIEDA.MonadicTests
       public void Equals_FailedInequalToSuccess()
       {
          var x = Validation<string>.Failure( "how appaling!" );
-         var y = Validation<string>.Success();
+         var y = Validation<string>.Success;
          var z = Validation<Validation<string>>.Failure( y );
 
          Assert.That( x.Equals( y ), Is.False );
@@ -101,8 +101,8 @@ namespace SIEDA.MonadicTests
       [Description( "Validations zu unterschiedlichen Typen sind unterschiedlich." )]
       public void Equals_DifferentTypeInequal()
       {
-         var x = Validation<Tuple<string, int>>.Success();
-         var y = Validation<Tuple<string, string>>.Success();
+         var x = Validation<Tuple<string, int>>.Success;
+         var y = Validation<Tuple<string, string>>.Success;
          Assert.That( x.Equals( y ), Is.False );
       }
 
@@ -133,7 +133,7 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrThrowWithText_DoesNotThrowIfSuccess()
       {
-         Assert.Throws<ValidationNoFailureException>( () => Validation<int>.Success().FailureOrThrow() );
+         Assert.Throws<ValidationNoFailureException>( () => Validation<int>.Success.FailureOrThrow() );
       }
 
       #endregion Accessing Value
@@ -144,7 +144,7 @@ namespace SIEDA.MonadicTests
       [Description( "Success wird zu Option.None konvertiert" )]
       public void ConvertToOption_Success()
       {
-         var Validation = Validation<string>.Success();
+         var Validation = Validation<string>.Success;
          var option = Validation.ToOption();
 
          Assert.That( option.IsNone, Is.True );
@@ -162,5 +162,18 @@ namespace SIEDA.MonadicTests
       }
 
       #endregion Convert
+
+      #region Flatten
+      [Test]
+      [Description( "Flattening - Eliminierung redundanter Schachtelungen" )]
+      public void Flatten()
+      {
+         var a = Validation<string>.Failure( "a" );
+         var b = Validation<Validation<string>>.Failure( a );
+
+         Assert.That( b, Is.Not.EqualTo(a) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+      }
+      #endregion Flatten
    }
 }

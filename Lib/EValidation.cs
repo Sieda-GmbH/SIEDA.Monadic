@@ -3,8 +3,11 @@
 namespace SIEDA.Monadic
 {
    /// <summary>
-   /// Represents the "result" of check that might have failed, that is an operation that either succeeds without any error
-   /// or fails with some information. Think of this as an <see cref="EFailable{TValue}"/> without a value when successful. 
+   /// <para>Represents the "result" of check that might have failed, that is an operation that either succeeds without any error
+   /// or fails with an <see cref="Exception"/>.</para>
+   /// <para>One can think of this as an "inverted" <see cref="Maybe{T}"/>, although this obviously comes with different intended
+   /// semantics and API restrictions. An alternative interpretion of this class is a <see cref="EFailable{TValue}"/> without a 
+   /// value when it is successful.</para>
    /// </summary>
    public readonly struct EValidation
    {
@@ -16,8 +19,8 @@ namespace SIEDA.Monadic
 
       #region Construction
 
-      /// <summary>Creates a <see cref="EValidation"/> with a "successful" outcome.</summary>
-      public static EValidation Success() => new EValidation( null );
+      /// <summary>The <see cref="EValidation"/> with a "successful" outcome.</summary>
+      public static readonly EValidation Success = new EValidation( null );
 
       /// <summary>Creates a <see cref="EValidation"/> with a <paramref name="error"/>-value, which must not be <see langword="null"/>.</summary>
       /// <exception cref="EValidationFailureConstructionException">if <paramref name="error"/> == <see langword="null"/>.</exception>
@@ -67,6 +70,17 @@ namespace SIEDA.Monadic
       }
 
       #endregion Accessing Failure
+
+      /// <summary>
+      /// Maps this instance by using its error (if any) as an argument for <paramref name="func"/>
+      /// and returning the result as a "flat" <see cref="EValidation"/> (instead of a "EValidation of an EValidation").
+      /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// <para>Returns this instance if <see cref="IsSuccess"/> == <see langword="true"/> or it is the result
+      /// of <paramref name="func"/>.</para>
+      /// </summary>
+      /// <typeparam name="U">The type of the new value.</typeparam>
+      /// <param name="func">The delegate that provides the new value, if relevant.</param>
+      public EValidation FlatMap<U>( Func<Exception, EValidation> func ) => IsFailure ? func( _error ) : this;
 
       #region Converters
 
