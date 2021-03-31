@@ -23,10 +23,15 @@ A *Maybe* indicates that a value **may** be present, aka there is either a value
 
 **Example:** When querying a data-structure for the presence of some value that is associated with a key, that query-getter may return a *Maybe*, which is a *Some* of that value if an association exists.
 
-### Failable
-A *Failable* indicates that either a value is "present" or something went wrong, which is typically represented by an exception. Note however that this exception was **never thrown**, as such no code paths have been erroneously skipped. A *Failable* is therefore either a **Success(X)** or a **Failure(E)** of a type X, with E usually being some exception.
+### Validation
+A *Validation* indicates that an operation **may** have failed, aka there is either no value because everything was fine or there is a value signaling a failure (but obviously never both). A *Validation* is therefore either a **Success** or a **Failure(X)** of a type X.
 
-**Example:** When calling a computation method of some service with arguments, that method may return a *Failable*, which is a *Success* containing the computation result if your input was satisfactory.
+**Example:** When triggering a write-operation on your file-system, the corresponding function may return a *Validation*, which is a *Failure* containing a description of the problem if the write was not successful (e.g. due to permission problems).
+
+### Failable
+A *Failable* indicates that either a value is "present" or something went wrong and a different value of a different type is "present". A *Failable* is therefore either a **Success(X)** or a **Failure(E)** of a type X, with E usually being some exception. Note however that such an exception is **not** thrown, as such no code paths are erroneously skipped and our contract is clean.
+
+**Example:** When parsing an XML-serialized data-structure, that method may return a *Failable*, which is a *Success* containing the deserialized DTO-object if your input was satisfactory. Otherwise, the *Failure* models what was wrong with the string.
 
 ### Option
 An *Option* represents the combination of a *Maybe* and *Failable*, indicating that a value is present or not present or that something went wrong. That means, in contrast to the two other classes, this is a ternary instead of a binary result type. An *Option* is therefore either a **Some(X)** or **None** or a **Failure(E)** of a type X, with E typically being some exception.
@@ -34,7 +39,7 @@ An *Option* represents the combination of a *Maybe* and *Failable*, indicating t
 **Example:** When asking some persistence-wrapper for a DTO identified by a specific id via an appropriate method, this wrapper may return an *Option*. That *Option* is a *Some* if your id matches a datapoint in the persistence wrapped by this class (like a database), a *None* if there is nothing present for that identifier and a *Failure* if the persistence-layer encountered a technical error (like the database-connection being closed).
 
 ## E-Variants
-Both *Failable* and *Option* exist in an *E*-Variant, namely *EFailable* and *EOption*. These two classes are basically similar to their regular counterparts, but with the right-side type fixed to Exception. Therefore, the two classes allow for shorter, more readable code and are the recommended way to employ these concepts, unless your use-cases differ significantly from _"modelling the result of operations"_.
+*Validation*, *Failable* and *Option* exist in *E*-variants, namely *EValidation*, *EFailable* and *EOption*. These classes are basically similar to their regular counterparts, but with the right-side type fixed to Exception. Therefore, these three classes allow for shorter, more readable code and are the recommended way to employ these concepts, unless your use-cases differ significantly from _"modelling the result of operations"_.
 
 ## Examples:
 
