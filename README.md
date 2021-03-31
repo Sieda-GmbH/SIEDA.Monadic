@@ -62,6 +62,7 @@ See [here](https://github.com/Sieda-GmbH/SIEDA.Monadic/blob/master/README.md#e-v
 
 ```csharp
 var maybe = Maybe<int>.Some( 1 );
+var validation = Validation<string>.Success();
 var failable = Failable<int, string>.Success( 2 );
 var option = Option<int, string>.Some( 3 );
 ``` 
