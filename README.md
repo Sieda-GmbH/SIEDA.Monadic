@@ -31,7 +31,7 @@ A *Validation* indicates that an operation **may** have failed, aka there is eit
 
 #### EValidation
 
-See further down below.
+See [here](https://github.com/Sieda-GmbH/SIEDA.Monadic/blob/master/README.md#e-variants).
 
 ### Binary Monadic Archetypes:
 #### Failable
@@ -41,7 +41,7 @@ A *Failable* indicates that either a value is "present" or something went wrong 
 
 #### EFailable
 
-See further down below.
+See [here](https://github.com/Sieda-GmbH/SIEDA.Monadic/blob/master/README.md#e-variants).
 
 ### Ternary Monadic Archetypes:
 #### Option
@@ -51,7 +51,7 @@ An *Option* represents the combination of a *Maybe* and *Failable*, indicating t
 
 #### EOption
 
-See further down below.
+See [here](https://github.com/Sieda-GmbH/SIEDA.Monadic/blob/master/README.md#e-variants).
 
 ## E-Variants
 *Validation*, *Failable* and *Option* exist in *E*-variants, namely *EValidation*, *EFailable* and *EOption*. These classes are basically similar to their regular counterparts, but with the right-side type fixed to Exception. Therefore, these three classes allow for shorter, more readable code and are the recommended way to employ these concepts, unless your use-cases differ significantly from _"modelling the result of operations"_.
