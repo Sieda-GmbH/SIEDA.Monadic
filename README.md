@@ -73,9 +73,9 @@ var option = Option<int, string>.Some( 3 );
 //if we assume this is our contract for some authentication storage...
 public interface SessionManager
 {
-   UserSessionKey CreateSession();
+   EFailable<UserSessionKey> CreateSession();
    Maybe<UserSession> GetSession( UserSessionKey key ); //return type clearly expresses that such a session may be non-existent!
-   bool EndSession( UserSessionKey key );
+   EValidation EndSession( UserSessionKey key );
 }
 
 //...we can for example leverage this when employing the monadic-based contract in a REST-API endpoint:
