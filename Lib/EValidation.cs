@@ -42,7 +42,7 @@ namespace SIEDA.Monadic
       /// <summary><see langword="true"/>, if this instance is a "success".</summary>
       public bool IsSuccess { get => _error == null; }
 
-      /// <summary><see langword="true"/>, if this instance is a "failure", aka has a value of type <typeparamref name="TFail"/>.</summary>
+      /// <summary><see langword="true"/>, if this instance is a "failure".</summary>
       public bool IsFailure => !IsSuccess;
 
       #endregion Properties
