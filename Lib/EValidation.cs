@@ -71,17 +71,6 @@ namespace SIEDA.Monadic
 
       #endregion Accessing Failure
 
-      /// <summary>
-      /// Maps this instance by using its error (if any) as an argument for <paramref name="func"/>
-      /// and returning the result as a "flat" <see cref="EValidation"/> (instead of a "EValidation of an EValidation").
-      /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
-      /// <para>Returns this instance if <see cref="IsSuccess"/> == <see langword="true"/> or it is the result
-      /// of <paramref name="func"/>.</para>
-      /// </summary>
-      /// <typeparam name="U">The type of the new value.</typeparam>
-      /// <param name="func">The delegate that provides the new value, if relevant.</param>
-      public EValidation FlatMap<U>( Func<Exception, EValidation> func ) => IsFailure ? func( _error ) : this;
-
       #region Converters
 
       /// <summary>Converts this instance into a <see cref="Option{TValue, TFail}"/>, which is either a failure or empty (but never defined).</summary>
