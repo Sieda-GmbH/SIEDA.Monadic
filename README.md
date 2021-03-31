@@ -102,9 +102,9 @@ public class ClockForTests
       _currentTime = Maybe<DateTime>.Some( definedNow );
    }
 
-   public void SetCurrentNow( DateTime d ) { _currentTime = Maybe<DateTime>.Some( d ); }
+   public void SetCurrentTimeTo( DateTime d ) { _currentTime = Maybe<DateTime>.Some( d ); }
 
-   public void RemoveCurrentNow() { _currentTime = Maybe<DateTime>.None; }
+   public void SetToRealTime() { _currentTime = Maybe<DateTime>.None; }
 
    public DateTime Now => _currentTime.Or( DateTime.Now );
 
