@@ -213,6 +213,15 @@ namespace SIEDA.Monadic
       /// this instance and <see cref="EFailable{TValue}.Failure(Exception)"/> containing <paramref name="error"/> otherwise.</returns>
       public EFailable<TValue> ToEFailable( Exception error ) => IsSuccess ? EFailable<TValue>.Success( _value ) : EFailable<TValue>.Failure( error );
 
+      /// <summary>
+      /// <para>Converts this instance into an appropriate <see cref="EFailable{TValue}"/> using converter-function <paramref name="func"/>.</para>
+      /// <para>Note that <paramref name="func"/> is only called if <see cref="IsSuccess"/> == <see langword="false"/>.</para>
+      /// </summary>
+      /// <returns><see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EFailable{TValue}.Failure(Exception)"/> containing the result of <paramref name="func"/> applied
+      /// to this instance's failure-value otherwise.</returns>
+      public EFailable<TValue> ToEFailable( Func<TFail, Exception> func ) => IsSuccess ? EFailable<TValue>.Success( _value ) : EFailable<TValue>.Failure( func( _error ) );
+
       /// <summary>Converts this instance into an appropriate <see cref="Option{TValue, TFail}"/>.</summary>
       /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for this instance and
       /// <see cref="Option{TValue, TFail}.Failure(TFail)"/> otherwise.</returns>

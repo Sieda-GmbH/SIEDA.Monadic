@@ -75,11 +75,39 @@ namespace SIEDA.Monadic
 
       #endregion Accessing Failure
 
+      /// <summary>
+      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/>
+      /// and returning a <see cref="Validation{TNewFail}"/> created from the result.
+      /// <para><paramref name="func"/> is only called if <see cref="IsSuccess"/> == <see langword="false"/>.</para>
+      /// <para>Returns <see cref="Validation{TNewValue}.Success"/> if <see cref="IsSuccess"/> == <see langword="true"/>.</para>
+      /// </summary>
+      /// <typeparam name="TNewFail">The type of the new "failed" value.</typeparam>
+      /// <param name="func">The delegate that provides the new failure.</param>
+      public Validation<TNewFail> FailMap<TNewFail>(Func<TFail, TNewFail> func) => IsSuccess ? Validation<TNewFail>.Success : Validation<TNewFail>.Failure( func(_error) );
+
       #region Converters
 
-      /// <summary>Converts this instance into a <see cref="Option{TValue, TFail}"/>, which is either a failure or empty (but never defined).</summary>
+      /// <summary>Converts this instance into a <see cref="Option{TValue, TFail}"/>, which is either a failure or none (but never defined).</summary>
       /// <returns><see cref="Option{TValue, TFail}"/> with its some-type being 'object' and its failure-type being <typeparamref name="TFail"/>.</returns>
       public Option<object, TFail> ToOption() => IsSuccess ? Option<object, TFail>.None : Option<object, TFail>.Failure( _error );
+
+      /// <summary>
+      /// <para>Converts this instance into an appropriate <see cref="EValidation"/>.</para>
+      /// <para>Note that any "failed" value this instance might have is lost in the conversion
+      ///       and the exception given via <paramref name="error"/> is used instead.</para>
+      /// </summary>
+      /// <returns><see cref="EValidation.Success"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EValidation.Failure(Exception)"/> containing <paramref name="error"/> otherwise.</returns>
+      public EValidation ToEValidation( Exception error ) => IsSuccess ? EValidation.Success : EValidation.Failure( error );
+
+      /// <summary>
+      /// <para>Converts this instance into an appropriate <see cref="EValidation"/> using converter-function <paramref name="func"/>.</para>
+      /// <para>Note that <paramref name="func"/> is only called if <see cref="IsSuccess"/> == <see langword="false"/>.</para>
+      /// </summary>
+      /// <returns><see cref="EValidation.Success"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EValidation.Failure(Exception)"/> containing the result of <paramref name="func"/> applied
+      /// to this instance's failure-value otherwise.</returns>
+      public EValidation ToEValidation( Func<TFail, Exception> func ) => IsSuccess ? EValidation.Success: EValidation.Failure( func( _error) );
 
       #endregion Converters
 

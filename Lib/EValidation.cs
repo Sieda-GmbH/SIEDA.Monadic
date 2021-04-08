@@ -47,6 +47,13 @@ namespace SIEDA.Monadic
 
       #endregion Properties
 
+      /// <summary>
+      /// <para>Noop if this instance was "successful", aka if <see cref="IsSuccess"/> == <see langword="true"/>,
+      /// otherwise this throws the inner exception wrapped by this <see cref="EValidation"/>.</para>
+      /// <para>Be careful when using this, it is strongly recommended to not throw exceptions and use an If-check with a '<see cref="IsSuccess"/>' instead!</para>
+      /// </summary>
+      public void ThrowIfFailure() { if (IsFailure) throw _error; }
+
       #region Accessing Failure
 
       /// <summary>
@@ -73,7 +80,7 @@ namespace SIEDA.Monadic
 
       #region Converters
 
-      /// <summary>Converts this instance into a <see cref="Option{TValue, TFail}"/>, which is either a failure or empty (but never defined).</summary>
+      /// <summary>Converts this instance into a <see cref="Option{TValue, TFail}"/>, which is either a failure or none (but never defined).</summary>
       /// <returns><see cref="Option{TValue, TFail}"/> with its some-type being 'object' and its failure-type being <see cref="Exception"/>.</returns>
       public Option<object, Exception> ToOption() => IsSuccess ? Option<object, Exception>.None : Option<object, Exception>.Failure( _error );
 

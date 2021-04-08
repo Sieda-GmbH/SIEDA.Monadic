@@ -539,7 +539,6 @@ namespace SIEDA.MonadicTests
          Assert.That( EFailable.OrThrow, Is.EqualTo( "hallo" ) );
       }
 
-
       [Test]
       [Description( "Failure wird zu EFailable.Failure konvertiert" )]
       public void ConvertToEFailable_Failure()
@@ -549,6 +548,28 @@ namespace SIEDA.MonadicTests
 
          Assert.That( EFailable.IsFailure, Is.True );
          Assert.That( EFailable.FailureOrThrow().Message, Is.EqualTo("msg") );
+      }
+
+      [Test]
+      [Description( "Success wird zu EFailable.Success konvertiert" )]
+      public void ConvertToEFailable_WithConverter_Success()
+      {
+         var failable = Failable<int, string>.Success( 42 );
+         var eFailable = failable.ToEFailable( s => new Exception( s ) );
+
+         Assert.That( eFailable.IsSuccess, Is.True );
+         Assert.That( eFailable.OrThrow(), Is.EqualTo( 42 ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_WithConverter_Failure()
+      {
+         var failable = Failable<int, string>.Failure( "hallo" );
+         var eFailable = failable.ToEFailable( s => new Exception( s ) );
+
+         Assert.That( eFailable.IsFailure, Is.True );
+         Assert.That( eFailable.FailureOrThrow().Message, Is.EqualTo( "hallo" ) );
       }
 
       [Test]
@@ -590,7 +611,6 @@ namespace SIEDA.MonadicTests
 
          Assert.That( EOption.IsSome, Is.True );
       }
-
       #endregion Convert
    }
 }

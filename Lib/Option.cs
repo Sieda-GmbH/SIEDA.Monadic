@@ -289,6 +289,17 @@ namespace SIEDA.Monadic
       public EOption<TValue> ToEOption( Exception error ) =>
          IsSome ? EOption<TValue>.Some( _value ) : ( IsFailure ? EOption<TValue>.Failure( error ) : EOption<TValue>.None );
 
+      /// <summary>
+      /// <para>Converts this instance into an appropriate <see cref="EOption{TValue}"/> using converter-function <paramref name="func"/>.</para>
+      /// <para>Note that <paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// </summary>
+      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for this instance,
+      /// <see cref="EOption{TValue}.None"/> if <see cref="IsNone"/> == <see langword="true"/> for this instance and
+      /// <see cref="EOption{TValue}.Failure(Exception)"/> containing the result of <paramref name="func"/> applied
+      /// to this instance's failure-value otherwise.</returns>
+      public EOption<TValue> ToEFailable( Func<TFail, Exception> func ) =>
+         IsSome ? EOption<TValue>.Some( _value ) : ( IsFailure ? EOption<TValue>.Failure( func(_error) ) : EOption<TValue>.None );
+
       #endregion Converters
 
       #region Object

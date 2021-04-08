@@ -4,7 +4,7 @@ namespace SIEDA.Monadic
 {
    /// <summary>Represents a value that may be present ("is some (value)") or absent ("is none (of the possible values)").</summary>
    /// <typeparam name="T">The type of the value contained within, if any.</typeparam>
-   public class Maybe<T>
+   public struct Maybe<T>
    {
       #region State
 

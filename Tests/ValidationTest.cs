@@ -144,23 +144,64 @@ namespace SIEDA.MonadicTests
       [Description( "Success wird zu Option.None konvertiert" )]
       public void ConvertToOption_Success()
       {
-         var Validation = Validation<string>.Success;
-         var option = Validation.ToOption();
+         var validation = Validation<string>.Success;
+         var option = validation.ToOption();
 
          Assert.That( option.IsNone, Is.True );
       }
 
       [Test]
-      [Description( "Success wird zu Option.Failure konvertiert" )]
+      [Description( "Failure wird zu Option.Failure konvertiert" )]
       public void ConvertToOption_Failure()
       {
-         var Validation = Validation<string>.Failure("hallo");
-         var option = Validation.ToOption();
+         var validation = Validation<string>.Failure("hallo");
+         var option = validation.ToOption();
 
          Assert.That( option.IsFailure, Is.True );
          Assert.That( option.FailureOrThrow(), Is.EqualTo( "hallo" ) );
       }
 
+      [Test]
+      [Description( "Success wird zu EValidation.Success konvertiert" )]
+      public void ConvertToEValidation_Success()
+      {
+         var validation = Validation<string>.Success;
+         var eValidation = validation.ToEValidation( new ArgumentException( "hallo" ) );
+
+         Assert.That( eValidation.IsSuccess, Is.True );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EValidation.Failure konvertiert" )]
+      public void ConvertToEValidation_WithConverter_Failure()
+      {
+         var validation = Validation<string>.Failure( "whatever" );
+         var eValidation = validation.ToEValidation( new ArgumentException( "hallo" ) );
+
+         Assert.That( eValidation.IsFailure, Is.True );
+         Assert.That( eValidation.FailureOrThrow().Message, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Success wird zu EValidation.Success konvertiert" )]
+      public void ConvertToEValidation_WithConverter_Success()
+      {
+         var validation = Validation<string>.Success;
+         var eValidation = validation.ToEValidation( s => new Exception(s) );
+
+         Assert.That( eValidation.IsSuccess, Is.True );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EValidation.Failure konvertiert" )]
+      public void ConvertToEValidation_Failure()
+      {
+         var validation = Validation<string>.Failure( "hallo" );
+         var eValidation = validation.ToEValidation( s => new Exception( s ) );
+
+         Assert.That( eValidation.IsFailure, Is.True );
+         Assert.That( eValidation.FailureOrThrow().Message, Is.EqualTo( "hallo" ) );
+      }
       #endregion Convert
 
       #region Flatten

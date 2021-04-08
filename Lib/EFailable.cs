@@ -147,6 +147,13 @@ namespace SIEDA.Monadic
       public TValue OrThrow( Exception e ) => IsSuccess ? _value : throw e;
 
       /// <summary>
+      /// <para>Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see langword="true"/>,
+      /// otherwise throws the inner exception wrapped by this <see cref="EFailable{TValue}"/>.</para>
+      /// <para>Be careful when using this, it is strongly recommended to not throw exceptions and use an If-check with a '<see cref="IsSuccess"/>' instead!</para>
+      /// </summary>
+      public TValue OrException() => IsSuccess ? _value : throw _error;
+
+      /// <summary>
       /// Writes this instance's "successful" value into the <see langword="out"/> parameter <paramref name="value"/>
       /// and returns <see langword="true"/> if <see cref="IsSuccess"/> == <see langword="true"/>,
       /// otherwise <paramref name="value"/> will be set to the <see langword="default"/> value of <typeparamref name="TValue"/>
