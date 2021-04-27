@@ -168,13 +168,16 @@ namespace SIEDA.Monadic
       /// <exception cref="MaybeNoneException"/>
       public TValue OrThrow() => IsSome ? _value : throw new MaybeNoneException( typeValue: typeof( TValue ) );
 
+      #pragma warning disable CS0618 // Type or member is obsolete
       /// <summary>
       /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise
       /// throws a <see cref="MaybeNoneException"/> with the message <paramref name="msg"/>.
       /// </summary>
       /// <exception cref="MaybeNoneException"/>
       public TValue OrThrow( string msg ) => IsSome ? _value : throw new MaybeNoneException( customMessage: msg );
+      #pragma warning restore CS0618
       
+      #pragma warning disable CS0618 // Type or member is obsolete
       /// <summary>
       /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise
       /// throws a <see cref="MaybeNoneException"/> with the formatted message <paramref
@@ -183,7 +186,6 @@ namespace SIEDA.Monadic
       /// <exception cref="MaybeNoneException"/>
       public TValue OrThrow( string msg, params string[] args ) =>
          IsSome ? _value : throw new MaybeNoneException( customMessage: string.Format( msg, args ) );
-      
       #pragma warning restore CS0618 // MaybeNoneException( string ) obsolete
 
       /// <summary>
