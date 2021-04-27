@@ -18,7 +18,10 @@
       <GenerateDocumentationFile>false</GenerateDocumentationFile>
       
       <!-- for details, see LICENSE-file in this repository -->
-      <Copyright>Copyright © 2020 SIEDA GmbH Kaiserslautern</Copyright>
+      <Copyright>Copyright © 2020-2021 SIEDA GmbH Kaiserslautern</Copyright>
+      
+      <!-- warnings we are not interested in -->
+      <NoWarn>CS1591,IDE0011,IDE0063</NoWarn>
 
       <!-- signing compiled output -->
       <SignAssembly>true</SignAssembly>

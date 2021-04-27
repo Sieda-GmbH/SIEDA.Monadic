@@ -1,5 +1,5 @@
 ﻿using System;
-using MonadicTests.Tests.HelperClass;
+using SIEDA.MonadicTests.HelperClass;
 using NUnit.Framework;
 using SIEDA.Monadic;
 
@@ -411,7 +411,7 @@ namespace SIEDA.MonadicTests
       {
          var flag1 = Option<bool, string>.Some( true );
 
-         Option<Option<bool, string>, string> result = flag1.Map( _ => Option<bool, string>.Some( true ) );
+         var result = flag1.Map( _ => Option<bool, string>.Some( true ) );
 
          Assert.That( result.Or( Option<bool, string>.Failure( "disgusting" ) ).Or( false ), Is.True );
       }
@@ -678,7 +678,7 @@ namespace SIEDA.MonadicTests
       public void ConvertToFailable_Failure()
       {
          var Option = Option<string, ArgumentException>.Failure( new ArgumentException("msg") );
-         Failable<string, ArgumentException> failable = Option.ToFailable( new ArgumentException("notMsg") ); //different exception text!
+         var failable = Option.ToFailable( new ArgumentException("notMsg") ); //different exception text!
 
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
@@ -694,40 +694,6 @@ namespace SIEDA.MonadicTests
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
       }
-
-      [Test]
-      [Description( "Some wird zu EFailable.Success konvertiert" )]
-      public void ConvertToEFailable_Some()
-      {
-         var Option = Option<string, ArgumentException>.Some( "hallo" );
-         var failable = Option.ToEFailable( new ArgumentException() );
-
-         Assert.That( failable.IsSuccess, Is.True );
-         Assert.That( failable.OrThrow, Is.EqualTo( "hallo" ) );
-      }
-
-      [Test]
-      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
-      public void ConvertToEFailable_Failure()
-      {
-         var Option = Option<string, ArgumentException>.Failure( new ArgumentException("notMsg") );
-         EFailable<string> failable = Option.ToEFailable( new ArgumentException("msg") );
-
-         Assert.That( failable.IsFailure, Is.True );
-         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
-      }
-
-      [Test]
-      [Description( "None wird zu EFailable.Failure konvertiert" )]
-      public void ConvertToEFailable_None()
-      {
-         var Option = Option<string, ArgumentException>.None;
-         var failable = Option.ToEFailable( new ArgumentException("msg") );
-
-         Assert.That( failable.IsFailure, Is.True );
-         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
-      }
-      
       #endregion Convert
    }
 }

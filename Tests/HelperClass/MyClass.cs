@@ -1,4 +1,4 @@
-﻿namespace MonadicTests.Tests.HelperClass
+﻿namespace SIEDA.MonadicTests.HelperClass
 {
    public class MyClass
    {

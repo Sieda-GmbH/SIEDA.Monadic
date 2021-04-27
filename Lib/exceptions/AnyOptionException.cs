@@ -5,7 +5,6 @@ namespace SIEDA.Monadic
 {
    /// <summary>
    /// Common superclass for exceptions thrown by either <see cref="Option{TValue, TFail}"/> *or* <see cref="EOption{TValue}"/>.
-   /// Note that this is further distinguished though <see cref="OptionException"/> and <see cref="EOptionException"/>.
    /// </summary>
    /// <remarks> Useful for 'try-catch' clauses. </remarks>
    [Serializable]

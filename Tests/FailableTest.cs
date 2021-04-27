@@ -1,5 +1,5 @@
 ﻿using System;
-using MonadicTests.Tests.HelperClass;
+using SIEDA.MonadicTests.HelperClass;
 using NUnit.Framework;
 using SIEDA.Monadic;
 
@@ -324,7 +324,7 @@ namespace SIEDA.MonadicTests
       {
          var flag = Failable<bool, string>.Success( true );
 
-         Failable<Failable<bool, string>, string> result = flag.Map( _ => Failable<bool, string>.Success( true ) );
+         var result = flag.Map( _ => Failable<bool, string>.Success( true ) );
 
          Assert.That( result.Or( Failable<bool, string>.Failure( "disgusting" ) ).Or( false ), Is.True );
       }
@@ -529,55 +529,11 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "Success wird zu EFailable.Success konvertiert" )]
-      public void ConvertToEFailable_Success()
-      {
-         var failable = Failable<string, bool>.Success( "hallo" );
-         var EFailable = failable.ToEFailable( new ArgumentException() );
-
-         Assert.That( EFailable.IsSuccess, Is.True );
-         Assert.That( EFailable.OrThrow, Is.EqualTo( "hallo" ) );
-      }
-
-      [Test]
-      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
-      public void ConvertToEFailable_Failure()
-      {
-         var failable = Failable<string, bool>.Failure( true );
-         EFailable<string> EFailable = failable.ToEFailable( new ArgumentException("msg") );
-
-         Assert.That( EFailable.IsFailure, Is.True );
-         Assert.That( EFailable.FailureOrThrow().Message, Is.EqualTo("msg") );
-      }
-
-      [Test]
-      [Description( "Success wird zu EFailable.Success konvertiert" )]
-      public void ConvertToEFailable_WithConverter_Success()
-      {
-         var failable = Failable<int, string>.Success( 42 );
-         var eFailable = failable.ToEFailable( s => new Exception( s ) );
-
-         Assert.That( eFailable.IsSuccess, Is.True );
-         Assert.That( eFailable.OrThrow(), Is.EqualTo( 42 ) );
-      }
-
-      [Test]
-      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
-      public void ConvertToEFailable_WithConverter_Failure()
-      {
-         var failable = Failable<int, string>.Failure( "hallo" );
-         var eFailable = failable.ToEFailable( s => new Exception( s ) );
-
-         Assert.That( eFailable.IsFailure, Is.True );
-         Assert.That( eFailable.FailureOrThrow().Message, Is.EqualTo( "hallo" ) );
-      }
-
-      [Test]
       [Description( "Failure wird zu Option.Failure konvertiert" )]
       public void ConvertToOption_None()
       {
          var failable = Failable<string, int>.Failure( 42 );
-         Option<string, int> option = failable.ToOption();
+         var option = failable.ToOption();
 
          Assert.That( option.IsFailure, Is.True );
       }
@@ -587,29 +543,9 @@ namespace SIEDA.MonadicTests
       public void ConvertToOption_Some()
       {
          var failable = Failable<string, int>.Success( "hubba" );
-         Option<string, int> option = failable.ToOption();
+         var option = failable.ToOption();
 
          Assert.That( option.IsSome, Is.True );
-      }
-
-      [Test]
-      [Description( "Failure wird zu EOption.Failure konvertiert" )]
-      public void ConvertToEOption_None()
-      {
-         var failable = Failable<string, int>.Failure(42);
-         EOption<string> EOption = failable.ToEOption( new ArgumentException("") );
-
-         Assert.That( EOption.IsFailure, Is.True );
-      }
-
-      [Test]
-      [Description( "Success wird zu EOption.Some konvertiert" )]
-      public void ConvertToEOption_Some()
-      {
-         var failable = Failable<string, int>.Success( "hubba" );
-         EOption<string> EOption = failable.ToEOption( new ArgumentException( "" ) );
-
-         Assert.That( EOption.IsSome, Is.True );
       }
       #endregion Convert
    }

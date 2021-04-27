@@ -20,7 +20,7 @@ namespace SIEDA.MonadicTests
       [Test]
       public void ConstructFailure_ErrorNull()
       {
-         Assert.That( () => EValidation.Failure( null ), Throws.TypeOf<EValidationFailureConstructionException>() );
+         Assert.That( () => EValidation.Failure( null ), Throws.TypeOf<ValidationFailureConstructionException>() );
       }
 
       [Test]
@@ -70,6 +70,24 @@ namespace SIEDA.MonadicTests
          Assert.That( x.Equals( y ), Is.False );
       }
 
+      [Test]
+      [Description( "EValidations sind equivalent zu Validations mit Right-Hand-Side Exception" )]
+      public void Equals_Validation()
+      {
+         var aEValid = EValidation.Success;
+         var aValid = Validation<Exception>.Success;
+
+         var exception = new ArgumentException();
+         var bEValid = EValidation.Failure( exception );
+         var bValid = Validation<Exception>.Failure( exception );
+
+         Assert.That( aEValid, Is.EqualTo( aValid ), "EValidation-Equals is buggy! (Success-Case)" );
+         Assert.That( bValid, Is.EqualTo( bEValid ), "EValidation-Equals is buggy! (Failure-Case)" );
+         Assert.That( aValid, Is.EqualTo( aEValid ), "Implementation of Validation is not accepting EValidation! (Success-Case)" );
+         Assert.That( bValid, Is.EqualTo( bEValid ), "Implementation of Validation is not accepting EValidation! (Failure-Case)" );
+
+         Assert.That( aEValid, Is.Not.EqualTo( bValid ) ); //sanity-check
+      }
       #endregion Equals
 
       #region Accessing Value
@@ -84,7 +102,7 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrThrowWithText_DoesNotThrowIfSuccess()
       {
-         Assert.Throws<EValidationNoFailureException>( () => EValidation.Success.FailureOrThrow() );
+         Assert.Throws<ValidationNoFailureException>( () => EValidation.Success.FailureOrThrow() );
       }
 
       #endregion Accessing Value
@@ -108,29 +126,6 @@ namespace SIEDA.MonadicTests
          var exception = new ArgumentNullException();
          var validation = EValidation.Failure( exception );
          var option = validation.ToOption();
-
-         Assert.That( option.IsFailure, Is.True );
-         Assert.That( option.FailureOrThrow(), Is.EqualTo( exception ) );
-      }
-
-
-      [Test]
-      [Description( "Success wird zu EOption.None konvertiert" )]
-      public void ConvertToEOption_Success()
-      {
-         var validation = EValidation.Success;
-         var option = validation.ToEOption();
-
-         Assert.That( option.IsNone, Is.True );
-      }
-
-      [Test]
-      [Description( "Success wird zu EOption.Failure konvertiert" )]
-      public void ConvertToEOption_Failure()
-      {
-         var exception = new ArgumentNullException();
-         var validation = EValidation.Failure( exception );
-         var option = validation.ToEOption();
 
          Assert.That( option.IsFailure, Is.True );
          Assert.That( option.FailureOrThrow(), Is.EqualTo( exception ) );

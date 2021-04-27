@@ -5,7 +5,6 @@ namespace SIEDA.Monadic
 {
    /// <summary>
    /// Common superclass for exceptions thrown by either <see cref="Failable{TValue, TFail}"/> *or* <see cref="EFailable{TValue}"/>.
-   /// Note that this is further distinguished though <see cref="FailableException"/> and <see cref="EFailableException"/>.
    /// </summary>
    /// <remarks> Useful for 'try-catch' clauses. </remarks>
    [Serializable]

@@ -9,7 +9,7 @@
       
    ##############################################################-->
    <PropertyGroup>
-      <VersionPrefix>2.3.1.0</VersionPrefix>
+      <VersionPrefix>2.4.0.0</VersionPrefix>
    </PropertyGroup>
    
    <!--#############################################################################################################################
@@ -29,8 +29,11 @@
       <!-- generating C# Documentation -->
       <GenerateDocumentationFile>true</GenerateDocumentationFile>
       
+      <!-- warnings we are not interested in -->
+      <NoWarn>CS1591,IDE0011,IDE0063</NoWarn>
+      
       <!-- for details, see LICENSE-file in this repository -->
-      <Copyright>Copyright © 2020 SIEDA GmbH Kaiserslautern</Copyright>
+      <Copyright>Copyright © 2020-2021 SIEDA GmbH Kaiserslautern</Copyright>
 
       <!-- signing compiled output -->
       <SignAssembly>true</SignAssembly>

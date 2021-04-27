@@ -1,5 +1,5 @@
 ﻿using System;
-using MonadicTests.Tests.HelperClass;
+using SIEDA.MonadicTests.HelperClass;
 using NUnit.Framework;
 using SIEDA.Monadic;
 
@@ -591,7 +591,7 @@ namespace SIEDA.MonadicTests
       public void ConvertToOption_None()
       {
          var maybe = Maybe<string>.None;
-         Option<string, int> option = maybe.ToOption<int>();
+         var option = maybe.ToOption<int>();
 
          Assert.That( option.IsNone, Is.True );
       }
@@ -601,31 +601,10 @@ namespace SIEDA.MonadicTests
       public void ConvertToOption_Some()
       {
          var maybe = Maybe<string>.Some("hubba");
-         Option<string, int> option = maybe.ToOption<int>();
+         var option = maybe.ToOption<int>();
 
          Assert.That( option.IsSome, Is.True );
       }
-
-      [Test]
-      [Description( "Leeres Maybe wird zu EOption.None konvertiert" )]
-      public void ConvertToEOption_None()
-      {
-         var maybe = Maybe<string>.None;
-         EOption<string> EOption = maybe.ToEOption();
-
-         Assert.That( EOption.IsNone, Is.True );
-      }
-
-      [Test]
-      [Description( "Definiertes Maybe wird zu EOption.Some konvertiert" )]
-      public void ConvertToEOption_Some()
-      {
-         var maybe = Maybe<string>.Some( "hubba" );
-         EOption<string> EOption = maybe.ToEOption();
-
-         Assert.That( EOption.IsSome, Is.True );
-      }
-
       #endregion Convert
    }
 }
