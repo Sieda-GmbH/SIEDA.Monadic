@@ -417,6 +417,16 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      [Description( "Map hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void MapToDifferentType()
+      {
+         var one = Option<int, bool>.Some( 1 );
+         Option<string, bool> onePlusOne = one.Map( i => $"{i}+1=2" );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
+      [Test]
       [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
       public void Map_NestingInFlatMap()
       {
@@ -567,11 +577,11 @@ namespace SIEDA.MonadicTests
 
       #endregion TryGet
 
-      #region TryGetError
+      #region TryGetFailure
 
       [Test]
-      [Description( "TryGetError() produziert korrektes Boolean-Result bei Some" )]
-      public void TryGet_Error_Some()
+      [Description( "TryGetFailure() produziert korrektes Boolean-Result bei Some" )]
+      public void TryGetFailure_Some()
       {
          var Option = Option<string, Exception>.Some( "blah" );
 
@@ -579,8 +589,8 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "TryGetError() schreibt keinen Wert bei Some" )]
-      public void TryGet_ErrorResult_Some()
+      [Description( "TryGetFailure() schreibt keinen Wert bei Some" )]
+      public void TryGetFailure_Result_Some()
       {
          var Option = Option<string, Exception>.Some( "blah" );
          Option.TryGetFailure( out var s );
@@ -589,8 +599,8 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "TryGetError() produziert korrektes Boolean-Result bei Failure" )]
-      public void TryGet_Error_Failure()
+      [Description( "TryGetFailure() produziert korrektes Boolean-Result bei Failure" )]
+      public void TryGetFailure_Failure()
       {
          var Option = Option<string, Exception>.Failure( new ArgumentException() );
 
@@ -598,8 +608,8 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "TryGetError() schreibt Wert bei Failure" )]
-      public void TryGet_ErrorResult_Failure()
+      [Description( "TryGetFailure() schreibt Wert bei Failure" )]
+      public void TryGetFailure_Result_Failure()
       {
          var Option = Option<string, Exception>.Failure( new ArgumentException("msg") );
          Option.TryGetFailure( out var e );
@@ -609,8 +619,8 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "TryGetError() produziert korrektes Boolean-Result bei None" )]
-      public void TryGet_Error_None()
+      [Description( "TryGetFailure() produziert korrektes Boolean-Result bei None" )]
+      public void TryGetFailure_None()
       {
          var Option = Option<string, Exception>.None;
 
@@ -618,8 +628,8 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "TryGetError() schreibt keinen Wert bei None" )]
-      public void TryGet_ErrorResult_None()
+      [Description( "TryGetFailure() schreibt keinen Wert bei None" )]
+      public void TryGetFailure_Result_None()
       {
          var Option = Option<string, Exception>.None;
          Option.TryGetFailure( out var s );
@@ -627,7 +637,7 @@ namespace SIEDA.MonadicTests
          Assert.IsNull( s );
       }
 
-      #endregion TryGetError
+      #endregion TryGetFailure
 
       #region Convert
       
@@ -693,6 +703,39 @@ namespace SIEDA.MonadicTests
 
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+      }
+
+      [Test]
+      [Description( "Some wird zu EFailable.Success konvertiert" )]
+      public void ConvertToEFailable_Some()
+      {
+         var Option = Option<string, ArgumentException>.Some( "hallo" );
+         var failable = Option.ToEFailable( new ArgumentException() );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_Failure()
+      {
+         var Option = Option<string, ArgumentException>.Failure( new ArgumentException( "notMsg" ) );
+         EFailable<string> failable = Option.ToEFailable( new ArgumentException( "msg" ) );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "None wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_None()
+      {
+         var Option = Option<string, ArgumentException>.None;
+         var failable = Option.ToEFailable( new ArgumentException( "msg" ) );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
       }
       #endregion Convert
    }

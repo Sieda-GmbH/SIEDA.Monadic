@@ -291,13 +291,10 @@ namespace SIEDA.MonadicTests
       }
 
       /// <summary>
-      /// Man kann natürlich auch sagen, <see cref="MappingNullTreatedLikeNone"/>
-      /// könnte genauso gut durch <see cref="FlatMappingNone"/> dargestellt werden.
+      /// Man kann natürlich auch sagen, <see cref="MappingNullTreatedLikeNone"/> könnte genauso gut durch <see cref="FlatMappingNone"/> dargestellt werden.
       ///
-      /// Nur ist die Frage, wie man hier <see langword="null"/> als Rückgabewert interpretieren will:
-      /// hier ist es <see cref="Maybe{T}.None"/>, weil sich manche Codestellen bereits darauf verlassen.
-      /// Will man dies ändern so muss man die Aufrufe von <see cref="Maybe{T}.Map"/> durchgehen
-      /// und bei <c>return null</c> dies durch die Variante mit <see cref="Maybe{T}.FlatMap"/> ersetzen.
+      /// Nur ist die Frage, wie man hier <see langword="null"/> als Rückgabewert interpretieren will: hier ist es <see cref="Maybe{T}.None"/>, weil das
+      /// konsistent zu <see cref="Maybe{TValue}.From(TValue)"/> ist.
       /// </summary>
       [Test]
       [Description( "In Map wird Null als None interpretiert." )]
@@ -353,6 +350,16 @@ namespace SIEDA.MonadicTests
          var result = hallo.FlatMap( h => sp.Map( space => h + space + "welt" ) );
 
          Assert.That( result.Or( "nix da" ), Is.EqualTo( "hallo welt" ) );
+      }
+
+      [Test]
+      [Description( "Map hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void MapToDifferentType()
+      {
+         var one = Maybe<int>.Some( 1 );
+         Maybe<string> onePlusOne = one.Map( i => $"{i}+1=2" );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
       }
 
       [Test]
@@ -604,6 +611,26 @@ namespace SIEDA.MonadicTests
          var option = maybe.ToOption<int>();
 
          Assert.That( option.IsSome, Is.True );
+      }
+
+      [Test]
+      [Description( "Leeres Maybe wird zu EOption.None konvertiert" )]
+      public void ConvertToEOption_None()
+      {
+         var maybe = Maybe<string>.None;
+         EOption<string> EOption = maybe.ToEOption();
+
+         Assert.That( EOption.IsNone, Is.True );
+      }
+
+      [Test]
+      [Description( "Definiertes Maybe wird zu EOption.Some konvertiert" )]
+      public void ConvertToEOption_Some()
+      {
+         var maybe = Maybe<string>.Some( "hubba" );
+         EOption<string> EOption = maybe.ToEOption();
+
+         Assert.That( EOption.IsSome, Is.True );
       }
       #endregion Convert
    }

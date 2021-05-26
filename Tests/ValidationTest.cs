@@ -160,6 +160,48 @@ namespace SIEDA.MonadicTests
          Assert.That( option.IsFailure, Is.True );
          Assert.That( option.FailureOrThrow(), Is.EqualTo( "hallo" ) );
       }
+
+      [Test]
+      [Description( "Success wird zu EValidation.Success konvertiert" )]
+      public void ConvertToEValidation_Success()
+      {
+         var validation = Validation<string>.Success;
+         var eValidation = validation.ToEValidation( new ArgumentException( "hallo" ) );
+
+         Assert.That( eValidation.IsSuccess, Is.True );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EValidation.Failure konvertiert" )]
+      public void ConvertToEValidation_WithConverter_Failure()
+      {
+         var validation = Validation<string>.Failure( "whatever" );
+         var eValidation = validation.ToEValidation( new ArgumentException( "hallo" ) );
+
+         Assert.That( eValidation.IsFailure, Is.True );
+         Assert.That( eValidation.FailureOrThrow().Message, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Success wird zu EValidation.Success konvertiert" )]
+      public void ConvertToEValidation_WithConverter_Success()
+      {
+         var validation = Validation<string>.Success;
+         var eValidation = validation.ToEValidation( s => new Exception( s ) );
+
+         Assert.That( eValidation.IsSuccess, Is.True );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EValidation.Failure konvertiert" )]
+      public void ConvertToEValidation_Failure()
+      {
+         var validation = Validation<string>.Failure( "hallo" );
+         var eValidation = validation.ToEValidation( s => new Exception( s ) );
+
+         Assert.That( eValidation.IsFailure, Is.True );
+         Assert.That( eValidation.FailureOrThrow().Message, Is.EqualTo( "hallo" ) );
+      }
       #endregion Convert
 
       #region Flatten
@@ -174,5 +216,19 @@ namespace SIEDA.MonadicTests
          Assert.That( b.Flatten(), Is.EqualTo( a ) );
       }
       #endregion Flatten
+
+      #region Mapping
+
+      [Test]
+      [Description( "FailMap hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void FailMapToDifferentType()
+      {
+         var one = Validation<int>.Failure( 1 );
+         Validation<string> onePlusOne = one.FailMap( i => $"{i}+1=2" );
+
+         Assert.That( onePlusOne.FailureOrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
+      #endregion Mapping
    }
 }

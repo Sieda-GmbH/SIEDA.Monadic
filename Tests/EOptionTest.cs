@@ -115,19 +115,19 @@ namespace SIEDA.MonadicTests
       [Test]
       public void ToString_Some()
       {
-         Assert.That( EOption<TestObj>.From( new TestObj( "hallo" ) ).ToString(), Is.EqualTo( "[Option<TestObj, Exception>.Some: Object 'hallo']" ) );
+         Assert.That( EOption<TestObj>.From( new TestObj( "hallo" ) ).ToString(), Is.EqualTo( "[EOption<TestObj>.Some: Object 'hallo']" ) );
       }
 
       [Test]
       public void ToString_None()
       {
-         Assert.That( EOption<TestObj>.From( null ).ToString(), Is.EqualTo( "[Option<TestObj, Exception>.None]" ) );
+         Assert.That( EOption<TestObj>.From( null ).ToString(), Is.EqualTo( "[EOption<TestObj>.None]" ) );
       }
 
       [Test]
       public void ToString_Failure()
       {
-         Assert.That( EOption<TestObj>.Failure( new ArgumentException( "evil" ) ).ToString(), Is.EqualTo( "[Option<TestObj, Exception>.Failure: System.ArgumentException: evil]" ) );
+         Assert.That( EOption<TestObj>.Failure( new ArgumentException( "evil" ) ).ToString(), Is.EqualTo( "[EOption<TestObj>.Failure: System.ArgumentException: evil]" ) );
       }
 
       #endregion ToString
@@ -252,6 +252,10 @@ namespace SIEDA.MonadicTests
          var cEOption = EFailable<int>.Failure( exception );
          var cOption = Failable<int, Exception>.Failure( exception );
 
+         Assert.That( aEOption.GetHashCode(), Is.EqualTo( aOption.GetHashCode() ), "HashCode not correct (Success-Case)" );
+         Assert.That( bEOption.GetHashCode(), Is.EqualTo( bOption.GetHashCode() ), "HashCode not correct (None-Case)" );
+         Assert.That( cEOption.GetHashCode(), Is.EqualTo( cOption.GetHashCode() ), "HashCode not correct (Failure-Case)" );
+
          Assert.That( aEOption, Is.EqualTo( aOption ), "EOption-Equals is buggy! (Some-Case)" );
          Assert.That( bEOption, Is.EqualTo( bOption ), "EOption-Equals is buggy! (None-Case)" );
          Assert.That( cEOption, Is.EqualTo( cOption ), "EOption-Equals is buggy! (Failure-Case)" );
@@ -259,8 +263,30 @@ namespace SIEDA.MonadicTests
          Assert.That( bOption, Is.EqualTo( bEOption ), "Implementation of Option is not accepting EOption! (None-Case)" );
          Assert.That( cOption, Is.EqualTo( cEOption ), "Implementation of Option is not accepting EOption! (Failure-Case)" );
 
-         Assert.That( aEOption, Is.Not.EqualTo( bOption ) ); //sanity-check
+         Assert.That( aEOption, Is.Not.EqualTo( bOption ) ); //sanity-checks
          Assert.That( cOption, Is.Not.EqualTo( bEOption ) );
+      }
+
+      [Test]
+      [Description( "EOptions sind nie equivalent zu Options ohne Right-Hand-Side Exception" )]
+      public void Equals_Option_DifferentType()
+      {
+         var aEOption = EOption<int>.Some( 4 );
+         var aOption = Option<int, string>.Some( 4 );
+
+         var bEOption = EOption<int>.None;
+         var bOption = Option<int, string>.None;
+
+         var exception = new ArgumentException();
+         var cEOption = EFailable<int>.Failure( exception );
+         var cOption = Failable<int, string>.Failure( "whatever" );
+
+         Assert.That( aEOption, Is.Not.EqualTo( aOption ) );
+         Assert.That( bEOption, Is.Not.EqualTo( bOption ) );
+         Assert.That( cEOption, Is.Not.EqualTo( cOption ) );
+         Assert.That( aOption, Is.Not.EqualTo( aEOption ) );
+         Assert.That( bOption, Is.Not.EqualTo( bEOption ) );
+         Assert.That( cOption, Is.Not.EqualTo( cEOption ) );
       }
       #endregion Equals
 
@@ -469,6 +495,16 @@ namespace SIEDA.MonadicTests
 
          Assert.That( result.Or( "nix da" ), Is.EqualTo( "hallo welt" ) );
       }
+
+      [Test]
+      [Description( "Map hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void MapToDifferentType()
+      {
+         var one = EOption<int>.Some( 1 );
+         EOption<string> onePlusOne = one.Map( i => $"{i}+1=2" );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
       #endregion Map and Nesting
 
       #region Is
@@ -597,68 +633,6 @@ namespace SIEDA.MonadicTests
 
       #endregion TryGet
 
-      #region TryGetError
-
-      [Test]
-      [Description( "TryGetError() produziert korrektes Boolean-Result bei Some" )]
-      public void TryGet_Error_Some()
-      {
-         var EOption = EOption<string>.Some( "blah" );
-
-         Assert.IsFalse( EOption.TryGetFailure( out var s ) );
-      }
-
-      [Test]
-      [Description( "TryGetError() schreibt keinen Wert bei Some" )]
-      public void TryGet_ErrorResult_Some()
-      {
-         var EOption = EOption<string>.Some( "blah" );
-         EOption.TryGetFailure( out var s );
-
-         Assert.IsNull( s );
-      }
-
-      [Test]
-      [Description( "TryGetError() produziert korrektes Boolean-Result bei Failure" )]
-      public void TryGet_Error_Failure()
-      {
-         var EOption = EOption<string>.Failure( new ArgumentException() );
-
-         Assert.IsTrue( EOption.TryGetFailure( out var s ) );
-      }
-
-      [Test]
-      [Description( "TryGetError() schreibt Wert bei Failure" )]
-      public void TryGet_ErrorResult_Failure()
-      {
-         var EOption = EOption<string>.Failure( new ArgumentException("msg") );
-         EOption.TryGetFailure( out var e );
-
-         Assert.That( e, Is.TypeOf<ArgumentException>() );
-         Assert.That( e.Message, Is.EqualTo("msg") );
-      }
-
-      [Test]
-      [Description( "TryGetError() produziert korrektes Boolean-Result bei None" )]
-      public void TryGet_Error_None()
-      {
-         var EOption = EOption<string>.None;
-
-         Assert.IsFalse( EOption.TryGetFailure( out var s ) );
-      }
-
-      [Test]
-      [Description( "TryGetError() schreibt keinen Wert bei None" )]
-      public void TryGet_ErrorResult_None()
-      {
-         var EOption = EOption<string>.None;
-         EOption.TryGetFailure( out var s );
-
-         Assert.IsNull( s );
-      }
-
-      #endregion TryGetError
-
       #region Convert
       
       [Test]
@@ -723,6 +697,71 @@ namespace SIEDA.MonadicTests
 
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+      }
+
+      [Test]
+      [Description( "Some wird zu EFailable.Some konvertiert" )]
+      public void ConvertToEFailable_Some()
+      {
+         var EOption = EOption<string>.Some( "hallo" );
+         var failable = EOption.ToEFailable( new ArgumentException() );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_Failure()
+      {
+         var EOption = EOption<string>.Failure( new ArgumentException( "msg" ) );
+         EFailable<string> failable = EOption.ToEFailable( new ArgumentException( "to-be-used-on-none!" ) );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "None wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_None()
+      {
+         var EOption = EOption<string>.None;
+         var failable = EOption.ToEFailable( new ArgumentException( "msg" ) );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "Some wird zu Option.Some konvertiert" )]
+      public void ConvertToOption_Some()
+      {
+         var EOption = EOption<string>.Some( "hallo" );
+         var option = EOption.ToOption();
+
+         Assert.That( option.IsSome, Is.True );
+         Assert.That( option.OrThrow, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu Option.Failure konvertiert" )]
+      public void ConvertToOption_Failure()
+      {
+         var EOption = EOption<string>.Failure( new ArgumentException( "msg" ) );
+         Option<string, Exception> option = EOption.ToOption();
+
+         Assert.That( option.IsFailure, Is.True );
+         Assert.That( option.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "None wird zu Option.None konvertiert" )]
+      public void ConvertToOption_None()
+      {
+         var EOption = EOption<string>.None;
+         var option = EOption.ToOption();
+
+         Assert.That( option.IsNone, Is.True );
       }
       #endregion Convert
    }

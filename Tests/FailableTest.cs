@@ -330,6 +330,16 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      [Description( "Map hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void MapToDifferentType()
+      {
+         var one = Failable<int, bool>.Success( 1 );
+         Failable<string, bool> onePlusOne = one.Map( i => $"{i}+1=2" );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
+      [Test]
       [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
       public void Map_NestingInFlatMap()
       {
@@ -546,6 +556,50 @@ namespace SIEDA.MonadicTests
          var option = failable.ToOption();
 
          Assert.That( option.IsSome, Is.True );
+      }
+
+      [Test]
+      [Description( "Success wird zu EFailable.Success konvertiert" )]
+      public void ConvertToEFailable_Success()
+      {
+         var failable = Failable<string, bool>.Success( "hallo" );
+         var EFailable = failable.ToEFailable( new ArgumentException() );
+
+         Assert.That( EFailable.IsSuccess, Is.True );
+         Assert.That( EFailable.OrThrow, Is.EqualTo( "hallo" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_Failure()
+      {
+         var failable = Failable<string, bool>.Failure( true );
+         EFailable<string> EFailable = failable.ToEFailable( new ArgumentException( "msg" ) );
+
+         Assert.That( EFailable.IsFailure, Is.True );
+         Assert.That( EFailable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "Success wird zu EFailable.Success konvertiert" )]
+      public void ConvertToEFailable_WithConverter_Success()
+      {
+         var failable = Failable<int, string>.Success( 42 );
+         var eFailable = failable.ToEFailable( new Exception( "whatever" ) );
+
+         Assert.That( eFailable.IsSuccess, Is.True );
+         Assert.That( eFailable.OrThrow(), Is.EqualTo( 42 ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
+      public void ConvertToEFailable_WithConverter_Failure()
+      {
+         var failable = Failable<int, string>.Failure( "will-be-overwritten" );
+         var eFailable = failable.ToEFailable( new Exception( "new" ) );
+
+         Assert.That( eFailable.IsFailure, Is.True );
+         Assert.That( eFailable.FailureOrThrow().Message, Is.EqualTo( "new" ) );
       }
       #endregion Convert
    }

@@ -1,15 +1,27 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace SIEDA.Monadic
 {
    /// <summary>
-   /// An implementation of <see cref="IValidation{TFail}"/>, with <c>TFail</c> beeing <see cref="Exception"/>.
+   /// <para>
+   /// Represents the "result" of a check that might have failed, that is an operation that either
+   /// succeeds without any error or fails with some <see cref="Exception"/> if the operation
+   /// "was a failure". Never <see langword="null"/>.
+   /// </para>
+   /// <para>
+   /// One can think of this as an "inverted" <see cref="Maybe{TValue}"/>, although this obviously comes
+   /// with different intended semantics and API restrictions. An alternative interpretion of this
+   /// class is a <see cref="EFailable{TValue}"/> without a value when it is successful.
+   /// </para>
    /// </summary>
-   public readonly struct EValidation : IValidation<Exception>
+   public readonly struct EValidation
    {
       #region State
 
-      private readonly IValidation<Exception> _innerValidation;
+      private readonly Exception _error;
+
+      // Property IsSuccess is also "State", and it is relevant for 'Equals(...)'.
 
       #endregion State
 
@@ -18,73 +30,134 @@ namespace SIEDA.Monadic
       /// <summary>
       /// The <see cref="EValidation"/> with a "successful" outcome.
       /// </summary>
-      public static readonly EValidation Success = new EValidation( Validation<Exception>.Success );
+      public static readonly EValidation Success = new EValidation( true, default );
 
       /// <summary>
-      /// Creates a <see cref="EValidation"/> with a <paramref name="error"/>-value, which must not
-      /// be <see langword="null"/>.
+      /// Creates a <see cref="EValidation"/> with a <paramref name="failure"/>-value, which
+      /// must not be <see langword="null"/>.
       /// </summary>
       /// <exception cref="ValidationFailureConstructionException">
-      /// if <paramref name="error"/> == <see langword="null"/>.
+      /// if <paramref name="failure"/> == <see langword="null"/>.
       /// </exception>
-      public static EValidation Failure( Exception error )
+      public static EValidation Failure( Exception failure )
       {
-         if( ReferenceEquals( error, null ) )
+         if( ReferenceEquals( failure, null ) )
          {
-            #pragma warning disable CS0618 // Type or member is obsolete
-            throw new ValidationFailureConstructionException();
-            #pragma warning restore CS0618
+            throw new ValidationFailureConstructionException( typeFailure: typeof( Exception ) );
          }
 
-         return new EValidation( Validation<Exception>.Failure( error ) );
+         return new EValidation( false, failure );
       }
 
-      private EValidation( IValidation<Exception> validation ) => _innerValidation = validation;
+      private EValidation( bool isSuccess, Exception failure )
+      {
+         IsSuccess = isSuccess;
+         _error = failure;
+      }
 
       #endregion Construction
 
       #region Properties
-      ///<inheritdoc/>
-      public bool IsSuccess => _innerValidation.IsSuccess;
+      /// <summary>
+      /// <see langword="true"/>, if this instance is a "success".
+      /// </summary>
+      public bool IsSuccess { get; }
 
-      ///<inheritdoc/>
-      public bool IsFailure => _innerValidation.IsFailure;
+      /// <summary>
+      /// <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>.
+      /// </summary>
+      public bool IsFailure => !IsSuccess;
 
       #endregion Properties
 
-      #region Mapping
-      ///<inheritdoc/>
-      public Validation<TNewFail> FailMap<TNewFail>( Func<Exception, TNewFail> func ) =>
-         _innerValidation.IsSuccess ? Validation<TNewFail>.Success : Validation<TNewFail>.Failure( func( _innerValidation.FailureOrThrow() ) );
-      #endregion Mapping
-
       #region Accessing Failure
-      ///<inheritdoc/>
-      public Exception FailureOrThrow() => _innerValidation.FailureOrThrow();
-
-      ///<inheritdoc/>
-      public bool TryGetFailure( out Exception failure ) => _innerValidation.TryGetFailure( out failure );
+      /// <summary>
+      /// Returns this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>,
+      /// otherwise throws a <see cref="ValidationNoFailureException"/>.
+      /// </summary>
+      /// <exception cref="ValidationNoFailureException"/>
+      public Exception FailureOrThrow() =>
+         IsFailure ? _error : throw new ValidationNoFailureException( typeof( Exception ) );
 
       #endregion Accessing Failure
 
+      #region Mapping
+      /// <summary>
+      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/>
+      /// and returning a <see cref="EValidation"/> created from the result.
+      /// <para><paramref name="func"/> is only called if <see cref="IsSuccess"/> == <see langword="false"/>.</para>
+      /// <para>Returns <see cref="EValidation.Success"/> if <see cref="IsSuccess"/> == <see langword="true"/>.</para>
+      /// </summary>
+      /// <param name="func">The delegate that provides the new failure.</param>
+      public EValidation FailMap( Func<Exception, Exception> func ) => IsSuccess ? EValidation.Success : EValidation.Failure( func( _error ) );
+      #endregion Mapping
+
       #region Converters
 
-      ///<inheritdoc/>
-      public IOption<object, Exception> ToOption() => _innerValidation.ToOption();
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="Validation{Exception}"/>.
+      /// </summary>
+      /// <returns>
+      /// <see cref="Validation{Exception}"/>.
+      /// </returns>
+      public Validation<Exception> ToValidation() =>
+         IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _error );
+
+      /// <summary>
+      /// Converts this instance into a <see cref="EOption{Object}"/>, which is either a
+      /// failure or empty (but never defined).
+      /// </summary>
+      /// <returns>
+      /// <see cref="EOption{Object}"/> with its some-type being 'object' and its failure-type
+      /// being <see cref="Exception"/>.
+      /// </returns>
+      public EOption<object> ToEOption() =>
+         IsSuccess ? EOption<object>.None : EOption<object>.Failure( _error );
+
+      /// <summary>
+      /// Converts this instance into a <see cref="Option{Object, Exception}"/>, which is either a
+      /// failure or empty (but never defined).
+      /// </summary>
+      /// <returns>
+      /// <see cref="Option{Object, Exception}"/> with its some-type being 'object' and its failure-type
+      /// being <see cref="Exception"/>.
+      /// </returns>
+      public Option<object, Exception> ToOption() =>
+         IsSuccess ? Option<object, Exception>.None : Option<object, Exception>.Failure( _error );
 
       #endregion Converters
 
       #region Object
 
-      ///<inheritdoc/>
-      public override string ToString() => _innerValidation.ToString();
+      /// <summary>
+      /// Custom implementation of <see cref="object.ToString()"/>, wrapping the corresponding call
+      /// to this instance's value, be it a "success" or a "failure".
+      /// </summary>
+      public override string ToString() =>
+         IsSuccess
+         ? $"[EValidation.Success]"
+         : $"[EValidation.Failure: { _error }]";
 
 
-      ///<inheritdoc/>
-      public override bool Equals( object obj ) => _innerValidation.Equals( obj );
+      /// <summary>
+      /// <para>Returns <see langword="true"/> iff <see cref="IsSuccess"/> returns the same boolean for
+      /// both objects and both instances reference the same <see cref="Exception"/> internally.
+      /// being <see langword="false"/>.</para>
+      /// <para>Supports cross-class checks with <see cref="Validation{Exception}"/> following the same semantics as above!</para>
+      /// </summary>
+      public override bool Equals( object obj ) =>
+            ( ( obj is EValidation otherE )
+            && ( IsSuccess == otherE.IsSuccess )
+            && ( IsSuccess || _error == otherE.FailureOrThrow() ) )
+         || ( ( obj is Validation<Exception> otherV )
+            && ( IsSuccess == otherV.IsSuccess )
+            && ( IsSuccess || _error == otherV.FailureOrThrow() ) );
 
-      ///<inheritdoc/>
-      public override int GetHashCode() => _innerValidation.GetHashCode();
+      /// <summary>
+      /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this
+      /// instance's value, be it a "success" or a "failure".
+      /// </summary>
+      public override int GetHashCode() => IsSuccess ? int.MaxValue : _error.GetHashCode();
 
       #endregion Object
    }

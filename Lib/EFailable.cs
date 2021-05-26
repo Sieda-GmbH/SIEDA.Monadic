@@ -1,31 +1,43 @@
-
 using System;
 
 namespace SIEDA.Monadic
 {
    /// <summary>
-   /// An implementation of <see cref="IFailable{TValue, TFail}"/>, with <c>TFail</c> beeing <see cref="Exception"/>.
+   /// Interface for a object that represents the "result" of an operation that might have failed,
+   /// containing either a value of type <typeparamref name="TValue"/> if the operation "was
+   /// successful" or a different value of type <see cref="Exception"/> if the operation "was a
+   /// failure". Neither of these are ever <see langword="null"/>.
    /// </summary>
-   /// <remarks>This class acts like a transparent wrapper around an <see cref="Option{TValue, TFail}"/>.</remarks>
    /// <typeparam name="TValue">The type of the "successful" value.</typeparam>
-   public readonly struct EFailable<TValue> : IFailable<TValue, Exception>
+   public readonly struct EFailable<TValue>
    {
       #region State
 
-      private readonly IFailable<TValue, Exception> _innerFailable;
+      private readonly TValue _value;
+
+      private readonly Exception _failure;
+
+      // Property IsSuccess is also "State", and it is relevant for 'Equals(...)'.
 
       #endregion State
 
       #region Construction
 
       /// <summary>
-      /// Creates an <see cref="EFailable{TValue}"/> with a "successful" <paramref
-      /// name="value"/>, which must not be <see langword="null"/>.
+      /// Creates a <see cref="EFailable{TValue}"/> with a "successful" <paramref name="value"/>, which must not be <see langword="null"/>.
       /// </summary>
       /// <exception cref="FailableSuccessConstructionException">
       /// if <paramref name="value"/> == <see langword="null"/>.
       /// </exception>
-      public static EFailable<TValue> Success( TValue value ) => new EFailable<TValue>( Failable<TValue, Exception>.Success( value ) );
+      public static EFailable<TValue> Success( TValue value )
+      {
+         if( ReferenceEquals( value, null ) )
+         {
+            throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
+         }
+
+         return new EFailable<TValue>( true, value, default );
+      }
 
       /// <summary>
       /// Creates a <see cref="EFailable{TValue}"/> with the value of the <see
@@ -34,104 +46,297 @@ namespace SIEDA.Monadic
       /// <exception cref="FailableSuccessConstructionException">
       /// if <paramref name="nullableValue"/> == <see langword="null"/> (has no value).
       /// </exception>
-      public static EFailable<TValue> Success<T>( T? nullableValue ) where T : struct, TValue => new EFailable<TValue>( Failable<TValue, Exception>.Success( nullableValue ) );
+      public static EFailable<TValue> Success<T>( T? nullableValue ) where T : struct, TValue
+      {
+         if( !nullableValue.HasValue )
+         {
+            throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
+         }
+
+         return new EFailable<TValue>( true, nullableValue.Value, default );
+      }
 
       /// <summary>
-      /// Creates an <see cref="EFailable{TValue}"/> with a <paramref name="failure"/>-exception,
+      /// Creates a <see cref="EFailable{TValue}"/> with a <paramref name="failure"/>-value,
       /// which must not be <see langword="null"/>.
       /// </summary>
       /// <exception cref="FailableFailureConstructionException">
       /// if <paramref name="failure"/> == <see langword="null"/>.
       /// </exception>
-      public static EFailable<TValue> Failure( Exception failure ) => new EFailable<TValue>( Failable<TValue, Exception>.Failure( failure ) );
+      public static EFailable<TValue> Failure( Exception failure )
+      {
+         if( ReferenceEquals( failure, null ) )
+         {
+            throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
+         }
 
-      private EFailable( IFailable<TValue, Exception> failable ) => _innerFailable = failable;
+         return new EFailable<TValue>( false, default, failure );
+      }
+
+      private EFailable( bool hasValue, TValue value, Exception failure )
+      {
+         IsSuccess = hasValue;
+         _value = value;
+         _failure = failure;
+      }
 
       #endregion Construction
 
       #region Properties
+      /// <summary>
+      /// <see langword="true"/>, if this instance is a "success", aka has a value of type <typeparamref name="TValue"/>.
+      /// </summary>
+      public bool IsSuccess { get; }
 
-      ///<inheritdoc/>
-      public bool IsSuccess => _innerFailable.IsSuccess;
-
-      ///<inheritdoc/>
-      public bool IsFailure => _innerFailable.IsFailure;
+      /// <summary>
+      /// <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>.
+      /// </summary>
+      public bool IsFailure => !IsSuccess;
 
       #endregion Properties
 
       #region Mapping
-      ///<inheritdoc/>
-      public IFailable<TNewValue, Exception> Map<TNewValue>( Func<TValue, TNewValue> func ) => _innerFailable.Map( func );
 
-      ///<inheritdoc/>
-      public IFailable<TNewValue, Exception> FlatMap<TNewValue>( Func<TValue, IFailable<TNewValue, Exception>> func ) => _innerFailable.FlatMap( func );
+      /// <summary>
+      /// Maps this instance by using its "successful" value (if any) as an argument for <paramref
+      /// name="func"/> and returning a <see cref="EFailable{TNewValue}"/> created from the result.
+      /// <para><paramref name="func"/> is only called if <see cref="IsSuccess"/> == <see langword="true"/>.</para>
+      /// <para>
+      /// Returns <see cref="EFailable{TNewValue}.Failure(Exception)"/> if <see cref="IsFailure"/>
+      /// == <see langword="true"/> with this instance's "failed" value being unchanged.
+      /// </para>
+      /// </summary>
+      /// <typeparam name="TNewValue">The type of the new "successful" value.</typeparam>
+      /// <param name="func">The delegate that provides the new value.</param>
+      public EFailable<TNewValue> Map<TNewValue>( Func<TValue, TNewValue> func ) =>
+         IsSuccess ? EFailable<TNewValue>.Success( func( _value ) ) : EFailable<TNewValue>.Failure( _failure );
 
-      ///<inheritdoc/>
-      public bool Is( TValue value ) => _innerFailable.Is( value );
+      /// <summary>
+      /// Maps this instance by using its "successful" value (if any) as an argument for <paramref
+      /// name="func"/> and returning the result as a "flat" <see cref="EFailable{TNewValue}"/>
+      /// (instead of a "Failable of a Failable").
+      /// <para><paramref name="func"/> is only called if <see cref="IsSuccess"/> == <see langword="true"/>.</para>
+      /// <para>
+      /// Returns <see cref="EFailable{TNewValue}.Failure"/> if <see cref="IsFailure"/>
+      /// == <see langword="true"/> or it is the result of <paramref name="func"/>.
+      /// </para>
+      /// </summary>
+      /// <typeparam name="TNewValue">The type of the new "successful" value.</typeparam>
+      /// <param name="func">The delegate that provides the new value which may fail.</param>
+      public EFailable<TNewValue> FlatMap<TNewValue>( Func<TValue, EFailable<TNewValue>> func ) =>
+         IsSuccess ? func( _value ) : EFailable<TNewValue>.Failure( _failure );
 
-      ///<inheritdoc/>
-      public bool Holds( Func<TValue, bool> predicate ) => _innerFailable.Holds( predicate );
+      /// <summary>
+      /// <see cref="EFailable{TValue}"/>-compatible equality-check for "successful" values.
+      /// </summary>
+      /// <param name="value">"Successful" value to check for equality.</param>
+      /// <returns>
+      /// <see langword="true"/> iff <see cref="IsSuccess"/> == <see langword="true"/><c>and</c> the
+      /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
+      /// langword="true"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
+      /// </returns>
+      public bool Is( TValue value ) => IsSuccess && _value.Equals( value );
+
+      /// <summary>
+      /// Monadic predicate check for "successful" values.
+      /// </summary>
+      /// <param name="predicate">The delegate that checks the predicate.</param>
+      /// <returns>
+      /// <see langword="true"/> iff <see cref="IsSuccess"/> == <see
+      /// langword="true"/><c>and</c><paramref name="predicate"/> returns <see langword="true"/> for
+      /// this instance's "successful" value, otherwise <see langword="false"/>.
+      /// </returns>
+      public bool Holds( Func<TValue, bool> predicate ) => IsSuccess && predicate( _value );
 
       #endregion Mapping
 
       #region Accessing Success
 
-      ///<inheritdoc/>
-      public TValue Or( TValue otherwise ) => _innerFailable.Or( otherwise );
+      /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see langword="true"/>,
+      /// otherwise <paramref name="otherwise"/>.
+      /// </summary>
+      /// <param name="otherwise">The desired value if this instance represents a "failure".</param>
+      public TValue Or( TValue otherwise ) => IsSuccess ? _value : otherwise;
 
-      ///<inheritdoc/>
-      public TValue OrThrow() => _innerFailable.OrThrow();
+      /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see
+      /// langword="true"/>, otherwise throws a <see cref="FailableFailureException"/>.
+      /// </summary>
+      /// <exception cref="FailableFailureException"/>
+      public TValue OrThrow() => IsSuccess ? _value : throw new FailableFailureException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
 
-      ///<inheritdoc/>
-      public TValue OrThrow( string msg ) => _innerFailable.OrThrow( msg );
+      /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see
+      /// langword="true"/>, otherwise throws the contained exception which would be returned
+      /// by <see cref="FailureOrThrow"/> of this instance.
+      /// </summary>
+      public TValue OrThrowContained() => IsSuccess ? _value : throw _failure;
 
-      ///<inheritdoc/>
-      public TValue OrThrow( string msg, params string[] args ) => _innerFailable.OrThrow( msg, args );
+      #pragma warning disable CS0618 // Type or member is obsolete
+      /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see
+      /// langword="true"/>, otherwise throws a <see cref="FailableFailureException"/> with the
+      /// message <paramref name="msg"/>.
+      /// </summary>
+      /// <exception cref="FailableFailureException"/>
+      public TValue OrThrow( string msg ) => IsSuccess ? _value : throw new FailableFailureException( customMessage: msg );
+      #pragma warning restore CS0618
 
-      ///<inheritdoc/>
-      public TValue OrThrow( Exception e ) => _innerFailable.OrThrow( e );
+      #pragma warning disable CS0618 // Type or member is obsolete
+      /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see
+      /// langword="true"/>, otherwise throws a <see cref="FailableFailureException"/> with the
+      /// formatted message <paramref name="msg"/> using the message arguments <paramref name="args"/>.
+      /// </summary>
+      /// <exception cref="FailableFailureException"/>
+      public TValue OrThrow( string msg, params string[] args ) => IsSuccess ? _value : throw new FailableFailureException( customMessage: string.Format( msg, args ) );
+      #pragma warning restore CS0618
 
-      ///<inheritdoc/>
-      public TValue OrUse( Func<Exception, TValue> otherwiseFunc ) => _innerFailable.OrUse( otherwiseFunc );
+      /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see
+      /// langword="true"/>, otherwise throws the exception <paramref name="e"/>.
+      /// </summary>
+      /// <param name="e">The desired exception if this instance represents a "failure".</param>
+      /// <exception cref="Exception"/>
+      public TValue OrThrow( Exception e ) => IsSuccess ? _value : throw e;
 
-      ///<inheritdoc/>
-      public bool TryGetValue( out TValue value ) => _innerFailable.TryGetValue( out value );
+      /// <summary>
+      /// Writes this instance's "successful" value into the <see langword="out"/> parameter
+      /// <paramref name="value"/> and returns <see langword="true"/> if <see cref="IsSuccess"/> ==
+      /// <see langword="true"/>, otherwise <paramref name="value"/> will be set to the <see
+      /// langword="default"/> value of <typeparamref name="TValue"/> and the method returns <see langword="false"/>.
+      /// </summary>
+      /// <param name="value">
+      /// <see langword="out"/> parameter for this instance's "successful" value.
+      /// </param>
+      public bool TryGetValue( out TValue value )
+      {
+         value = IsSuccess ? _value : default;
+         return IsSuccess;
+      }
 
       #endregion Accessing Success
 
       #region Accessing Failure
 
-      ///<inheritdoc/>
-      public Exception FailureOrThrow() => _innerFailable.FailureOrThrow();
-
-      ///<inheritdoc/>
-      public bool TryGetFailure( out Exception exception ) => _innerFailable.TryGetFailure( out exception );
+      /// <summary>
+      /// Returns this instance's "failed" value if <see cref="IsFailure"/> == <see
+      /// langword="true"/>, otherwise throws a <see cref="FailableNoFailureException"/>.
+      /// </summary>
+      /// <exception cref="FailableNoFailureException"/>
+      public Exception FailureOrThrow() => IsFailure ? _failure : throw new FailableNoFailureException( typeof( TValue ), typeof( Exception ) );
 
       #endregion Accessing Failure
 
       #region Converters
 
-      ///<inheritdoc/>
-      public Maybe<TValue> ToMaybe() => _innerFailable.ToMaybe();
+      /// <summary>
+      /// Converts this instance into a <see cref="Maybe{TValue}"/>.
+      /// </summary>
+      /// <returns>
+      /// <see cref="Maybe{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see
+      /// langword="true"/> for this instance and <see cref="Maybe{TValue}.None"/> otherwise, thus
+      /// *LOSING* the "failed" value of this instance.
+      /// </returns>
+      public Maybe<TValue> ToMaybe() =>
+         IsSuccess ? Maybe<TValue>.Some( _value ) : Maybe<TValue>.None;
 
-      ///<inheritdoc/>
-      public IOption<TValue, Exception> ToOption() => _innerFailable.ToOption();
+      /// <summary>Converts this instance into an appropriate <see cref="Failable{TValue, Exception}"/></summary>
+      /// <returns><see cref="Failable{TValue, Exception}.Success(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="Failable{TValue, Exception}.Failure(Exception)"/> otherwise.</returns>
+      public Failable<TValue, Exception> ToFailable() => IsSuccess ? Failable<TValue, Exception>.Success( _value ) : Failable<TValue, Exception>.Failure( _failure );
 
-      ///<inheritdoc/>
-      public IValidation<Exception> ToValidation() => _innerFailable.ToValidation();
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="Option{TValue, Exception}"/>.
+      /// </summary>
+      /// <returns>
+      /// <see cref="Option{TValue, Exception}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see
+      /// langword="true"/> for this instance and <see cref="Option{TValue, Exception}.Failure(Exception)"/> otherwise.
+      /// </returns>
+      public Option<TValue, Exception> ToOption() =>
+         IsSuccess ? Option<TValue, Exception>.Some( _value ) : Option<TValue, Exception>.Failure( _failure );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EOption{TValue}"/>.
+      /// </summary>
+      /// <returns>
+      /// <see cref="Option{TValue, Exception}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see
+      /// langword="true"/> for this instance and <see cref="EOption{TValue}.Failure(Exception)"/> otherwise.
+      /// </returns>
+      public EOption<TValue> ToEOption() =>
+         IsSuccess ? EOption<TValue>.Some( _value ) : EOption<TValue>.Failure( _failure );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="Validation{Exception}"/>. />.
+      /// </summary>
+      /// <returns>
+      /// <see cref="Validation{Exception}.Success"/> if <see cref="IsSuccess"/> == <see langword="true"/>, thus *LOSING* the
+      /// "successful" value of this instance. If <see cref="IsSuccess"/> == <see langword="false"/>, this method returns
+      /// <see cref="Validation{Exception}.Failure(Exception)"/> with this instance's "failed" value instead.
+      /// </returns>
+      [Obsolete( "Why not convert to an EValidation instead? After all, that is their purpose...", false )]
+      public Validation<Exception> ToValidation() =>
+         IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EValidation"/>. />.
+      /// </summary>
+      /// <returns>
+      /// <see cref="EValidation.Success"/> if <see cref="IsSuccess"/> == <see langword="true"/>, thus *LOSING* the
+      /// "successful" value of this instance. If <see cref="IsSuccess"/> == <see langword="false"/>, this method returns
+      /// <see cref="EValidation.Failure(Exception)"/> with this instance's "failed" value instead.
+      /// </returns>
+      public EValidation ToEValidation() =>
+         IsSuccess ? EValidation.Success : EValidation.Failure( _failure );
 
       #endregion Converters
 
       #region Object
 
-      ///<inheritdoc/>
-      public override string ToString() => _innerFailable.ToString();
+      /// <summary>
+      /// Custom implementation of <see cref="object.ToString()"/>, wrapping the corresponding call
+      /// to this instance's value, be it a "success" or a "failure". This will return an internal
+      /// representation of this instances state, suitable for debugging only.
+      /// </summary>
+      public override string ToString() =>
+         IsSuccess //neither 'value' nor 'failure' is ever null!
+         ? $"[EFailable<{typeof( TValue ).Name}>.Success: { _value }]"
+         : $"[EFailable<{typeof( TValue ).Name}>.Failure: { _failure }]";
 
-      ///<inheritdoc/>
-      public override bool Equals( object obj ) => _innerFailable.Equals( obj );
 
-      ///<inheritdoc/>
-      public override int GetHashCode() => _innerFailable.GetHashCode();
+      /// <summary>
+      /// <para>
+      /// Returns <see langword="true"/> if <see cref="IsSuccess"/> returns the same boolean for
+      /// both objects and
+      /// </para>
+      /// <para>
+      /// - if <see cref="IsSuccess"/> being <see langword="true"/>: result of method <see
+      ///   cref="object.Equals(object)"/> for the two instances' "some" values
+      /// </para>
+      /// <para>
+      /// - if <see cref="IsSuccess"/> being <see langword="false"/>: result is <see langword="true"/>
+      /// if and only if both instances reference the same <see cref="Exception"/> internally
+      /// </para>
+      /// <para>Respects type, a <see cref="EFailable{A}"/> and a <see cref="EFailable{B}"/> are never equal!</para>
+      /// <para>Supports cross-class checks with <see cref="Failable{TValue, Exception}"/> following the same semantics as above!</para>
+      /// </summary>
+      public override bool Equals( object obj ) =>
+            ( ( obj is EFailable<TValue> otherEf )
+            && ( IsSuccess == otherEf.IsSuccess )
+            && ( IsFailure || _value.Equals( otherEf.OrThrow() ) )
+            && ( IsSuccess || _failure == otherEf.FailureOrThrow() ) )
+         || ( ( obj is Failable<TValue, Exception> otherF )
+            && ( IsSuccess == otherF.IsSuccess )
+            && ( IsFailure || _value.Equals( otherF.OrThrow() ) )
+            && ( IsSuccess || _failure == otherF.FailureOrThrow() ) );
+
+      /// <summary>
+      /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this
+      /// instance's value, be it a "success" or a "failure".
+      /// </summary>
+      public override int GetHashCode() => IsSuccess ? _value.GetHashCode() : _failure.GetHashCode();
 
       #endregion Object
    }

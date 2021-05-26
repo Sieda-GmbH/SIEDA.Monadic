@@ -233,15 +233,15 @@ namespace SIEDA.Monadic
       /// <summary>
       /// Converts this instance into an appropriate <see cref="EFailable{TValue}"/>.
       /// </summary>
-      /// <param name="error">
+      /// <param name="exc">
       /// An object representing a "failure", used in case <see cref="IsSome"/> == <see langword="false"/>
       /// </param>
       /// <returns>
       /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see
       /// langword="true"/> for this instance and <see cref="EFailable{TValue}.Failure(Exception)"/>
-      /// containing <paramref name="error"/> otherwise.
+      /// containing <paramref name="exc"/> otherwise.
       /// </returns>
-      public EFailable<TValue> ToEFailable( Exception error ) => IsSome ? EFailable<TValue>.Success( _value ) : EFailable<TValue>.Failure( error );
+      public EFailable<TValue> ToEFailable( Exception exc ) => IsSome ? EFailable<TValue>.Success( _value ) : EFailable<TValue>.Failure( exc );
 
       /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="Option{TValue, TFail}"/>.</para>
@@ -256,8 +256,20 @@ namespace SIEDA.Monadic
       /// <see cref="Option{TValue, TFail}.Some(TValue)"/> if <see cref="IsSome"/> == <see
       /// langword="true"/> for this instance and <see cref="Option{TValue, TFail}.None"/> otherwise.
       /// </returns>
-      public IOption<TValue, TFail> ToOption<TFail>() =>
-         IsSome ? Option<TValue, TFail>.Some( _value ) : Option<TValue, TFail>.None;
+      public Option<TValue, TFail> ToOption<TFail>() => IsSome ? Option<TValue, TFail>.Some( _value ) : Option<TValue, TFail>.None;
+
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EOption{TValue}"/>.
+      /// </summary>
+      /// <returns>
+      /// <see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance and <see cref="EOption{TValue}.None"/>
+      /// otherwise.
+      /// </returns>
+      public EOption<TValue> ToEOption() => IsSome ? EOption<TValue>.Some( _value ) : EOption<TValue>.None;
+
+      //MAYBEs cannot be converted into Validations, that makes no sense!
 
       #endregion Converters
 
