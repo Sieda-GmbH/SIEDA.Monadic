@@ -11,7 +11,7 @@
    <PropertyGroup>
       <!-- the IMPORTANT ones -->
       <AssemblyName>SIEDA.Monadic.TestSuite</AssemblyName>
-      <TargetFramework>netcoreapp3.1</TargetFramework>
+      <TargetFramework>net5.0</TargetFramework>
       <IsPackable>false</IsPackable>
 
       <!-- generating C# Documentation -->
