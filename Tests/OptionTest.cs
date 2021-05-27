@@ -455,7 +455,7 @@ namespace SIEDA.MonadicTests
 
       [Test]
       [Description( "Check mittels Direktvergleich - Vergleich liefert 'true'" )]
-      public void ContainsDefinedTrue()
+      public void Is_DefinedTrue()
       {
          var f = Option<string, Exception>.Some( "hubba" );
 
@@ -464,7 +464,7 @@ namespace SIEDA.MonadicTests
 
       [Test]
       [Description( "Check mittels Direktvergleich - Vergleich liefert 'false'" )]
-      public void ContainsDefinedFalse()
+      public void Is_DefinedFalse()
       {
          var f = Option<string, Exception>.Some( "hubba" );
 
@@ -473,11 +473,56 @@ namespace SIEDA.MonadicTests
 
       [Test]
       [Description( "Check mittels Direktvergleich - None immer 'false'" )]
-      public void ContainsFalseWhenNone()
+      public void Is_FalseWhenNone()
+      {
+         var f = Option<string, Exception>.None;
+
+         Assert.That( f.Is( "hubba" ), Is.EqualTo( false ) );
+      }
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - None immer 'false'" )]
+      public void Is_FalseWhenFailed()
       {
          var f = Option<string, Exception>.Failure( new ArgumentException() );
 
          Assert.That( f.Is( "hubba" ), Is.EqualTo( false ) );
+      }
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - Vergleich liefert 'true'" )]
+      public void IsNot_DefinedTrue()
+      {
+         var f = Option<string, Exception>.Some( "hubba" );
+
+         Assert.That( f.IsNot( "hubbahub" ), Is.EqualTo( true ) );
+      }
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - Vergleich liefert 'false'" )]
+      public void IsNot_DefinedFalse()
+      {
+         var f = Option<string, Exception>.Some( "hubba" );
+
+         Assert.That( f.IsNot( "hubba" ), Is.EqualTo( false ) );
+      }
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - None immer 'false'" )]
+      public void IsNot_FalseWhenNone()
+      {
+         var f = Option<string, Exception>.None;
+
+         Assert.That( f.IsNot( "hubba" ), Is.EqualTo( false ) );
+      }
+
+      [Test]
+      [Description( "Check mittels Direktvergleich - None immer 'false'" )]
+      public void IsNot_FalseWhenFailed()
+      {
+         var f = Option<string, Exception>.Failure( new ArgumentException() );
+
+         Assert.That( f.IsNot( "hubba" ), Is.EqualTo( false ) );
       }
 
       #endregion Is

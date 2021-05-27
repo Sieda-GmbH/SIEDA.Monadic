@@ -239,8 +239,7 @@ namespace SIEDA.Monadic
       /// langword="true"/> for this instance and <see cref="Maybe{TValue}.None"/> otherwise, thus
       /// *LOSING* the "failed" value of this instance.
       /// </returns>
-      public Maybe<TValue> ToMaybe() =>
-         IsSuccess ? Maybe<TValue>.Some( _value ) : Maybe<TValue>.None;
+      public Maybe<TValue> ToMaybe() => IsSuccess ? Maybe<TValue>.Some( _value ) : Maybe<TValue>.None;
 
       /// <summary>Converts this instance into an appropriate <see cref="Failable{TValue, Exception}"/></summary>
       /// <returns><see cref="Failable{TValue, Exception}.Success(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
@@ -255,8 +254,7 @@ namespace SIEDA.Monadic
       /// <see cref="Option{TValue, Exception}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see
       /// langword="true"/> for this instance and <see cref="Option{TValue, Exception}.Failure(Exception)"/> otherwise.
       /// </returns>
-      public Option<TValue, Exception> ToOption() =>
-         IsSuccess ? Option<TValue, Exception>.Some( _value ) : Option<TValue, Exception>.Failure( _failure );
+      public Option<TValue, Exception> ToOption() => IsSuccess ? Option<TValue, Exception>.Some( _value ) : Option<TValue, Exception>.Failure( _failure );
 
       /// <summary>
       /// Converts this instance into an appropriate <see cref="EOption{TValue}"/>.
@@ -265,8 +263,7 @@ namespace SIEDA.Monadic
       /// <see cref="Option{TValue, Exception}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see
       /// langword="true"/> for this instance and <see cref="EOption{TValue}.Failure(Exception)"/> otherwise.
       /// </returns>
-      public EOption<TValue> ToEOption() =>
-         IsSuccess ? EOption<TValue>.Some( _value ) : EOption<TValue>.Failure( _failure );
+      public EOption<TValue> ToEOption() => IsSuccess ? EOption<TValue>.Some( _value ) : EOption<TValue>.Failure( _failure );
 
       /// <summary>
       /// Converts this instance into an appropriate <see cref="Validation{Exception}"/>. />.
@@ -276,9 +273,7 @@ namespace SIEDA.Monadic
       /// "successful" value of this instance. If <see cref="IsSuccess"/> == <see langword="false"/>, this method returns
       /// <see cref="Validation{Exception}.Failure(Exception)"/> with this instance's "failed" value instead.
       /// </returns>
-      [Obsolete( "Why not convert to an EValidation instead? After all, that is their purpose...", false )]
-      public Validation<Exception> ToValidation() =>
-         IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
+      public Validation<Exception> ToValidation() => IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
 
       /// <summary>
       /// Converts this instance into an appropriate <see cref="EValidation"/>. />.
@@ -288,8 +283,7 @@ namespace SIEDA.Monadic
       /// "successful" value of this instance. If <see cref="IsSuccess"/> == <see langword="false"/>, this method returns
       /// <see cref="EValidation.Failure(Exception)"/> with this instance's "failed" value instead.
       /// </returns>
-      public EValidation ToEValidation() =>
-         IsSuccess ? EValidation.Success : EValidation.Failure( _failure );
+      public EValidation ToEValidation() => IsSuccess ? EValidation.Success : EValidation.Failure( _failure );
 
       #endregion Converters
 

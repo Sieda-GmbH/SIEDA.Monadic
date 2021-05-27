@@ -216,6 +216,16 @@ namespace SIEDA.Monadic
       /// </returns>
       public bool Is( TValue value ) => IsSome && _value.Equals( value );
 
+      /// <summary>
+      /// <see cref="EOption{TValue}"/>-compatible inequality-check for values.
+      /// </summary>
+      /// <param name="value">Value to check for equality.</param>
+      /// <returns>
+      /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/><c>and</c> the
+      /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
+      /// langword="false"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
+      /// </returns>
+      public bool IsNot( TValue value ) => IsSome && !_value.Equals( value );
 
       /// <summary>
       /// Monadic predicate check for values.
@@ -248,7 +258,7 @@ namespace SIEDA.Monadic
       private TValue ThrowNotSome( string customMessage )
       {
          // The return-type is just a hack, this method NEVER returns anything.
-#pragma warning disable CS0618 // Type or member is obsolete
+         #pragma warning disable CS0618 // Type or member is obsolete
          if( IsFailure )
          {
             throw new OptionFailureException( customMessage: customMessage );
@@ -257,7 +267,7 @@ namespace SIEDA.Monadic
          {
             throw new OptionNoneException( customMessage: customMessage );
          }
-#pragma warning restore CS0618
+         #pragma warning restore CS0618
       }
 
       /// <summary>
@@ -387,6 +397,41 @@ namespace SIEDA.Monadic
             ? EFailable<TValue>.Success( _value )
             : EFailable<TValue>.Failure( IsFailure ? _failure : failureOnNone );
 
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="Failable{TValue, Exception}"/>.
+      /// </summary>
+      /// <param name="funcForNone">
+      /// A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance, otherwise <see cref="Failable{TValue,
+      /// TFail}.Failure(TFail)"/> containing the result of <paramref name="funcForNone"/> if
+      /// <see cref="IsNone"/> == <see langword="true"/> or this instance's "failed" value if
+      /// <see cref="IsFailure"/> == <see langword="true"/>.
+      /// </returns>
+      public Failable<TValue, Exception> ToFailable( Func<Exception> funcForNone ) =>
+         IsSome
+            ? Failable<TValue, Exception>.Success( _value )
+            : Failable<TValue, Exception>.Failure( IsFailure ? _failure : funcForNone() );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EFailable{TValue}"/>.
+      /// </summary>
+      /// <param name="funcForNone">
+      /// A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance, otherwise <see cref="EFailable{TValue}.Failure(Exception)"/>
+      ///containing the result of <paramref name="funcForNone"/> if <see cref="IsNone"/> == <see langword="true"/>
+      ///or this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>.
+      /// </returns>
+      public EFailable<TValue> ToEFailable( Func<Exception> funcForNone ) =>
+         IsSome
+            ? EFailable<TValue>.Success( _value )
+            : EFailable<TValue>.Failure( IsFailure ? _failure : funcForNone() );
+
       /// <summary> Converts this instance into an appropriate <see cref="Option{TValue, Exception}"/>. </summary>
       /// <returns><see cref="Option{TValue, Exception}.Some(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for this instance,
       /// <see cref="Option{TValue, Exception}.None"/> if <see cref="IsNone"/> == <see langword="true"/> for this instance and
@@ -403,7 +448,6 @@ namespace SIEDA.Monadic
       /// "successful value" or "no value" state of this instance. If <see cref="IsFailure"/> == <see langword="true"/>, this method returns
       /// <see cref="Validation{TFail}.Failure(TFail)"/> with this instance's "failed" value instead.
       /// </returns>
-      [Obsolete( "Why not convert to an EValidation instead? After all, that is their purpose...", false )]
       public Validation<Exception> ToValidation() =>
          IsFailure
             ? Validation<Exception>.Failure( _failure )
@@ -422,6 +466,23 @@ namespace SIEDA.Monadic
          IsSome
             ? EValidation.Success
             : EValidation.Failure( IsFailure ? _failure : failureOnNone );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EValidation"/>. />.
+      /// </summary>
+      /// <param name="funcForNone">
+      /// A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="EValidation.Success"/> if <see cref="IsSome"/> == <see langword="true"/>, thus *LOSING* a
+      /// "successful value" of this instance. If <see cref="IsNone"/> == <see langword="true"/>, <paramref name="funcForNone"/>
+      /// is used to construct and return <see cref="EValidation.Failure(Exception)"/> and, finally, if instead <see cref="IsFailure"/>
+      /// == <see langword="true"/>, this method returns with this instance's "failed" value instead.
+      /// </returns>
+      public EValidation ToEValidation( Func<Exception> funcForNone ) =>
+         IsSome
+            ? EValidation.Success
+            : EValidation.Failure( IsFailure ? _failure : funcForNone() );
 
       #endregion Converters
 

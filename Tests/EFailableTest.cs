@@ -373,8 +373,8 @@ namespace SIEDA.MonadicTests
       #region Is
 
       [Test]
-      [Description( "Check mittels Contains - Vergleich liefert 'true'" )]
-      public void ContainsDefinedTrue()
+      [Description( "Check mittels Is_ - Vergleich liefert 'true'" )]
+      public void Is_DefinedTrue()
       {
          var f = EFailable<string>.Success( "hubba" );
 
@@ -382,8 +382,8 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "Check mittels Contains - Vergleich liefert 'false'" )]
-      public void ContainsDefinedFalse()
+      [Description( "Check mittels Is_ - Vergleich liefert 'false'" )]
+      public void Is_DefinedFalse()
       {
          var f = EFailable<string>.Success( "hubba" );
 
@@ -391,8 +391,8 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
-      [Description( "Check mittels Contains - None immer 'false'" )]
-      public void ContainsFalseWhenNone()
+      [Description( "Check mittels Is_ - None immer 'false'" )]
+      public void Is_FalseWhenNone()
       {
          var f = EFailable<string>.Failure(new ArgumentException());
 

@@ -140,6 +140,17 @@ namespace SIEDA.Monadic
       public bool Is( TValue value ) => IsSome && _value.Equals( value );
 
       /// <summary>
+      /// <see cref="Maybe{T}"/>-compatible inequality-check for values.
+      /// </summary>
+      /// <param name="value">Value to check for inequality.</param>
+      /// <returns>
+      /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/><c>and</c> the
+      /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
+      /// langword="false"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
+      /// </returns>
+      public bool IsNot( TValue value ) => IsSome && !_value.Equals( value );
+
+      /// <summary>
       /// Monadic predicate check for values.
       /// </summary>
       /// <param name="predicate">The delegate that checks the predicate.</param>
@@ -220,15 +231,31 @@ namespace SIEDA.Monadic
       /// <typeparam name="TFail">
       /// The type of "failure" for the new <see cref="Failable{TValue, TFail}"/>.
       /// </typeparam>
-      /// <param name="error">
+      /// <param name="failure">
       /// An object representing a "failure", used in case <see cref="IsSome"/> == <see langword="false"/>
       /// </param>
       /// <returns>
       /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
       /// langword="true"/> for this instance and <see cref="Failable{TValue,
-      /// TFail}.Failure(TFail)"/> containing <paramref name="error"/> otherwise.
+      /// TFail}.Failure(TFail)"/> containing <paramref name="failure"/> otherwise.
       /// </returns>
-      public Failable<TValue, TFail> ToFailable<TFail>( TFail error ) => IsSome ? Failable<TValue, TFail>.Success( _value ) : Failable<TValue, TFail>.Failure( error );
+      public Failable<TValue, TFail> ToFailable<TFail>( TFail failure ) => IsSome ? Failable<TValue, TFail>.Success( _value ) : Failable<TValue, TFail>.Failure( failure );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="Failable{TValue, TFail}"/> using a function if necessary.
+      /// </summary>
+      /// <typeparam name="TFail">
+      /// The type of "failure" for the new <see cref="Failable{TValue, TFail}"/>.
+      /// </typeparam>
+      /// <param name="func">
+      /// An function producting a "failure", used in case <see cref="IsSome"/> == <see langword="false"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance and <see cref="Failable{TValue,
+      /// TFail}.Failure(TFail)"/> containing the result of <paramref name="func"/> otherwise.
+      /// </returns>
+      public Failable<TValue, TFail> ToFailable<TFail>( Func<TFail> func ) => IsSome ? Failable<TValue, TFail>.Success( _value ) : Failable<TValue, TFail>.Failure( func() );
 
       /// <summary>
       /// Converts this instance into an appropriate <see cref="EFailable{TValue}"/>.
@@ -242,6 +269,19 @@ namespace SIEDA.Monadic
       /// containing <paramref name="exc"/> otherwise.
       /// </returns>
       public EFailable<TValue> ToEFailable( Exception exc ) => IsSome ? EFailable<TValue>.Success( _value ) : EFailable<TValue>.Failure( exc );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EFailable{TValue}"/> using a function if necessary.
+      /// </summary>
+      /// <param name="func">
+      /// An function producting a "failure", used in case <see cref="IsSome"/> == <see langword="false"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance and <see cref="EFailable{TValue}.Failure(Exception)"/>
+      /// containing the result of <paramref name="func"/> otherwise.
+      /// </returns>
+      public EFailable<TValue> ToEFailable( Func<Exception> func ) => IsSome ? EFailable<TValue>.Success( _value ) : EFailable<TValue>.Failure( func() );
 
       /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="Option{TValue, TFail}"/>.</para>
