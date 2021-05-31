@@ -1,4 +1,5 @@
 using System;
+using Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
 {
@@ -15,10 +16,8 @@ namespace SIEDA.Monadic
       #region State
 
       private readonly TValue _value;
-
       private readonly TFail _failure;
-
-      // Property IsSuccess is also "State", and it is relevant for 'Equals(...)'.
+      private readonly FlbType _type;
 
       #endregion State
 
@@ -38,7 +37,7 @@ namespace SIEDA.Monadic
             throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          }
 
-         return new Failable<TValue, TFail>( true, value, default );
+         return new Failable<TValue, TFail>( FlbType.Success, value, default );
       }
 
       /// <summary>
@@ -55,7 +54,7 @@ namespace SIEDA.Monadic
             throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          }
 
-         return new Failable<TValue, TFail>( true, nullableValue.Value, default );
+         return new Failable<TValue, TFail>( FlbType.Success, nullableValue.Value, default );
       }
 
       /// <summary>
@@ -72,7 +71,7 @@ namespace SIEDA.Monadic
             throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          }
 
-         return new Failable<TValue, TFail>( false, default, failure );
+         return new Failable<TValue, TFail>( FlbType.Failure, default, failure );
       }
 
       /// <summary>
@@ -89,12 +88,12 @@ namespace SIEDA.Monadic
             throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          }
 
-         return new Failable<TValue, TFail>( false, default, nullableFailure.Value );
+         return new Failable<TValue, TFail>( FlbType.Failure, default, nullableFailure.Value );
       }
 
-      private Failable( bool hasValue, TValue value, TFail failure )
+      private Failable( FlbType flbType, TValue value, TFail failure )
       {
-         IsSuccess = hasValue;
+         _type = flbType;
          _value = value;
          _failure = failure;
       }
@@ -102,17 +101,20 @@ namespace SIEDA.Monadic
       #endregion Construction
 
       #region Properties
+      /// <summary> Returns an appropriate <see cref="FlbType"/> for this instance, useful in case you want to use a switch-case.</summary>
+      public FlbType Enum { get => _type; }
+
       /// <summary>
       /// <see langword="true"/>, if this instance is a "success", aka has a value of type
       /// <typeparamref name="TValue"/>.
       /// </summary>
-      public bool IsSuccess { get; }
+      public bool IsSuccess { get => _type == FlbType.Success; }
 
       /// <summary>
       /// <see langword="true"/>, if this instance is a "failure", aka has a value of type
       /// <typeparamref name="TFail"/>.
       /// </summary>
-      public bool IsFailure => !IsSuccess;
+      public bool IsFailure { get => _type == FlbType.Failure; }
 
       #endregion Properties
 
@@ -306,6 +308,40 @@ namespace SIEDA.Monadic
       public EFailable<TValue> ToEFailable( Func<TFail, Exception> func ) => IsSuccess ? EFailable<TValue>.Success( _value ) : EFailable<TValue>.Failure( func( _failure ) );
 
       /// <summary>
+      /// <para>Converts this instance into an appropriate <see cref="EFailable{TValue}"/> and performs an operation akin
+      /// to <see cref="EFailable{TValue}.Map{TNewValue}(Func{TValue, TNewValue})"/> while converting.</para>
+      /// <para>Note that any "failed" value this instance might have is lost in the conversion
+      /// and the exception given via <paramref name="exc"/> is used instead.</para>
+      /// </summary>
+      /// <param name="func">
+      /// A function producting the new "value", used in case <see cref="IsSuccess"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="exc">
+      /// An object representing a "failure", used in case <see cref="IsSuccess"/> == <see langword="false"/>
+      /// </param>
+      /// <returns><see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EFailable{TValue}.Failure(Exception)"/> containing the result of <paramref name="func"/>
+      /// called with the result of <see cref="FailureOrThrow"/> otherwise.</returns>
+      public EFailable<TNewValue> ToEFailableWith<TNewValue>( Func<TValue, TNewValue> func, Exception exc ) =>
+         IsSuccess ? EFailable<TNewValue>.Success( func( _value ) ) : EFailable<TNewValue>.Failure( exc );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EFailable{TValue}"/> using a function if necessary.
+      /// While converting, this method performs an operation akin to <see cref="EFailable{TValue}.Map{TNewValue}(Func{TValue, TNewValue})"/>.
+      /// </summary>
+      /// <param name="func">
+      /// A function producting the new "value", used in case <see cref="IsSuccess"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="excFunc">
+      /// A function producting the new "failure", used in case <see cref="IsSuccess"/> == <see langword="false"/>
+      /// </param>
+      /// <returns><see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EFailable{TValue}.Failure(Exception)"/> containing the result of <paramref name="excFunc"/>
+      /// called with the result of <see cref="FailureOrThrow"/> otherwise.</returns>
+      public EFailable<TNewValue> ToEFailableWith<TNewValue>( Func<TValue, TNewValue> func, Func<TFail, Exception> excFunc ) =>
+         IsSuccess ? EFailable<TNewValue>.Success( func( _value ) ) : EFailable<TNewValue>.Failure( excFunc( _failure ) );
+
+      /// <summary>
       /// Converts this instance into an appropriate <see cref="Option{TValue, TFail}"/>.
       /// </summary>
       /// <returns>
@@ -315,6 +351,20 @@ namespace SIEDA.Monadic
       public Option<TValue, TFail> ToOption() => IsSuccess ? Option<TValue, TFail>.Some( _value ) : Option<TValue, TFail>.Failure( _failure );
 
       /// <summary>
+      /// Converts this instance into an appropriate <see cref="Option{TValue, TFail}"/> and performs an operation akin
+      /// to <see cref="Option{TValue, TFail}.Map{TNewValue}(Func{TValue, TNewValue})"/> while converting.
+      /// </summary>
+      /// <param name="func">
+      /// A function producting the new "value", used in case <see cref="IsSuccess"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="Option{TNewValue, TFail}.Some(TNewValue)"/> if <see cref="IsSuccess"/> == <see
+      /// langword="true"/> for this instance and <see cref="Option{TNewValue, TFail}.Failure(TFail)"/> otherwise.
+      /// </returns>
+      public Option<TNewValue, TFail> ToOptionWith<TNewValue>( Func<TValue, TNewValue> func ) =>
+         IsSuccess ? Option<TNewValue, TFail>.Some( func( _value ) ) : Option<TNewValue, TFail>.Failure( _failure );
+
+      /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="EOption{TValue}"/>.</para>
       /// <para>Note that any "failed" value this instance might have is lost in the conversion
       ///       and the exception given via <paramref name="exc"/> is used instead.</para>
@@ -322,8 +372,8 @@ namespace SIEDA.Monadic
       /// <param name="exc">
       /// An object representing a "failure", used in case <see cref="IsSuccess"/> == <see langword="false"/>
       /// </param>
-      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for this instance and
-      /// <see cref="EOption{TValue}.Failure(Exception)"/> containing <paramref name="exc"/> otherwise.</returns>
+      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EOption{TValue}.Failure(Exception)"/> containing <paramref name="exc"/> otherwise.</returns>
       public EOption<TValue> ToEOption( Exception exc ) => IsSuccess ? EOption<TValue>.Some( _value ) : EOption<TValue>.Failure( exc );
 
       /// <summary>
@@ -332,10 +382,44 @@ namespace SIEDA.Monadic
       /// <param name="func">
       /// A function producting the new "failure", used in case <see cref="IsSuccess"/> == <see langword="false"/>
       /// </param>
-      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for this instance and
-      /// <see cref="EOption{TValue}.Failure(Exception)"/> containing the result of <paramref name="func"/>
+      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EOption{TValue}.Failure(Exception)"/> containing the result of <paramref name="func"/>
       /// called with the result of <see cref="FailureOrThrow"/> otherwise.</returns>
       public EOption<TValue> ToEOption( Func<TFail, Exception> func ) => IsSuccess ? EOption<TValue>.Some( _value ) : EOption<TValue>.Failure( func( _failure ) );
+
+      /// <summary>
+      /// <para>Converts this instance into an appropriate <see cref="EOption{TValue}"/> and performs an operation akin
+      /// to <see cref="EOption{TValue}.Map{TNewValue}(Func{TValue, TNewValue})"/> while converting.</para>
+      /// <para>Note that any "failed" value this instance might have is lost in the conversion
+      /// and the exception given via <paramref name="exc"/> is used instead.</para>
+      /// </summary>
+      /// <param name="func">
+      /// A function producting the new "value", used in case <see cref="IsSuccess"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="exc">
+      /// An object representing a "failure", used in case <see cref="IsSuccess"/> == <see langword="false"/>
+      /// </param>
+      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EOption{TValue}.Failure(Exception)"/> containing the result of <paramref name="func"/>
+      /// called with the result of <see cref="FailureOrThrow"/> otherwise.</returns>
+      public EOption<TNewValue> ToEOptionWith<TNewValue>( Func<TValue, TNewValue> func, Exception exc ) =>
+         IsSuccess ? EOption<TNewValue>.Some( func( _value ) ) : EOption<TNewValue>.Failure( exc );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EOption{TValue}"/> using a function if necessary.
+      /// While converting, this method performs an operation akin to <see cref="EOption{TValue}.Map{TNewValue}(Func{TValue, TNewValue})"/>.
+      /// </summary>
+      /// <param name="func">
+      /// A function producting the new "value", used in case <see cref="IsSuccess"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="excFunc">
+      /// A function producting the new "failure", used in case <see cref="IsSuccess"/> == <see langword="false"/>
+      /// </param>
+      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
+      /// this instance and <see cref="EOption{TValue}.Failure(Exception)"/> containing the result of <paramref name="excFunc"/>
+      /// called with the result of <see cref="FailureOrThrow"/> otherwise.</returns>
+      public EOption<TNewValue> ToEOptionWith<TNewValue>( Func<TValue, TNewValue> func, Func<TFail, Exception> excFunc ) =>
+         IsSuccess ? EOption<TNewValue>.Some( func( _value ) ) : EOption<TNewValue>.Failure( excFunc( _failure ) );
 
       /// <summary>
       /// Converts this instance into an appropriate <see cref="Validation{TFail}"/>. />.

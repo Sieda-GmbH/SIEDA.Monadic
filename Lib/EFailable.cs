@@ -1,4 +1,5 @@
 using System;
+using Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
 {
@@ -14,10 +15,8 @@ namespace SIEDA.Monadic
       #region State
 
       private readonly TValue _value;
-
       private readonly Exception _failure;
-
-      // Property IsSuccess is also "State", and it is relevant for 'Equals(...)'.
+      private readonly FlbType _type;
 
       #endregion State
 
@@ -36,7 +35,7 @@ namespace SIEDA.Monadic
             throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          }
 
-         return new EFailable<TValue>( true, value, default );
+         return new EFailable<TValue>( FlbType.Success, value, default );
       }
 
       /// <summary>
@@ -53,7 +52,7 @@ namespace SIEDA.Monadic
             throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          }
 
-         return new EFailable<TValue>( true, nullableValue.Value, default );
+         return new EFailable<TValue>( FlbType.Success, nullableValue.Value, default );
       }
 
       /// <summary>
@@ -70,12 +69,12 @@ namespace SIEDA.Monadic
             throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          }
 
-         return new EFailable<TValue>( false, default, failure );
+         return new EFailable<TValue>( FlbType.Failure, default, failure );
       }
 
-      private EFailable( bool hasValue, TValue value, Exception failure )
+      private EFailable( FlbType flbType, TValue value, Exception failure )
       {
-         IsSuccess = hasValue;
+         _type = flbType;
          _value = value;
          _failure = failure;
       }
@@ -83,15 +82,18 @@ namespace SIEDA.Monadic
       #endregion Construction
 
       #region Properties
+      /// <summary> Returns an appropriate <see cref="FlbType"/> for this instance, useful in case you want to use a switch-case.</summary>
+      public FlbType Enum { get => _type; }
+
       /// <summary>
       /// <see langword="true"/>, if this instance is a "success", aka has a value of type <typeparamref name="TValue"/>.
       /// </summary>
-      public bool IsSuccess { get; }
+      public bool IsSuccess { get => _type == FlbType.Success; }
 
       /// <summary>
       /// <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>.
       /// </summary>
-      public bool IsFailure => !IsSuccess;
+      public bool IsFailure { get => _type == FlbType.Failure; }
 
       #endregion Properties
 

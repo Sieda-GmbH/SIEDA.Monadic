@@ -1,4 +1,5 @@
 ﻿using System;
+using Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
 {
@@ -20,8 +21,7 @@ namespace SIEDA.Monadic
       #region State
 
       private readonly TFail _error;
-
-      // Property IsSuccess is also "State", and it is relevant for 'Equals(...)'.
+      private readonly VldType _type;
 
       #endregion State
 
@@ -30,7 +30,7 @@ namespace SIEDA.Monadic
       /// <summary>
       /// The <see cref="Validation{TFail}"/> with a "successful" outcome.
       /// </summary>
-      public static readonly Validation<TFail> Success = new Validation<TFail>( true, default );
+      public static readonly Validation<TFail> Success = new Validation<TFail>( VldType.Success, default );
 
       /// <summary>
       /// Creates a <see cref="Validation{TFail}"/> with a <paramref name="failure"/>-value, which
@@ -45,30 +45,31 @@ namespace SIEDA.Monadic
          {
             throw new ValidationFailureConstructionException( typeFailure: typeof( TFail ) );
          }
-
-         return new Validation<TFail>( false, failure );
+         return new Validation<TFail>( VldType.Failure, failure );
       }
 
-      private Validation( bool isSuccess, TFail failure )
+      private Validation( VldType vldType, TFail failure )
       {
-         IsSuccess = isSuccess;
+         _type = vldType;
          _error = failure;
       }
 
       #endregion Construction
 
       #region Properties
+      /// <summary> Returns an appropriate <see cref="VldType"/> for this instance, useful in case you want to use a switch-case.</summary>
+      public VldType Enum { get => _type; }
+
       /// <summary>
       /// <see langword="true"/>, if this instance is a "success".
       /// </summary>
-      public bool IsSuccess { get; }
+      public bool IsSuccess { get => _type == VldType.Success; }
 
       /// <summary>
       /// <see langword="true"/>, if this instance is a "failure", aka has a value of type
       /// <typeparamref name="TFail"/>.
       /// </summary>
-      public bool IsFailure => !IsSuccess;
-
+      public bool IsFailure { get => _type == VldType.Failure; }
       #endregion Properties
 
       #region Accessing Failure

@@ -241,7 +241,6 @@ namespace SIEDA.MonadicTests
       #endregion Equals
 
       #region Accessing Value
-
       [Test]
       public void Or_FailureOrNull()
       {

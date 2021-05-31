@@ -2,6 +2,7 @@
 using SIEDA.MonadicTests.HelperClass;
 using NUnit.Framework;
 using SIEDA.Monadic;
+using Monadic.SwitchCase;
 
 namespace SIEDA.MonadicTests
 {
@@ -23,6 +24,7 @@ namespace SIEDA.MonadicTests
          var testValue = Failable<object, object>.Success( new object() );
 
          Assert.That( testValue.IsSuccess, Is.True );
+         Assert.That( testValue.Enum, Is.EqualTo( FlbType.Success ) );
       }
 
       [Test]
@@ -556,6 +558,27 @@ namespace SIEDA.MonadicTests
          var option = failable.ToOption();
 
          Assert.That( option.IsSome, Is.True );
+      }
+
+      [Test]
+      [Description( "Failure wird zu Option.Failure konvertiert" )]
+      public void ConvertToOption_SwitchValueType_None()
+      {
+         var failable = Failable<string, int>.Failure( 42 );
+         var option = failable.ToOptionWith( (s) => true );
+
+         Assert.That( option.IsFailure, Is.True );
+      }
+
+      [Test]
+      [Description( "Success wird zu Option.Some konvertiert" )]
+      public void ConvertToOption_SwitchValueType_Some()
+      {
+         var failable = Failable<string, int>.Success( "hubba" );
+         var option = failable.ToOptionWith( ( s ) => true );
+
+         Assert.That( option.IsSome, Is.True );
+         Assert.IsTrue( option.OrThrow() );
       }
 
       [Test]

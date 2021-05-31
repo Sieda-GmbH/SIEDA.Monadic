@@ -2,6 +2,7 @@
 using SIEDA.MonadicTests.HelperClass;
 using NUnit.Framework;
 using SIEDA.Monadic;
+using Monadic.SwitchCase;
 
 namespace SIEDA.MonadicTests
 {
@@ -23,6 +24,7 @@ namespace SIEDA.MonadicTests
          var testValue = EFailable<object>.Success( new object() );
 
          Assert.That( testValue.IsSuccess, Is.True );
+         Assert.That( testValue.Enum, Is.EqualTo(FlbType.Success ) );
       }
 
       [Test]

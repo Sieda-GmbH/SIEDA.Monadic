@@ -61,8 +61,8 @@
    </PropertyGroup>
    <ItemGroup>
       <!-- include non-source code files for NuGet-Package -->
-      <None Include="..\LICENSE" Pack="true" PackagePath=""/>
-      <None Include="..\logo.png" Pack="true" PackagePath=""/>
+      <None Include="..\LICENSE" Pack="true" PackagePath="" />
+      <None Include="..\logo.png" Pack="true" PackagePath="" />
    </ItemGroup>
 
    <!--#############################################################################################################################

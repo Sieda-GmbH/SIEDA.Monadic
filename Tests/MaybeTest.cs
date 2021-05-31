@@ -2,6 +2,7 @@
 using SIEDA.MonadicTests.HelperClass;
 using NUnit.Framework;
 using SIEDA.Monadic;
+using Monadic.SwitchCase;
 
 namespace SIEDA.MonadicTests
 {
@@ -20,6 +21,7 @@ namespace SIEDA.MonadicTests
 
          Assert.That( x.IsSome, Is.True );
          Assert.That( x.IsNone, Is.False );
+         Assert.That( x.Enum, Is.EqualTo( MybType.Some ) );
          Assert.AreEqual( x, y );
       }
 
@@ -32,12 +34,13 @@ namespace SIEDA.MonadicTests
 
       [Test]
       [Description( "Maybe mit Wert Nullable kann kein Some sein." )]
-      public void ExplicitNullableThrowsException()
+      public void ExplicitNullableConvertedToNone()
       {
          var x = Maybe<int>.From( new int?() );
 
          Assert.That( x.IsSome, Is.False );
          Assert.That( x.IsNone, Is.True );
+         Assert.That( x.Enum, Is.EqualTo( MybType.None ) );
       }
 
       [Test]
@@ -48,6 +51,7 @@ namespace SIEDA.MonadicTests
 
          Assert.That( x.IsSome, Is.False );
          Assert.That( x.IsNone, Is.True );
+         Assert.That( x.Enum, Is.EqualTo( MybType.None ) );
       }
 
       [Test]
@@ -58,6 +62,7 @@ namespace SIEDA.MonadicTests
 
          Assert.That( x.IsSome, Is.False );
          Assert.That( x.IsNone, Is.True );
+         Assert.That( x.Enum, Is.EqualTo( MybType.None ) );
       }
 
       [Test]
@@ -68,6 +73,7 @@ namespace SIEDA.MonadicTests
 
          Assert.That( x.IsSome, Is.False );
          Assert.That( x.IsNone, Is.True );
+         Assert.That( x.Enum, Is.EqualTo( MybType.None ) );
       }
 
       [Test]
@@ -78,6 +84,7 @@ namespace SIEDA.MonadicTests
 
          Assert.That( testValue.IsSome, Is.True );
          Assert.That( testValue.Or( 0 ), Is.EqualTo( testObject.Value ) );
+         Assert.That( testValue.Enum, Is.EqualTo( MybType.Some ) );
       }
 
       #endregion Construction

@@ -1,4 +1,5 @@
 ﻿using System;
+using Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
 {
@@ -20,10 +21,8 @@ namespace SIEDA.Monadic
       #region State
 
       private readonly TValue _value;
-
       private readonly Exception _failure;
-
-      // Properties IsSome and IsFailure are also "State", and they are relevant for 'Equals(...)'.
+      private readonly OptType _type;
 
       #endregion State
 
@@ -32,11 +31,7 @@ namespace SIEDA.Monadic
       /// <summary>
       /// Empty instance, no value present, failure absent.
       /// </summary>
-      public static readonly EOption<TValue> None = new EOption<TValue>(
-         hasValue: false,
-         hasError: false,
-         default,
-         default );
+      public static readonly EOption<TValue> None = new EOption<TValue>( OptType.None, default, default );
 
       /// <summary>
       /// Creates an <see cref="EOption{TValue}"/> with value <paramref name="value"/>.
@@ -51,7 +46,7 @@ namespace SIEDA.Monadic
             throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          }
 
-         return new EOption<TValue>( hasValue: true, hasError: false, value, default );
+         return new EOption<TValue>( OptType.Some, value, default );
       }
 
       /// <summary>
@@ -68,7 +63,7 @@ namespace SIEDA.Monadic
             throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          }
 
-         return new EOption<TValue>( hasValue: true, hasError: false, nullableValue.Value, default );
+         return new EOption<TValue>( OptType.Some, nullableValue.Value, default );
       }
 
       /// <summary>
@@ -79,7 +74,7 @@ namespace SIEDA.Monadic
       /// <para>Returns <see cref="None"/> if <paramref name="value"/> == <see langword="null"/>.</para>
       /// </summary>
       public static EOption<TValue> From( TValue value ) =>
-         ReferenceEquals( value, null ) ? None : new EOption<TValue>( hasValue: true, hasError: false, value, default );
+         ReferenceEquals( value, null ) ? None : new EOption<TValue>( OptType.Some, value, default );
 
       /// <summary>
       /// <para>
@@ -93,7 +88,7 @@ namespace SIEDA.Monadic
       /// </para>
       /// </summary>
       public static EOption<TValue> From<T>( T? nullableValue ) where T : struct, TValue =>
-          nullableValue.HasValue ? new EOption<TValue>( hasValue: true, hasError: false, nullableValue.Value, default ) : None;
+          nullableValue.HasValue ? new EOption<TValue>( OptType.Some, nullableValue.Value, default ) : None;
 
       /// <summary>
       /// Creates an <see cref="Option{TValue, TFail}"/> with a <paramref name="failure"/>-value,
@@ -109,13 +104,12 @@ namespace SIEDA.Monadic
             throw new OptionFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          }
 
-         return new EOption<TValue>( hasValue: false, hasError: true, default, failure );
+         return new EOption<TValue>( OptType.Failure, default, failure );
       }
 
-      private EOption( bool hasValue, bool hasError, TValue value, Exception failure )
+      private EOption( OptType optType, TValue value, Exception failure )
       {
-         IsSome = hasValue;
-         IsFailure = hasError;
+         _type = optType;
          _value = value;
          _failure = failure;
       }
@@ -123,22 +117,24 @@ namespace SIEDA.Monadic
       #endregion Construction
 
       #region Properties
+      /// <summary> Returns an appropriate <see cref="OptType"/> for this instance, useful in case you want to use a switch-case.</summary>
+      public OptType Enum { get => _type; }
 
       /// <summary>
       /// <see langword="true"/>, if this instance has a value, is "some", its value is present.
       /// </summary>
-      public bool IsSome { get; }
+      public bool IsSome { get => _type == OptType.Some; }
 
       /// <summary>
       /// <see langword="true"/>, if this instance has no value,
       /// its value is absent, but it is still no failure.
       /// </summary>
-      public bool IsNone => !IsSome && !IsFailure;
+      public bool IsNone { get => _type == OptType.None; }
 
       /// <summary>
       /// <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>.
       /// </summary>
-      public bool IsFailure { get; }
+      public bool IsFailure { get => _type == OptType.Failure; }
 
       /// <summary>
       /// <see langword="true"/> if this instance has no value, meaning either <see cref="IsNone"/>

@@ -1,4 +1,5 @@
 ﻿using System;
+using Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
 {
@@ -12,8 +13,7 @@ namespace SIEDA.Monadic
       #region State
 
       private readonly TValue _value;
-
-      // Property IsSome is also "State", and it is relevant for 'Equals(...)'.
+      private readonly MybType _type;
 
       #endregion State
 
@@ -22,7 +22,7 @@ namespace SIEDA.Monadic
       /// <summary>
       /// Empty instance, no value present, value absent.
       /// </summary>
-      public static readonly Maybe<TValue> None = new Maybe<TValue>( false, default );
+      public static readonly Maybe<TValue> None = new Maybe<TValue>( MybType.None, default );
 
       /// <summary>
       /// Creates a <see cref="Maybe{T}"/> with value <paramref name="value"/>.
@@ -37,7 +37,7 @@ namespace SIEDA.Monadic
             throw new MaybeSomeConstructionException( typeValue: typeof( TValue ) );
          }
 
-         return new Maybe<TValue>( true, value );
+         return new Maybe<TValue>( MybType.Some, value );
       }
 
       /// <summary>
@@ -53,7 +53,7 @@ namespace SIEDA.Monadic
             throw new MaybeSomeConstructionException( typeValue: typeof( TValue ) );
          }
 
-         return new Maybe<TValue>( true, nullableValue.Value );
+         return new Maybe<TValue>( MybType.Some, nullableValue.Value );
       }
 
       /// <summary>
@@ -63,7 +63,7 @@ namespace SIEDA.Monadic
       /// </para>
       /// <para>Returns <see cref="None"/> if <paramref name="value"/> == <see langword="null"/>.</para>
       /// </summary>
-      public static Maybe<TValue> From( TValue value ) => ReferenceEquals( value, null ) ? None : new Maybe<TValue>( true, value );
+      public static Maybe<TValue> From( TValue value ) => ReferenceEquals( value, null ) ? None : new Maybe<TValue>( MybType.Some, value );
 
       /// <summary>
       /// <para>
@@ -76,11 +76,11 @@ namespace SIEDA.Monadic
       /// (has no value).
       /// </para>
       /// </summary>
-      public static Maybe<TValue> From<U>( U? nullableValue ) where U : struct, TValue => nullableValue.HasValue ? new Maybe<TValue>( true, nullableValue.Value ) : None;
+      public static Maybe<TValue> From<U>( U? nullableValue ) where U : struct, TValue => nullableValue.HasValue ? new Maybe<TValue>( MybType.Some, nullableValue.Value ) : None;
 
-      private Maybe( bool hasValue, TValue value )
+      private Maybe( MybType mbyType, TValue value )
       {
-         IsSome = hasValue;
+         _type = mbyType;
          _value = value;
       }
 
@@ -88,32 +88,35 @@ namespace SIEDA.Monadic
 
       #region Properties
 
+      /// <summary> Returns an appropriate <see cref="MybType"/> for this instance, useful in case you want to use a switch-case.</summary>
+      public MybType Enum { get => _type; }
+
       /// <summary>
       /// <see langword="true"/>, if this instance has a value, is "some", its value is present.
       /// </summary>
-      public bool IsSome { get; }
+      public bool IsSome { get => _type == MybType.Some; }
 
       /// <summary>
       /// <see langword="true"/>, if this instance is <see cref="None"/>, has no value, its value is absent.
       /// </summary>
-      public bool IsNone => !IsSome;
+      public bool IsNone { get => _type == MybType.None; }
 
-      #endregion Properties
+   #endregion Properties
 
-      #region Mapping
+   #region Mapping
 
-      /// <summary>
-      /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>
-      /// and returning a <see cref="Maybe{U}"/> created from the result.
-      /// <para><paramref name="func"/> is only called if <see cref="IsSome"/> == <see langword="true"/>.</para>
-      /// <para>
-      /// Returns <see cref="Maybe{U}.None"/> if <see cref="IsNone"/> == <see langword="true"/> or
-      /// the result of <paramref name="func"/> == <see langword="null"/>.
-      /// </para>
-      /// </summary>
-      /// <typeparam name="U">The type of the new value.</typeparam>
-      /// <param name="func">The delegate that provides the new value.</param>
-      public Maybe<U> Map<U>( Func<TValue, U> func ) => IsSome ? Maybe<U>.From( func( _value ) ) : Maybe<U>.None;
+   /// <summary>
+   /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>
+   /// and returning a <see cref="Maybe{U}"/> created from the result.
+   /// <para><paramref name="func"/> is only called if <see cref="IsSome"/> == <see langword="true"/>.</para>
+   /// <para>
+   /// Returns <see cref="Maybe{U}.None"/> if <see cref="IsNone"/> == <see langword="true"/> or
+   /// the result of <paramref name="func"/> == <see langword="null"/>.
+   /// </para>
+   /// </summary>
+   /// <typeparam name="U">The type of the new value.</typeparam>
+   /// <param name="func">The delegate that provides the new value.</param>
+   public Maybe<U> Map<U>( Func<TValue, U> func ) => IsSome ? Maybe<U>.From( func( _value ) ) : Maybe<U>.None;
 
       /// <summary>
       /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>
