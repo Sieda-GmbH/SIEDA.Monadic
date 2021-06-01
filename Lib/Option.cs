@@ -202,7 +202,6 @@ namespace SIEDA.Monadic
                ? Option<TNewValue, TFail>.None
                : Option<TNewValue, TFail>.Failure( _failure );
 
-
       /// <summary>
       /// <see cref="Option{TValue, TFail}"/>-compatible equality-check for values.
       /// </summary>

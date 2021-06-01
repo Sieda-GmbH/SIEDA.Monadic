@@ -345,11 +345,24 @@ namespace SIEDA.MonadicTests
       [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
       public void Map_NestingInFlatMap()
       {
-         var flag1 = Failable<bool, string>.Success( true );
-         var flag2 = Failable<bool, string>.Success( true );
+         var flag1 = Failable<int, string>.Success( 1 );
+         var flag2 = Failable<int, string>.Success( 2 );
 
-         var result = flag1.FlatMap( outerBoolVal => flag2.Map( boolVal => boolVal && outerBoolVal ? 3 : 2 ) );
+         var result = flag1.FlatMap( outerInt => flag2.Map( innerInt => outerInt + innerInt ) );
 
+         Assert.That( result.Or( -999 ), Is.EqualTo( 3 ) );
+      }
+
+      [Test]
+      [Description( "Verschachtelte Fallunterscheidungen mit FlatMap und Option." )]
+      public void Map_NestingInFlatMap_FlattenToOption()
+      {
+         var flag1 = Failable<int, string>.Success( 1 );
+         var flag2 = Option<int, string>.Some( 2 );
+
+         var result = flag1.FlatMap( outerInt => flag2.Map( innerInt => outerInt + innerInt ) );
+
+         Assert.True( result.IsSome );
          Assert.That( result.Or( -999 ), Is.EqualTo( 3 ) );
       }
 

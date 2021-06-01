@@ -476,10 +476,10 @@ namespace SIEDA.MonadicTests
       [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
       public void Map_NestingInFlatMap()
       {
-         var flag1 = EOption<bool>.Some( true );
-         var flag2 = EOption<bool>.Some( true );
+         var flag1 = EOption<int>.Some( 1 );
+         var flag2 = EOption<int>.Some( 2 );
 
-         var result = flag1.FlatMap( outerBoolVal => flag2.Map( boolVal => boolVal && outerBoolVal ? 3 : 2 ) );
+         var result = flag1.FlatMap( outerInt => flag2.Map( innerInt => outerInt + innerInt ) );
 
          Assert.That( result.Or( -999 ), Is.EqualTo( 3 ) );
       }

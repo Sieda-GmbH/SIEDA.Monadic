@@ -150,6 +150,24 @@ namespace SIEDA.Monadic
          IsSuccess ? func( _value ) : Failable<TNewValue, TFail>.Failure( _failure );
 
       /// <summary>
+      /// <para>Maps this instance by using its "successful" value (if any) as an argument for <paramref
+      /// name="func"/> and returning the result as an <see cref="Option{TNewValue,TFail}"/>
+      /// (instead of a "Failable of an Option").</para>
+      /// <para><paramref name="func"/> is only called if <see cref="IsSuccess"/> == <see langword="true"/>.</para>
+      /// <para>
+      /// Returns <see cref="Option{TNewValue, TFail}.Failure(TFail)"/> if <see cref="IsFailure"/>
+      /// == <see langword="true"/> or it is the result of <paramref name="func"/>.
+      /// </para>
+      /// <para>Note that this type of special flat-map only exists for <see cref="Failable{TValue, TFail}"/>
+      /// and <see cref="EFailable{TValue}"/> as all other monadic types are imcompatible. For these types,
+      /// simply perform a conversion first.</para>
+      /// </summary>
+      /// <typeparam name="TNewValue">The type of the new "successful" value.</typeparam>
+      /// <param name="func">The delegate that provides the new value which may fail.</param>
+      public Option<TNewValue, TFail> FlatMap<TNewValue>( Func<TValue, Option<TNewValue, TFail>> func ) =>
+         IsSuccess ? func( _value ) : Option<TNewValue, TFail>.Failure( _failure );
+
+      /// <summary>
       /// <see cref="Failable{TValue, TFail}"/>-compatible equality-check for "successful" values.
       /// </summary>
       /// <param name="value">"Successful" value to check for equality.</param>

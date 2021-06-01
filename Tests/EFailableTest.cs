@@ -340,11 +340,39 @@ namespace SIEDA.MonadicTests
       [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
       public void Map_NestingInFlatMap()
       {
-         var flag1 = EFailable<bool>.Success( true );
-         var flag2 = EFailable<bool>.Success( true );
+         var flag1 = EFailable<int>.Success( 1 );
+         var flag2 = EFailable<int>.Success( 2 );
 
-         var result = flag1.FlatMap( outerBoolVal => flag2.Map( boolVal => boolVal && outerBoolVal ? 3 : 2 ) );
+         var result = flag1.FlatMap( outerInt => flag2.Map( innerInt => outerInt + innerInt ) );
 
+         Assert.That( result.Or( -999 ), Is.EqualTo( 3 ) );
+      }
+
+      [Test]
+      [Description( "Verschachtelte Fallunterscheidungen mit FlatMap und Option." )]
+      public void Map_NestingInFlatMap_FlattenToOption()
+      {
+         var flag1 = EFailable<int>.Success( 1 );
+         var flag2 = Option<int,Exception>.Some( 2 );
+
+         #pragma warning disable CS0618 // Type or member is obsolete
+         var result = flag1.FlatMap( outerInt => flag2.Map( innerInt => outerInt + innerInt ) );
+         #pragma warning restore CS0618
+
+         Assert.True( result.IsSome );
+         Assert.That( result.Or( -999 ), Is.EqualTo( 3 ) );
+      }
+
+      [Test]
+      [Description( "Verschachtelte Fallunterscheidungen mit FlatMap und EOption." )]
+      public void Map_NestingInFlatMap_FlattenToEOption()
+      {
+         var flag1 = EFailable<int>.Success( 1 );
+         var flag2 = EOption<int>.Some( 2 );
+
+         var result = flag1.FlatMap( outerInt => flag2.Map( innerInt => outerInt + innerInt ) );
+
+         Assert.True( result.IsSome );
          Assert.That( result.Or( -999 ), Is.EqualTo( 3 ) );
       }
 
