@@ -3,11 +3,11 @@ using System.Runtime.Serialization;
 
 namespace SIEDA.Monadic
 {
-   /// <summary>Exception thrown exclusively by <see cref="Option{TValue, TFail}"/> on illegal value access because of absent value.</summary>
+   /// <summary>Exception thrown exclusively by <see cref="Option{TValue, TFail}"/> and <see cref="EOption{TValue}"/> on illegal value access because of absent value.</summary>
    [Serializable]
-   public class OptionNoneException : OptionException
+   public class OptionNoneException : AnyOptionException
    {
-      /// <summary>Allows <see cref="Option{TValue, TFail}"/> to construct and throw this exception with its default message.</summary>
+      /// <summary>Allows classes to construct and throw this exception with its default message.</summary>
       internal OptionNoneException( Type typeValue, Type typeFailure ) : base( $"Option<{typeValue.Name}, {typeFailure.Name}> has no value!" ) { }
 
       /// <summary>Allows <see cref="Option{TValue, TFail}"/> to construct and throw this exception with a custom message.</summary>

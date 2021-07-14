@@ -41,6 +41,20 @@ namespace SIEDA.MonadicTests
          Assert.That( testValue.IsSuccess, Is.False );
       }
 
+      [Test]
+      public void ConstructFailure_WrappingErrorGiven()
+      {
+         var testValue = EFailable<object>.Wrapping( () => new ArgumentException() );
+         Assert.That( testValue.IsSuccess, Is.True );
+      }
+
+      [Test]
+      public void ConstructFailure_WrappingErrorThrown()
+      {
+         var testValue = EFailable<object>.Wrapping( () => throw new ArgumentException() );
+         Assert.That( testValue.IsSuccess, Is.False );
+      }
+
       #endregion Construction
 
       #region ToString

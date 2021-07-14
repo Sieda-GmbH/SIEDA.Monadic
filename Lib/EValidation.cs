@@ -28,6 +28,30 @@ namespace SIEDA.Monadic
       #region Construction
 
       /// <summary>
+      /// Creates an appropriate <see cref="EValidation"/> wrapping either an exception thrown by <paramref name="toExecute"/> or simply being <see cref="Success"/>.
+      /// </summary>
+      /// <param name="toExecute">Function executed and wrapped by this monadic instance.</param>
+      /// <exception cref="ValidationFromWrappedConstructionException">
+      /// if <paramref name="toExecute"/> == <see langword="null"/>.
+      /// </exception>
+      public static EValidation Wrapping<U>( Func<U> toExecute )
+      {
+         if( ReferenceEquals( toExecute, null ) )
+         {
+            throw new ValidationFromWrappedConstructionException();
+         }
+         try
+         {
+            toExecute();
+            return Success;
+         }
+         catch( Exception e )
+         {
+            return Failure( e );
+         }
+      }
+
+      /// <summary>
       /// The <see cref="EValidation"/> with a "successful" outcome.
       /// </summary>
       public static readonly EValidation Success = new EValidation( VldType.Success, default );

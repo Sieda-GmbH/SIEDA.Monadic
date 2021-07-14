@@ -3,11 +3,11 @@ using System.Runtime.Serialization;
 
 namespace SIEDA.Monadic
 {
-   /// <summary>Exception thrown exclusively by <see cref="Failable{TValue, TFail}"/> on illegal value access because of failure.</summary>
+   /// <summary>Exception thrown exclusively by <see cref="Failable{TValue, TFail}"/> and <see cref="EFailable{TValue}"/> on illegal value access because of failure.</summary>
    [Serializable]
-   public class FailableFailureException : FailableException
+   public class FailableFailureException : AnyFailableException
    {
-      /// <summary>Allows <see cref="Failable{TValue, TFail}"/> to construct and throw this exception with its default message.</summary>
+      /// <summary>Allows classes to construct and throw this exception with its default message.</summary>
       internal FailableFailureException( Type typeValue, Type typeFailure ) : base( $"Failable<{typeValue.Name}, {typeFailure.Name}> is a failure!" ) { }
 
       /// <summary>Allows <see cref="Failable{TValue, TFail}"/> to construct and throw this exception with a custom message.</summary>

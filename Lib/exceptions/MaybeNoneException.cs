@@ -5,7 +5,7 @@ namespace SIEDA.Monadic
 {
    /// <summary>Exception thrown exclusively by <see cref="Maybe{TValue}"/> on illegal value access because of absent value.</summary>
    [Serializable]
-   public class MaybeNoneException : Exception
+   public class MaybeNoneException : AnyMaybeException
    {
       /// <summary>Allows <see cref="Maybe{TValue}"/> to construct and throw this exception with its default message.</summary>
       internal MaybeNoneException( Type typeValue ) : base( $"Maybe<{typeValue.Name}> has no value!" ) { }

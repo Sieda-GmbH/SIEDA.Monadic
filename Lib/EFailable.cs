@@ -23,6 +23,27 @@ namespace SIEDA.Monadic
       #region Construction
 
       /// <summary>
+      /// Creates an appropriate <see cref="EFailable{TValue}"/> wrapping the result of <paramref name="toExecute"/> or the exception that method threw.
+      /// </summary>
+      /// <param name="toExecute">Function executed and wrapped by this monadic instance.</param>
+      /// <exception cref="FailableFromWrappedConstructionException">
+      /// if <paramref name="toExecute"/> == <see langword="null"/>.
+      /// </exception>
+      public static EFailable<TValue> Wrapping( Func<TValue> toExecute )
+      {
+         if( ReferenceEquals( toExecute, null ) )
+         {
+            throw new FailableFromWrappedConstructionException( typeValue: typeof( TValue ) );
+         }
+         try
+         {
+            return Success( toExecute() );
+         } catch( Exception e) {
+            return Failure( e );
+         }
+      }
+
+      /// <summary>
       /// Creates a <see cref="EFailable{TValue}"/> with a "successful" <paramref name="value"/>, which must not be <see langword="null"/>.
       /// </summary>
       /// <exception cref="FailableSuccessConstructionException">

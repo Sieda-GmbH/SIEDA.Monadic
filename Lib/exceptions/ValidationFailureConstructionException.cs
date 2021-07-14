@@ -3,9 +3,9 @@ using System.Runtime.Serialization;
 
 namespace SIEDA.Monadic
 {
-   /// <summary>Exception thrown exclusively by <see cref="Validation{TFail}"/> on illegal "failure" instance construction.</summary>
+   /// <summary>Exception thrown exclusively by <see cref="Validation{TFail}"/> and <see cref="EValidation"/> on illegal "failure" instance construction.</summary>
    [Serializable]
-   public class ValidationFailureConstructionException : FailableException
+   public class ValidationFailureConstructionException : AnyValidationException
    {
       /// <summary>Allows <see cref="Validation{TFail}"/> to construct and throw this exception.</summary>
       internal ValidationFailureConstructionException( Type typeFailure )

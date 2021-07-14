@@ -3,11 +3,11 @@ using System.Runtime.Serialization;
 
 namespace SIEDA.Monadic
 {
-   /// <summary>Exception thrown exclusively by <see cref="Option{TValue, TFail}"/> on illegal "failure" instance construction.</summary>
+   /// <summary>Exception thrown exclusively by <see cref="Option{TValue, TFail}"/> and <see cref="EOption{TValue}"/> on illegal "failure" instance construction.</summary>
    [Serializable]
-   public class OptionFailureConstructionException : OptionException
+   public class OptionFailureConstructionException : AnyOptionException
    {
-      /// <summary>Allows <see cref="Option{TValue, TFail}"/> to construct and throw this exception.</summary>
+      /// <summary>Allows classes to construct and throw this exception.</summary>
       internal OptionFailureConstructionException( Type typeValue, Type typeFailure )
          : base( $"Illegal 'failure' given for Option<{typeValue.Name}, {typeFailure.Name}>, the failure-value must not be a 'null'-reference!" ) {}
 

@@ -5,7 +5,7 @@ namespace SIEDA.Monadic
 {
    /// <summary>Exception thrown exclusively by <see cref="Maybe{TValue}"/> on illegal "some value" instance construction.</summary>
    [Serializable]
-   public class MaybeSomeConstructionException : Exception
+   public class MaybeSomeConstructionException : AnyMaybeException
    {
       /// <summary>Allows <see cref="Maybe{TValue}"/> to construct and throw this exception.</summary>
       internal MaybeSomeConstructionException( Type typeValue )

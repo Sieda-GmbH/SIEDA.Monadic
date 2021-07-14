@@ -3,11 +3,11 @@ using System.Runtime.Serialization;
 
 namespace SIEDA.Monadic
 {
-   /// <summary>Exception thrown exclusively by <see cref="Option{TValue, TFail}"/> on illegal failure access.</summary>
+   /// <summary>Exception thrown exclusively by <see cref="Option{TValue, TFail}"/> and <see cref="EOption{TValue}"/> on illegal failure access.</summary>
    [Serializable]
-   public class OptionNoFailureException : OptionException
+   public class OptionNoFailureException : AnyOptionException
    {
-      /// <summary>Allows <see cref="Option{TValue, TFail}"/> to construct and throw this exception.</summary>
+      /// <summary>Allows classes to construct and throw this exception.</summary>
       internal OptionNoFailureException( Type typeValue, Type typeFailure ) : base( $"Option<{typeValue.Name}, {typeFailure.Name}> is not a failure!" ) {}
 
       #region constructors for serialization
