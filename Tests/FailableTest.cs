@@ -621,10 +621,10 @@ namespace SIEDA.MonadicTests
       public void ConvertToEFailable_WithConverter_Success()
       {
          var failable = Failable<int, string>.Success( 42 );
-         var eFailable = failable.ToEFailable( new Exception( "whatever" ) );
+         var eFailable = failable.ToEFailableWith( i => $"1{i}", new Exception( "whatever" ) );
 
          Assert.That( eFailable.IsSuccess, Is.True );
-         Assert.That( eFailable.OrThrow(), Is.EqualTo( 42 ) );
+         Assert.That( eFailable.OrThrow(), Is.EqualTo( "142" ) );
       }
 
       [Test]
@@ -632,7 +632,7 @@ namespace SIEDA.MonadicTests
       public void ConvertToEFailable_WithConverter_Failure()
       {
          var failable = Failable<int, string>.Failure( "will-be-overwritten" );
-         var eFailable = failable.ToEFailable( new Exception( "new" ) );
+         var eFailable = failable.ToEFailableWith( i => $"1{i}", new Exception( "new" ) );
 
          Assert.That( eFailable.IsFailure, Is.True );
          Assert.That( eFailable.FailureOrThrow().Message, Is.EqualTo( "new" ) );

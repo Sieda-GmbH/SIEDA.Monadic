@@ -338,8 +338,7 @@ namespace SIEDA.Monadic
       /// An object representing a "failure", used in case <see cref="IsSuccess"/> == <see langword="false"/>
       /// </param>
       /// <returns><see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
-      /// this instance and <see cref="EFailable{TValue}.Failure(Exception)"/> containing the result of <paramref name="func"/>
-      /// called with the result of <see cref="FailureOrThrow"/> otherwise.</returns>
+      /// this instance and <see cref="EFailable{TValue}.Failure(Exception)"/> containing <paramref name="exc"/> otherwise.</returns>
       public EFailable<TNewValue> ToEFailableWith<TNewValue>( Func<TValue, TNewValue> func, Exception exc ) =>
          IsSuccess ? EFailable<TNewValue>.Success( func( _value ) ) : EFailable<TNewValue>.Failure( exc );
 

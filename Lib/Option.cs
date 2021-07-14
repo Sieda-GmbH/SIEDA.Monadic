@@ -560,6 +560,41 @@ namespace SIEDA.Monadic
       public EOption<TValue> ToEOption( Func<TFail,Exception> func ) =>
          IsSome ? EOption<TValue>.Some( _value ) : ( IsFailure ? EOption<TValue>.Failure( func( _failure ) ) : EOption<TValue>.None );
 
+      /// <summary>
+      /// <para>Converts this instance into an appropriate <see cref="EOption{TValue}"/> and performs an operation akin
+      /// to <see cref="EOption{TValue}.Map{TNewValue}(Func{TValue, TNewValue})"/> while converting.</para>
+      /// <para>Note that any "failed" value this instance might have is lost in the conversion
+      /// and the exception given via <paramref name="exc"/> is used instead.</para>
+      /// </summary>
+      /// <param name="func">
+      /// A function producting the new "value", used in case <see cref="IsSome"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="exc">
+      /// An object representing a "failure", used in case <see cref="IsFailure"/> == <see langword="true"/>
+      /// </param>
+      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for
+      /// this instance, <see cref="EOption{TValue}.None"/>  if <see cref="IsNone"/> == <see langword="true"/> and
+      /// <see cref="EFailable{TValue}.Failure(Exception)"/> containing <paramref name="exc"/> otherwise.
+      public EOption<TNewValue> ToEOptionWith<TNewValue>( Func<TValue, TNewValue> func, Exception exc ) =>
+         IsSome ? EOption<TNewValue>.Some( func( _value ) ) : ( IsNone ? EOption<TNewValue>.None : EOption<TNewValue>.Failure( exc ) );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="EOption{TValue}"/> using a function if necessary.
+      /// While converting, this method performs an operation akin to <see cref="EOption{TValue}.Map{TNewValue}(Func{TValue, TNewValue})"/>.
+      /// </summary>
+      /// <param name="func">
+      /// A function producting the new "value", used in case <see cref="IsSome"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="excFunc">
+      /// A function producting the new "failure", used in case <see cref="IsFailure"/> == <see langword="true"/>
+      /// </param>
+      /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for
+      /// this instance, <see cref="EOption{TValue}.None"/>  if <see cref="IsNone"/> == <see langword="true"/> and
+      /// <see cref="EFailable{TValue}.Failure(Exception)"/> containing the result of <paramref name="excFunc"/>
+      /// called with the result of <see cref="FailureOrThrow"/> otherwise.</returns>
+      public EOption<TNewValue> ToEOptionWith<TNewValue>( Func<TValue, TNewValue> func, Func<TFail, Exception> excFunc ) =>
+         IsSome ? EOption<TNewValue>.Some( func( _value ) ) : ( IsNone ? EOption<TNewValue>.None : EOption<TNewValue>.Failure( excFunc( _failure ) ) );
+
       #endregion Converters
 
       #region Object

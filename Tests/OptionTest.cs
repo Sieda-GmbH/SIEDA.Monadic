@@ -532,9 +532,9 @@ namespace SIEDA.MonadicTests
       [Description( "Check mittels Predikatsfunktion - Vergleich liefert 'true'" )]
       public void Is_PredicateMatchingDefined()
       {
-         var Option = Option<string, Exception>.Some( "hubba" );
+         var option = Option<string, Exception>.Some( "hubba" );
 
-         Assert.That( Option.Holds( s => s.Equals( "hubba" ) ), Is.EqualTo( true ) );
+         Assert.That( option.Holds( s => s.Equals( "hubba" ) ), Is.EqualTo( true ) );
                                                    
       }
 
@@ -542,9 +542,9 @@ namespace SIEDA.MonadicTests
       [Description( "Check mittels Predikatsfunktion - Vergleich liefert 'false'" )]
       public void Is_PredicateNonMatchingDefined()
       {
-         var Option = Option<string, Exception>.Some( "hubba" );
+         var option = Option<string, Exception>.Some( "hubba" );
 
-         Assert.That( Option.Holds( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
+         Assert.That( option.Holds( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
                                                    
       }
 
@@ -552,9 +552,9 @@ namespace SIEDA.MonadicTests
       [Description( "Check mittels Predikatsfunktion - Vergleich findet nicht statt" )]
       public void Is_PredicateUndefined()
       {
-         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+         var option = Option<string, Exception>.Failure( new ArgumentException() );
 
-         Assert.That( Option.Holds( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
+         Assert.That( option.Holds( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
                                                    
       }
 
@@ -566,17 +566,17 @@ namespace SIEDA.MonadicTests
       [Description( "TryGetValue() produziert korrektes Boolean-Result bei Failure" )]
       public void TryGet_Result_Failure()
       {
-         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+         var option = Option<string, Exception>.Failure( new ArgumentException() );
 
-         Assert.IsFalse( Option.TryGetValue( out var s ) );
+         Assert.IsFalse( option.TryGetValue( out var s ) );
       }
 
       [Test]
       [Description( "TryGetValue() schreibt keinen Wert bei Failure" )]
       public void TryGet_Value_Failure()
       {
-         var Option = Option<string, Exception>.Failure( new ArgumentException() );
-         Option.TryGetValue( out var s );
+         var option = Option<string, Exception>.Failure( new ArgumentException() );
+         option.TryGetValue( out var s );
 
          Assert.IsNull( s );
       }
@@ -585,17 +585,17 @@ namespace SIEDA.MonadicTests
       [Description( "TryGetValue() produziert korrektes Boolean-Result bei Some" )]
       public void TryGet_Value_Some()
       {
-         var Option = Option<string, Exception>.Some( "blub" );
+         var option = Option<string, Exception>.Some( "blub" );
 
-         Assert.IsTrue( Option.TryGetValue( out var s ) );
+         Assert.IsTrue( option.TryGetValue( out var s ) );
       }
 
       [Test]
       [Description( "TryGetValue() schreibt keinen Wert bei Some" )]
       public void TryGet_Result_Some()
       {
-         var Option = Option<string, Exception>.Some( "blub" );
-         Option.TryGetValue( out var s );
+         var option = Option<string, Exception>.Some( "blub" );
+         option.TryGetValue( out var s );
 
          Assert.That( s, Is.EqualTo( "blub" ) );
       }
@@ -604,17 +604,17 @@ namespace SIEDA.MonadicTests
       [Description( "TryGetValue() produziert korrektes Boolean-Result bei None" )]
       public void TryGet_Value_None()
       {
-         var Option = Option<string, Exception>.None;
+         var option = Option<string, Exception>.None;
 
-         Assert.IsFalse( Option.TryGetValue( out var s ) );
+         Assert.IsFalse( option.TryGetValue( out var s ) );
       }
 
       [Test]
       [Description( "TryGetValue() schreibt keinen Wert bei None" )]
       public void TryGet_Result_None()
       {
-         var Option = Option<string, Exception>.None;
-         Option.TryGetValue( out var s );
+         var option = Option<string, Exception>.None;
+         option.TryGetValue( out var s );
 
          Assert.IsNull( s );
       }
@@ -627,17 +627,17 @@ namespace SIEDA.MonadicTests
       [Description( "TryGetFailure() produziert korrektes Boolean-Result bei Some" )]
       public void TryGetFailure_Some()
       {
-         var Option = Option<string, Exception>.Some( "blah" );
+         var option = Option<string, Exception>.Some( "blah" );
 
-         Assert.IsFalse( Option.TryGetFailure( out var s ) );
+         Assert.IsFalse( option.TryGetFailure( out var s ) );
       }
 
       [Test]
       [Description( "TryGetFailure() schreibt keinen Wert bei Some" )]
       public void TryGetFailure_Result_Some()
       {
-         var Option = Option<string, Exception>.Some( "blah" );
-         Option.TryGetFailure( out var s );
+         var option = Option<string, Exception>.Some( "blah" );
+         option.TryGetFailure( out var s );
 
          Assert.IsNull( s );
       }
@@ -646,17 +646,17 @@ namespace SIEDA.MonadicTests
       [Description( "TryGetFailure() produziert korrektes Boolean-Result bei Failure" )]
       public void TryGetFailure_Failure()
       {
-         var Option = Option<string, Exception>.Failure( new ArgumentException() );
+         var option = Option<string, Exception>.Failure( new ArgumentException() );
 
-         Assert.IsTrue( Option.TryGetFailure( out var s ) );
+         Assert.IsTrue( option.TryGetFailure( out var s ) );
       }
 
       [Test]
       [Description( "TryGetFailure() schreibt Wert bei Failure" )]
       public void TryGetFailure_Result_Failure()
       {
-         var Option = Option<string, Exception>.Failure( new ArgumentException("msg") );
-         Option.TryGetFailure( out var e );
+         var option = Option<string, Exception>.Failure( new ArgumentException("msg") );
+         option.TryGetFailure( out var e );
 
          Assert.That( e, Is.TypeOf<ArgumentException>() );
          Assert.That( e.Message, Is.EqualTo("msg") );
@@ -666,17 +666,17 @@ namespace SIEDA.MonadicTests
       [Description( "TryGetFailure() produziert korrektes Boolean-Result bei None" )]
       public void TryGetFailure_None()
       {
-         var Option = Option<string, Exception>.None;
+         var option = Option<string, Exception>.None;
 
-         Assert.IsFalse( Option.TryGetFailure( out var s ) );
+         Assert.IsFalse( option.TryGetFailure( out var s ) );
       }
 
       [Test]
       [Description( "TryGetFailure() schreibt keinen Wert bei None" )]
       public void TryGetFailure_Result_None()
       {
-         var Option = Option<string, Exception>.None;
-         Option.TryGetFailure( out var s );
+         var option = Option<string, Exception>.None;
+         option.TryGetFailure( out var s );
 
          Assert.IsNull( s );
       }
@@ -689,8 +689,8 @@ namespace SIEDA.MonadicTests
       [Description( "Some wird zu Maybe.Some konvertiert" )]
       public void ConvertToMaybe_Some()
       {
-         var Option = Option<string, Exception>.Some( "hallo" );
-         var maybe = Option.ToMaybe();
+         var option = Option<string, int>.Some( "hallo" );
+         var maybe = option.ToMaybe();
 
          Assert.That( maybe.IsSome, Is.True );
          Assert.That( maybe.OrThrow, Is.EqualTo( "hallo" ) );
@@ -700,8 +700,8 @@ namespace SIEDA.MonadicTests
       [Description( "Failure wird zu Maybe.None konvertiert" )]
       public void ConvertToMaybe_Failure()
       {
-         var Option = Option<string, Exception>.Failure( new ArgumentException() );
-         var maybe = Option.ToMaybe();
+         var option = Option<string, int>.Failure( 666 );
+         var maybe = option.ToMaybe();
 
          Assert.That( maybe.IsNone, Is.True );
       }
@@ -710,8 +710,8 @@ namespace SIEDA.MonadicTests
       [Description( "None wird zu Maybe.None konvertiert" )]
       public void ConvertToMaybe_None()
       {
-         var Option = Option<string, Exception>.None;
-         var maybe = Option.ToMaybe();
+         var option = Option<int, string>.None;
+         var maybe = option.ToMaybe();
 
          Assert.That( maybe.IsNone, Is.True );
       }
@@ -720,30 +720,30 @@ namespace SIEDA.MonadicTests
       [Description( "Some wird zu Failable.Some konvertiert" )]
       public void ConvertToFailable_Some()
       {
-         var Option = Option<string, ArgumentException>.Some( "hallo" );
-         var failable = Option.ToFailable( new ArgumentException() );
+         var option = Option<int, string>.Some( 123 );
+         var failable = option.ToFailable( "whatever" );
 
          Assert.That( failable.IsSuccess, Is.True );
-         Assert.That( failable.OrThrow, Is.EqualTo( "hallo" ) );
+         Assert.That( failable.OrThrow, Is.EqualTo( 123 ) );
       }
 
       [Test]
       [Description( "Failure wird zu Failable.Failure konvertiert" )]
       public void ConvertToFailable_Failure()
       {
-         var Option = Option<string, ArgumentException>.Failure( new ArgumentException("msg") );
-         var failable = Option.ToFailable( new ArgumentException("notMsg") ); //different exception text!
+         var option = Option<int, string>.Failure( "msg" );
+         var failable = option.ToFailable( "notMsg" ); //different text!
 
          Assert.That( failable.IsFailure, Is.True );
-         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+         Assert.That( failable.FailureOrThrow(), Is.EqualTo("msg") );
       }
 
       [Test]
       [Description( "None wird zu Failable.Failure konvertiert" )]
       public void ConvertToFailable_None()
       {
-         var Option = Option<string, ArgumentException>.None;
-         var failable = Option.ToFailable( new ArgumentException("msg") );
+         var option = Option<int, string>.None;
+         var failable = option.ToEFailable( new ArgumentException("msg") );
 
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
@@ -753,19 +753,19 @@ namespace SIEDA.MonadicTests
       [Description( "Some wird zu EFailable.Success konvertiert" )]
       public void ConvertToEFailable_Some()
       {
-         var Option = Option<string, ArgumentException>.Some( "hallo" );
-         var failable = Option.ToEFailable( new ArgumentException() );
+         var option = Option<int, string>.Some( 123 );
+         var failable = option.ToEFailable( new ArgumentException() );
 
          Assert.That( failable.IsSuccess, Is.True );
-         Assert.That( failable.OrThrow, Is.EqualTo( "hallo" ) );
+         Assert.That( failable.OrThrow, Is.EqualTo( 123 ) );
       }
 
       [Test]
       [Description( "Failure wird zu EFailable.Failure konvertiert" )]
       public void ConvertToEFailable_Failure()
       {
-         var Option = Option<string, ArgumentException>.Failure( new ArgumentException( "notMsg" ) );
-         EFailable<string> failable = Option.ToEFailable( new ArgumentException( "msg" ) );
+         var option = Option<int, string>.Failure( "notMsg" );
+         EFailable<int> failable = option.ToEFailable( new ArgumentException( "msg" ) );
 
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
@@ -775,11 +775,43 @@ namespace SIEDA.MonadicTests
       [Description( "None wird zu EFailable.Failure konvertiert" )]
       public void ConvertToEFailable_None()
       {
-         var Option = Option<string, ArgumentException>.None;
-         var failable = Option.ToEFailable( new ArgumentException( "msg" ) );
+         var option = Option<int, string>.None;
+         var failable = option.ToEFailable( new ArgumentException( "msg" ) );
 
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "Some wird zu EOption.Some konvertiert" )]
+      public void ConvertToEFailable_WithConverter_Some()
+      {
+         var testValue = Option<int, string>.Some( 42 );
+         var eOption = testValue.ToEOptionWith( i => $"1{i}", new ArgumentException() );
+
+         Assert.That( eOption.IsSome, Is.True );
+         Assert.That( eOption.OrThrow, Is.EqualTo( "142" ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EOption.Failure konvertiert" )]
+      public void ConvertToEFailable_WithConverter_Failure()
+      {
+         var testValue = Option<int, string>.Failure( "will-be-overwritten" );
+         var eOption = testValue.ToEOptionWith( i => $"1{i}", new ArgumentException("msg") );
+
+         Assert.That( eOption.IsFailure, Is.True );
+         Assert.That( eOption.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "None wird zu EOption.None konvertiert" )]
+      public void ConvertToEFailable_WithConverter_None()
+      {
+         var testValue = Option<int, ArgumentException>.None;
+         var eOption = testValue.ToEOptionWith( i => $"1{i}", new ArgumentException() );
+
+         Assert.That( eOption.IsNone, Is.True );
       }
       #endregion Convert
    }
