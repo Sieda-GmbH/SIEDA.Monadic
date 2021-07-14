@@ -574,7 +574,7 @@ namespace SIEDA.Monadic
       /// </param>
       /// <returns><see cref="EOption{TValue}.Some(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for
       /// this instance, <see cref="EOption{TValue}.None"/>  if <see cref="IsNone"/> == <see langword="true"/> and
-      /// <see cref="EFailable{TValue}.Failure(Exception)"/> containing <paramref name="exc"/> otherwise.
+      /// <see cref="EFailable{TValue}.Failure(Exception)"/> containing <paramref name="exc"/> otherwise.</returns>
       public EOption<TNewValue> ToEOptionWith<TNewValue>( Func<TValue, TNewValue> func, Exception exc ) =>
          IsSome ? EOption<TNewValue>.Some( func( _value ) ) : ( IsNone ? EOption<TNewValue>.None : EOption<TNewValue>.Failure( exc ) );
 
