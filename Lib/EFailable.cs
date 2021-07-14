@@ -135,6 +135,15 @@ namespace SIEDA.Monadic
          IsSuccess ? EFailable<TNewValue>.Success( func( _value ) ) : EFailable<TNewValue>.Failure( _failure );
 
       /// <summary>
+      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/>
+      /// and returning a <see cref="EFailable{TValue}"/> created from the result.
+      /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// <para>Otherwise, this instance is left untouched.</para>
+      /// </summary>
+      /// <param name="func">The delegate that provides the new failure.</param>
+      public EFailable<TValue> ExceptionMap( Func<Exception, Exception> func ) => IsFailure ? Failure( func( _failure ) ) : this;
+
+      /// <summary>
       /// Maps this instance by using its "successful" value (if any) as an argument for <paramref
       /// name="func"/> and returning the result as a "flat" <see cref="EFailable{TNewValue}"/>
       /// (instead of a "Failable of a Failable").

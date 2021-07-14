@@ -174,6 +174,14 @@ namespace SIEDA.Monadic
                ? EOption<TNewValue>.None
                : EOption<TNewValue>.Failure( _failure );
 
+      /// <summary>
+      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/>
+      /// and returning a <see cref="EOption{TValue}"/> created from the result.
+      /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// <para>Otherwise, this instance is left untouched.</para>
+      /// </summary>
+      /// <param name="func">The delegate that provides the new failure.</param>
+      public EOption<TValue> ExceptionMap( Func<Exception, Exception> func ) => IsFailure ? Failure( func( _failure ) ) : this;
 
       /// <summary>
       /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>
