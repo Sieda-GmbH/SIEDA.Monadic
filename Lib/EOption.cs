@@ -184,6 +184,18 @@ namespace SIEDA.Monadic
       public EOption<TValue> ExceptionMap( Func<Exception, Exception> func ) => IsFailure ? Failure( func( _failure ) ) : this;
 
       /// <summary>
+      /// <para>Executes a side-effect, represented as the function <paramref name="func"/>, if and only if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// <para>In any case, this instance is left untouched (but returned for easy functional chaining).</para>
+      /// <para>*BEST PRACTICE:* Use this function for logging only!</para>
+      /// </summary>
+      /// <param name="func">The action to execute as side effect.</param>
+      public EOption<TValue> ExceptionSideEffect( Action<Exception> func )
+      {
+         if( IsFailure ) func( _failure );
+         return this;
+      }
+
+      /// <summary>
       /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>
       /// and returning the result as a "flat" <see cref="EOption{TNewValue}"/> (instead of
       /// an "Option of an Option").

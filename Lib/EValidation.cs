@@ -20,7 +20,7 @@ namespace SIEDA.Monadic
    {
       #region State
 
-      private readonly Exception _error;
+      private readonly Exception _failure;
       private readonly VldType _type;
 
       #endregion State
@@ -76,7 +76,7 @@ namespace SIEDA.Monadic
       private EValidation( VldType vldType, Exception failure )
       {
          _type = vldType;
-         _error = failure;
+         _failure = failure;
       }
 
       #endregion Construction
@@ -103,7 +103,7 @@ namespace SIEDA.Monadic
       /// </summary>
       /// <exception cref="ValidationNoFailureException"/>
       public Exception FailureOrThrow() =>
-         IsFailure ? _error : throw new ValidationNoFailureException( typeof( Exception ) );
+         IsFailure ? _failure : throw new ValidationNoFailureException( typeof( Exception ) );
 
       #endregion Accessing Failure
 
@@ -115,7 +115,19 @@ namespace SIEDA.Monadic
       /// <para>Otherwise, this instance is left untouched.</para>
       /// </summary>
       /// <param name="func">The delegate that provides the new failure.</param>
-      public EValidation ExceptionMap( Func<Exception, Exception> func ) => IsSuccess ? Success : Failure( func( _error ) );
+      public EValidation ExceptionMap( Func<Exception, Exception> func ) => IsSuccess ? Success : Failure( func( _failure ) );
+
+      /// <summary>
+      /// <para>Executes a side-effect, represented as the function <paramref name="func"/>, if and only if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// <para>In any case, this instance is left untouched (but returned for easy functional chaining).</para>
+      /// <para>*BEST PRACTICE:* Use this function for logging only!</para>
+      /// </summary>
+      /// <param name="func">The action to execute as side effect.</param>
+      public EValidation ExceptionSideEffect( Action<Exception> func )
+      {
+         if( IsFailure ) func( _failure );
+         return this;
+      }
       #endregion Mapping
 
       #region Converters
@@ -127,7 +139,7 @@ namespace SIEDA.Monadic
       /// <see cref="Validation{Exception}"/>.
       /// </returns>
       public Validation<Exception> ToValidation() =>
-         IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _error );
+         IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
 
       /// <summary>
       /// Converts this instance into a <see cref="EOption{Object}"/>, which is either a
@@ -138,7 +150,7 @@ namespace SIEDA.Monadic
       /// being <see cref="Exception"/>.
       /// </returns>
       public EOption<object> ToEOption() =>
-         IsSuccess ? EOption<object>.None : EOption<object>.Failure( _error );
+         IsSuccess ? EOption<object>.None : EOption<object>.Failure( _failure );
 
       /// <summary>
       /// Converts this instance into a <see cref="Option{Object, Exception}"/>, which is either a
@@ -149,7 +161,7 @@ namespace SIEDA.Monadic
       /// being <see cref="Exception"/>.
       /// </returns>
       public Option<object, Exception> ToOption() =>
-         IsSuccess ? Option<object, Exception>.None : Option<object, Exception>.Failure( _error );
+         IsSuccess ? Option<object, Exception>.None : Option<object, Exception>.Failure( _failure );
 
       #endregion Converters
 
@@ -162,7 +174,7 @@ namespace SIEDA.Monadic
       public override string ToString() =>
          IsSuccess
          ? $"[EValidation.Success]"
-         : $"[EValidation.Failure: { _error }]";
+         : $"[EValidation.Failure: { _failure }]";
 
 
       /// <summary>
@@ -174,16 +186,16 @@ namespace SIEDA.Monadic
       public override bool Equals( object obj ) =>
             ( ( obj is EValidation otherE )
             && ( IsSuccess == otherE.IsSuccess )
-            && ( IsSuccess || _error == otherE.FailureOrThrow() ) )
+            && ( IsSuccess || _failure == otherE.FailureOrThrow() ) )
          || ( ( obj is Validation<Exception> otherV )
             && ( IsSuccess == otherV.IsSuccess )
-            && ( IsSuccess || _error == otherV.FailureOrThrow() ) );
+            && ( IsSuccess || _failure == otherV.FailureOrThrow() ) );
 
       /// <summary>
       /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this
       /// instance's value, be it a "success" or a "failure".
       /// </summary>
-      public override int GetHashCode() => IsSuccess ? int.MaxValue : _error.GetHashCode();
+      public override int GetHashCode() => IsSuccess ? int.MaxValue : _failure.GetHashCode();
 
       #endregion Object
    }
