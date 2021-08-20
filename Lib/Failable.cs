@@ -135,6 +135,20 @@ namespace SIEDA.Monadic
          IsSuccess ? Failable<TNewValue, TFail>.Success( func( _value ) ) : Failable<TNewValue, TFail>.Failure( _failure );
 
       /// <summary>
+      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref
+      /// name="func"/> and returning a <see cref="Failable{TValue, TNewFail}"/> created from the result.
+      /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// <para>
+      /// Returns <see cref="Failable{TValue, TNewFail}.Success(TValue)"/> if <see cref="IsSuccess"/>
+      /// == <see langword="true"/> with this instance's "successful" value being unchanged.
+      /// </para>
+      /// </summary>
+      /// <typeparam name="TNewFail">The type of the new "failed" value.</typeparam>
+      /// <param name="func">The delegate that provides the new failure.</param>
+      public Failable<TValue, TNewFail> MapFailure<TNewFail>( Func<TFail, TNewFail> func ) =>
+         IsFailure ? Failable<TValue, TNewFail>.Failure( func( _failure ) ) : Failable<TValue, TNewFail>.Success( _value );
+
+      /// <summary>
       /// Maps this instance by using its "successful" value (if any) as an argument for <paramref
       /// name="func"/> and returning the result as a "flat" <see cref="Failable{TNewValue,
       /// TFail}"/> (instead of a "Failable of a Failable").

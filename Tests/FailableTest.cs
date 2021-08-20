@@ -342,6 +342,44 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      [Description( "Die MapFailure-Operation wird auf Fehlschläge angewendet." )]
+      public void MapFailure_Failure()
+      {
+         var original = Failable<bool, string>.Failure( "hallo" );
+         var result = original.MapFailure( s => s += " welt" );
+         Assert.That( result.FailureOrThrow(), Is.EqualTo( "hallo welt" ) );
+      }
+
+      [Test]
+      [Description( "Die MapFailure-Operation wird nicht auf Erfolge angewendet." )]
+      public void MapFailure_Success()
+      {
+         var original = Failable<bool, string>.Success( false );
+         var result = original.MapFailure( s => s += " welt" );
+         Assert.That( result.OrThrow(), Is.EqualTo( false ) );
+      }
+
+      [Test]
+      [Description( "Die MapFailure-Operation wird nicht auf Erfolge angewendet." )]
+      public void MapFailure_Success_SideEffect()
+      {
+         var myInt = 0;
+         var original = Failable<bool, string>.Success( false );
+         var result = original.MapFailure( s => ++myInt );
+         Assert.That( myInt, Is.EqualTo( 0 ) );
+      }
+
+      [Test]
+      [Description( "MapFailure hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void MapFailureToDifferentType()
+      {
+         var one = Failable<bool, int>.Failure( 1 );
+         Failable<bool, string> onePlusOne = one.MapFailure( i => $"{i}+1=2" );
+
+         Assert.That( onePlusOne.FailureOrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
+      [Test]
       [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
       public void Map_NestingInFlatMap()
       {

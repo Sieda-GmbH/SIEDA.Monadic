@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
@@ -176,6 +177,24 @@ namespace SIEDA.Monadic
                ? Option<TNewValue, TFail>.None
                : Option<TNewValue, TFail>.Failure( _failure );
 
+      /// <summary>
+      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref
+      /// name="func"/> and returning a <see cref="Option{TValue, TNewFail}"/> created from the result.
+      /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
+      /// <para>
+      /// Returns <see cref="Option{TValue, TNewFail}.Some(TValue)"/> if <see cref="IsSome"/>
+      /// == <see langword="true"/> with this instance's "successful" value being unchanged and returns
+      /// <see cref="Option{TValue, TNewFail}.None"/> if <see cref="IsNone"/> == <see langword="true"/>.
+      /// </para>
+      /// </summary>
+      /// <typeparam name="TNewFail">The type of the new "failed" value.</typeparam>
+      /// <param name="func">The delegate that provides the new failure.</param>
+      public Option<TValue, TNewFail> MapFailure<TNewFail>( Func<TFail, TNewFail> func ) =>
+         IsFailure
+         ? Option<TValue, TNewFail>.Failure( func( _failure ) )
+         : IsNone
+               ? Option<TValue, TNewFail>.None
+               : Option<TValue, TNewFail>.Some( _value );
 
       /// <summary>
       /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>

@@ -115,13 +115,13 @@ namespace SIEDA.MonadicTests
       [Test]
       public void ToString_Some()
       {
-         Assert.That( Option<TestObj, String>.From( new TestObj( "hallo" ) ).ToString(), Is.EqualTo( "[Option<TestObj, String>.Some: Object 'hallo']" ) );
+         Assert.That( Option<TestObj, string>.From( new TestObj( "hallo" ) ).ToString(), Is.EqualTo( "[Option<TestObj, string>.Some: Object 'hallo']" ) );
       }
 
       [Test]
       public void ToString_None()
       {
-         Assert.That( Option<TestObj, String>.From( null ).ToString(), Is.EqualTo( "[Option<TestObj, String>.None]" ) );
+         Assert.That( Option<TestObj, string>.From( null ).ToString(), Is.EqualTo( "[Option<TestObj, string>.None]" ) );
       }
 
       [Test]
@@ -379,7 +379,7 @@ namespace SIEDA.MonadicTests
       #region Map and Nesting
       [Test]
       [Description( "Die Map-Operation wird auf Erfolge angewendet." )]
-      public void Map_Success()
+      public void Map_Some()
       {
          var original = Option<string, bool>.Some( "hallo" );
          var result = original.Map( s => s+= " welt" );
