@@ -115,19 +115,19 @@ namespace SIEDA.MonadicTests
       [Test]
       public void ToString_Some()
       {
-         Assert.That( Option<TestObj, string>.From( new TestObj( "hallo" ) ).ToString(), Is.EqualTo( "[Option<TestObj, string>.Some: Object 'hallo']" ) );
+         Assert.That( Option<TestObj, string>.From( new TestObj( "hallo" ) ).ToString(), Is.EqualTo( "[Option<TestObj, String>.Some: Object 'hallo']" ) );
       }
 
       [Test]
       public void ToString_None()
       {
-         Assert.That( Option<TestObj, string>.From( null ).ToString(), Is.EqualTo( "[Option<TestObj, string>.None]" ) );
+         Assert.That( Option<TestObj, int>.From( null ).ToString(), Is.EqualTo( "[Option<TestObj, Int32>.None]" ) );
       }
 
       [Test]
       public void ToString_Failure()
       {
-         Assert.That( Option<String, TestObj>.Failure( new TestObj( "evil" ) ).ToString(), Is.EqualTo( "[Option<String, TestObj>.Failure: Object 'evil']" ) );
+         Assert.That( Option<bool, TestObj>.Failure( new TestObj( "evil" ) ).ToString(), Is.EqualTo( "[Option<Boolean, TestObj>.Failure: Object 'evil']" ) );
       }
 
       #endregion ToString
