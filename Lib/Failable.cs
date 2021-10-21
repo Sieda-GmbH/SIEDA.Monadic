@@ -186,7 +186,7 @@ namespace SIEDA.Monadic
       /// </summary>
       /// <param name="value">"Successful" value to check for equality.</param>
       /// <returns>
-      /// <see langword="true"/> iff <see cref="IsSuccess"/> == <see langword="true"/><c>and</c> the
+      /// <see langword="true"/> iff <see cref="IsSuccess"/> == <see langword="true"/> <c>and</c> the
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
       /// langword="true"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
@@ -198,7 +198,7 @@ namespace SIEDA.Monadic
       /// <param name="predicate">The delegate that checks the predicate.</param>
       /// <returns>
       /// <see langword="true"/> iff <see cref="IsSuccess"/> == <see
-      /// langword="true"/><c>and</c><paramref name="predicate"/> returns <see langword="true"/> for
+      /// langword="true"/> <c>and</c><paramref name="predicate"/> returns <see langword="true"/> for
       /// this instance's "successful" value, otherwise <see langword="false"/>.
       /// </returns>
       public bool Holds( Func<TValue, bool> predicate ) => IsSuccess && predicate( _value );
