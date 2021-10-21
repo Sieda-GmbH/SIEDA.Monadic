@@ -117,10 +117,21 @@ namespace SIEDA.Monadic
       /// <summary> Monadic predicate check for values. </summary>
       /// <param name="predicate">The delegate that checks the predicate.</param>
       /// <returns>
-      /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/> <c>and</c><paramref name="predicate"/> returns <see langword="true"/> for
-      /// this instance's value, otherwise <see langword="false"/>.
+      /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/> <c>and</c> <paramref name="predicate"/> returns <see langword="true"/> for
+      /// this instance's value. <see langword="false"/> in *all* other cases..
       /// </returns>
       public bool Holds( Func<TValue, bool> predicate ) => IsSome && predicate( _value );
+
+      /// <summary>
+      /// <para>Negated monadic predicate check for values. Basically syntactic sugar, equivalent code is:</para>
+      /// <para><see cref="IsSome"/> <see langword="and"/> ( <see langword="not"/> <see cref="Holds(Func{TValue, bool})"/> )</para>
+      /// </summary>
+      /// <param name="predicate">The delegate that checks the predicate and is subsequently negated.</param>
+      /// <returns>
+      /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/> <c>and</c> <paramref name="predicate"/> returns <see langword="false"/> for
+      /// this instance's value. <see langword="false"/> in *all* other cases..
+      /// </returns>
+      public bool HoldsNot( Func<TValue, bool> predicate ) => IsSome && !predicate( _value );
 
       #endregion Mapping
 

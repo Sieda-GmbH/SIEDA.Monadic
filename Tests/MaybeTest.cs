@@ -482,6 +482,36 @@ namespace SIEDA.MonadicTests
          Assert.That( maybe.Holds( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
       }
 
+      [Test]
+      [Description( "Check mittels negierter Predikatsfunktion - Vergleich liefert 'true'" )]
+      public void NotPredicateMatchingDefined()
+      {
+         var maybe = Maybe<string>.Some( "hubba" );
+
+         Assert.That( maybe.HoldsNot( s => s.Equals( "hubba" ) ), Is.EqualTo( false ) );
+
+      }
+
+      [Test]
+      [Description( "Check mittels negierter Predikatsfunktion - Vergleich liefert 'false'" )]
+      public void NotPredicateNonMatchingDefined()
+      {
+         var maybe = Maybe<string>.Some( "hubba" );
+
+         Assert.That( maybe.HoldsNot( s => s.Equals( "NOT-hubba" ) ), Is.EqualTo( true ) );
+
+      }
+
+      [Test]
+      [Description( "Check mittels negierter Predikatsfunktion - Vergleich findet nicht statt" )]
+      public void NotPredicateUndefined()
+      {
+         var maybe = Maybe<string>.None;
+
+         Assert.That( maybe.HoldsNot( s => s.Equals( "hubba-hub" ) ), Is.EqualTo( false ) );
+      }
+
+
       #endregion Holds
 
       #region Or
