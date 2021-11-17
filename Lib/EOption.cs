@@ -5,14 +5,12 @@ namespace SIEDA.Monadic
 {
    /// <summary>
    /// <para>
-   /// Interface for a object that is a sort of combination of a <see cref="Maybe{TValue}"/> and a <see
-   /// cref="EFailable{TValue}"/>: Represents the "result" of an operation that might have
-   /// failed with a value that may be absent even if the operation did not fail.
+   /// Interface for a object that is a sort of combination of a <see cref="Maybe{TValue}"/> and a <see cref="EFailable{TValue}"/>:
+   /// Represents the "result" of an operation that might have failed with a value that may be absent even if the operation did not fail.
    /// </para>
    /// <para>
-   /// If the operation did not fail, there may be either "some" value of type <typeparamref
-   /// name="TValue"/> or no value ("none (of the possible values)") without a failure. If the
-   /// operation was indeed a "failure", there is a value of type <see cref="Exception"/>.
+   /// If the operation did not fail, there may be either "some" value of type <typeparamref name="TValue"/> or no value ("none (of the
+   /// possible values)") without a failure. If the operation was indeed a "failure", there is a value of type <see cref="Exception"/>.
    /// </para>
    /// </summary>
    /// <typeparam name="TValue">The type of the value.</typeparam>
@@ -28,17 +26,11 @@ namespace SIEDA.Monadic
 
       #region Construction
 
-      /// <summary>
-      /// Empty instance, no value present, failure absent.
-      /// </summary>
+      /// <summary> Empty instance, no value present, failure absent. </summary>
       public static readonly EOption<TValue> None = new EOption<TValue>( OptType.None, default, default );
 
-      /// <summary>
-      /// Creates an <see cref="EOption{TValue}"/> with value <paramref name="value"/>.
-      /// </summary>
-      /// <exception cref="OptionSomeConstructionException">
-      /// if <paramref name="value"/> == <see langword="null"/>.
-      /// </exception>
+      /// <summary> Creates an <see cref="EOption{TValue}"/> with value <paramref name="value"/>. </summary>
+      /// <exception cref="OptionSomeConstructionException"> if <paramref name="value"/> == <see langword="null"/>. </exception>
       public static EOption<TValue> Some( TValue value )
       {
          if( ReferenceEquals( value, null ) )
@@ -49,13 +41,8 @@ namespace SIEDA.Monadic
          return new EOption<TValue>( OptType.Some, value, default );
       }
 
-      /// <summary>
-      /// Creates an <see cref="EOption{TValue}"/> with the value of the <see
-      /// cref="Nullable{T}"/><paramref name="nullableValue"/>.
-      /// </summary>
-      /// <exception cref="OptionSomeConstructionException">
-      /// if <paramref name="nullableValue"/> == <see langword="null"/> (has no value).
-      /// </exception>
+      /// <summary> Creates an <see cref="EOption{TValue}"/> with the value of the <see cref="Nullable{T}"/><paramref name="nullableValue"/>. </summary>
+      /// <exception cref="OptionSomeConstructionException"> if <paramref name="nullableValue"/> == <see langword="null"/> (has no value). </exception>
       public static EOption<TValue> Some<T>( T? nullableValue ) where T : struct, TValue
       {
          if( !nullableValue.HasValue )
@@ -67,36 +54,22 @@ namespace SIEDA.Monadic
       }
 
       /// <summary>
-      /// <para>
-      /// Creates and returns an <see cref="EOption{TValue}"/> with value <paramref
-      /// name="value"/> if <paramref name="value"/> != <see langword="null"/>.
-      /// </para>
-      /// <para>Returns <see cref="None"/> if <paramref name="value"/> == <see langword="null"/>.</para>
+      /// <para> Creates and returns an <see cref="EOption{TValue}"/> with value <paramref name="value"/> if <paramref name="value"/> != <see langword="null"/>. </para>
+      /// <para> Returns <see cref="None"/> if <paramref name="value"/> == <see langword="null"/>. </para>
       /// </summary>
       public static EOption<TValue> From( TValue value ) =>
          ReferenceEquals( value, null ) ? None : new EOption<TValue>( OptType.Some, value, default );
 
       /// <summary>
-      /// <para>
-      /// Creates and returns an <see cref="EOption{TValue}"/> with the value of the <see
-      /// cref="Nullable{T}"/><paramref name="nullableValue"/> if <paramref name="nullableValue"/>
-      /// != <see langword="null"/> (has a value).
-      /// </para>
-      /// <para>
-      /// Returns <see cref="None"/> if <paramref name="nullableValue"/> == <see langword="null"/>
-      /// (has no value).
-      /// </para>
+      /// <para> Creates and returns an <see cref="EOption{TValue}"/> with the value of the <see cref="Nullable{T}"/> <paramref name="nullableValue"/> if
+      /// <paramref name="nullableValue"/> != <see langword="null"/> (has a value). </para>
+      /// <para> Returns <see cref="None"/> if <paramref name="nullableValue"/> == <see langword="null"/> (has no value). </para>
       /// </summary>
       public static EOption<TValue> From<T>( T? nullableValue ) where T : struct, TValue =>
           nullableValue.HasValue ? new EOption<TValue>( OptType.Some, nullableValue.Value, default ) : None;
 
-      /// <summary>
-      /// Creates an <see cref="Option{TValue, TFail}"/> with a <paramref name="failure"/>-value,
-      /// which must not be <see langword="null"/>.
-      /// </summary>
-      /// <exception cref="OptionFailureConstructionException">
-      /// if <paramref name="failure"/> == <see langword="null"/>.
-      /// </exception>
+      /// <summary> Creates an <see cref="Option{TValue, TFail}"/> with a <paramref name="failure"/>-value, which must not be <see langword="null"/>. </summary>
+      /// <exception cref="OptionFailureConstructionException"> if <paramref name="failure"/> == <see langword="null"/>. </exception>
       public static EOption<TValue> Failure( Exception failure )
       {
          if( ReferenceEquals( failure, null ) )
@@ -120,32 +93,19 @@ namespace SIEDA.Monadic
       /// <summary> Returns an appropriate <see cref="OptType"/> for this instance, useful in case you want to use a switch-case.</summary>
       public OptType Enum { get => _type; }
 
-      /// <summary>
-      /// <see langword="true"/>, if this instance has a value, is "some", its value is present.
-      /// </summary>
+      /// <summary> <see langword="true"/>, if this instance has a value, is "some", its value is present. </summary>
       public bool IsSome { get => _type == OptType.Some; }
 
-      /// <summary>
-      /// <see langword="true"/>, if this instance has no value,
-      /// its value is absent, but it is still no failure.
-      /// </summary>
+      /// <summary> <see langword="true"/>, if this instance has no value, its value is absent, but it is still no failure. </summary>
       public bool IsNone { get => _type == OptType.None; }
 
-      /// <summary>
-      /// <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>.
-      /// </summary>
+      /// <summary> <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>. </summary>
       public bool IsFailure { get => _type == OptType.Failure; }
 
-      /// <summary>
-      /// <see langword="true"/> if this instance has no value, meaning either <see cref="IsNone"/>
-      /// or <see cref="IsFailure"/> is <see langword="true"/>.
-      /// </summary>
+      /// <summary> <see langword="true"/> if this instance has no value, meaning either <see cref="IsNone"/> or <see cref="IsFailure"/> is <see langword="true"/>. </summary>
       public bool IsNotSome => !IsSome;
 
-      /// <summary>
-      /// <see langword="true"/>, if this instance is no "failure", meaning either <see
-      /// cref="IsSome"/> or <see cref="IsNone"/> is <see langword="true"/>.
-      /// </summary>
+      /// <summary> <see langword="true"/>, if this instance is no "failure", meaning either <see cref="IsSome"/> or <see cref="IsNone"/> is <see langword="true"/>. </summary>
       public bool IsNotFailure => !IsFailure;
 
       #endregion Properties
@@ -153,17 +113,10 @@ namespace SIEDA.Monadic
       #region Mapping
 
       /// <summary>
-      /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>
-      /// and returning an <see cref="EOption{TNewValue}"/> created from the result.
+      /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/> and returning an <see cref="EOption{TNewValue}"/> created from the result.
       /// <para><paramref name="func"/> is only called if <see cref="IsSome"/> == <see langword="true"/>.</para>
-      /// <para>
-      /// Returns <see cref="EOption{TNewValue}.None"/> if <see cref="IsNone"/> == <see
-      /// langword="true"/> or the result of <paramref name="func"/> == <see langword="null"/>.
-      /// </para>
-      /// <para>
-      /// Returns <see cref="EOption{TNewValue}.Failure(Exception)"/> if <see cref="IsFailure"/>
-      /// == <see langword="true"/> with this instance's "failed" value being unchanged.
-      /// </para>
+      /// <para> Returns <see cref="EOption{TNewValue}.None"/> if <see cref="IsNone"/> == <see langword="true"/> or the result of <paramref name="func"/> == <see langword="null"/>. </para>
+      /// <para> Returns <see cref="EOption{TNewValue}.Failure(Exception)"/> if <see cref="IsFailure"/> == <see langword="true"/> with this instance's "failed" value being unchanged. </para>
       /// </summary>
       /// <typeparam name="TNewValue">The type of the new value.</typeparam>
       /// <param name="func">The delegate that provides the new value.</param>
@@ -175,8 +128,7 @@ namespace SIEDA.Monadic
                : EOption<TNewValue>.Failure( _failure );
 
       /// <summary>
-      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/>
-      /// and returning a <see cref="EOption{TValue}"/> created from the result.
+      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/> and returning a <see cref="EOption{TValue}"/> created from the result.
       /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
       /// <para>Otherwise, this instance is left untouched.</para>
       /// </summary>
@@ -196,23 +148,14 @@ namespace SIEDA.Monadic
       }
 
       /// <summary>
-      /// Maps this instance by using its value (if any) as an argument for <paramref name="func"/>
-      /// and returning the result as a "flat" <see cref="EOption{TNewValue}"/> (instead of
-      /// an "Option of an Option").
+      /// <para>Maps this instance by using its value (if any) as an argument for <paramref name="func"/> and returning the result as a "flat"
+      /// <see cref="EOption{TNewValue}"/> (instead of an "Option of an Option").</para>
       /// <para><paramref name="func"/> is only called if <see cref="IsSome"/> == <see langword="true"/>.</para>
-      /// <para>
-      /// Returns <see cref="EOption{TNewValue}.None"/> if <see cref="IsNone"/> == <see
-      /// langword="true"/> or it is the result of <paramref name="func"/>.
-      /// </para>
-      /// <para>
-      /// Returns <see cref="EOption{TNewValue}.Failure(Exception)"/> if <see cref="IsFailure"/>
-      /// == <see langword="true"/> or it is the result of <paramref name="func"/>.
-      /// </para>
+      /// <para> Returns <see cref="EOption{TNewValue}.None"/> if <see cref="IsNone"/> == <see langword="true"/> or it is the result of <paramref name="func"/>. </para>
+      /// <para> Returns <see cref="EOption{TNewValue}.Failure(Exception)"/> if <see cref="IsFailure"/> == <see langword="true"/> or it is the result of <paramref name="func"/>. </para>
       /// </summary>
       /// <typeparam name="TNewValue">The type of the new value.</typeparam>
-      /// <param name="func">
-      /// The delegate that provides the new value which may fail or result in an absent value.
-      /// </param>
+      /// <param name="func"> The delegate that provides the new value which may fail or result in an absent value. </param>
       public EOption<TNewValue> FlatMap<TNewValue>( Func<TValue, EOption<TNewValue>> func ) =>
          IsSome
             ? func( _value )
@@ -221,9 +164,7 @@ namespace SIEDA.Monadic
                : EOption<TNewValue>.Failure( _failure );
 
 
-      /// <summary>
-      /// <see cref="EOption{TValue}"/>-compatible equality-check for values.
-      /// </summary>
+      /// <summary> <see cref="EOption{TValue}"/>-compatible equality-check for values. </summary>
       /// <param name="value">Value to check for equality.</param>
       /// <returns>
       /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/> <c>and</c> the
@@ -232,9 +173,7 @@ namespace SIEDA.Monadic
       /// </returns>
       public bool Is( TValue value ) => IsSome && _value.Equals( value );
 
-      /// <summary>
-      /// <see cref="EOption{TValue}"/>-compatible inequality-check for values.
-      /// </summary>
+      /// <summary> <see cref="EOption{TValue}"/>-compatible inequality-check for values. </summary>
       /// <param name="value">Value to check for equality.</param>
       /// <returns>
       /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/> <c>and</c> the
@@ -243,9 +182,7 @@ namespace SIEDA.Monadic
       /// </returns>
       public bool IsNot( TValue value ) => IsSome && !_value.Equals( value );
 
-      /// <summary>
-      /// Monadic predicate check for values.
-      /// </summary>
+      /// <summary> Monadic predicate check for values. </summary>
       /// <param name="predicate">The delegate that checks the predicate.</param>
       /// <returns>
       /// <see langword="true"/> iff <see cref="IsSome"/> == <see
@@ -286,62 +223,45 @@ namespace SIEDA.Monadic
          #pragma warning restore CS0618
       }
 
-      /// <summary>
-      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise
-      /// <paramref name="otherwise"/>.
-      /// </summary>
-      /// <param name="otherwise">
-      /// The desired value if this instance has no value (with or without failure).
-      /// </param>
+      /// <summary> Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise <paramref name="otherwise"/>. </summary>
+      /// <param name="otherwise"> The desired value if this instance has no value (with or without failure). </param>
       public TValue Or( TValue otherwise ) => IsSome ? _value : otherwise;
 
       /// <summary>
-      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise
-      /// throws an <see cref="OptionNoneException"/> if <see cref="IsNone"/> == <see
-      /// langword="true"/> or an <see cref="OptionFailureException"/> if <see cref="IsFailure"/> ==
-      /// <see langword="true"/>.
+      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise throws an <see cref="OptionNoneException"/> if <see cref="IsNone"/>
+      /// == <see langword="true"/> or an <see cref="OptionFailureException"/> if <see cref="IsFailure"/> == <see langword="true"/>.
       /// </summary>
       /// <exception cref="OptionNoneException"/>
       /// <exception cref="OptionFailureException"/>
       public TValue OrThrow() => IsSome ? _value : ThrowNotSome();
 
       /// <summary>
-      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise
-      /// throws an <see cref="OptionNoneException"/> if <see cref="IsNone"/> == <see
-      /// langword="true"/> or an <see cref="OptionFailureException"/> if <see cref="IsFailure"/> ==
-      /// <see langword="true"/>, both with the message <paramref name="msg"/>.
+      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise throws an <see cref="OptionNoneException"/> if <see cref="IsNone"/>
+      /// == <see langword="true"/> or an <see cref="OptionFailureException"/> if <see cref="IsFailure"/> == <see langword="true"/>, both with the message <paramref name="msg"/>.
       /// </summary>
       /// <exception cref="OptionNoneException"/>
       /// <exception cref="OptionFailureException"/>
       public TValue OrThrow( string msg ) => IsSome ? _value : ThrowNotSome( msg );
 
       /// <summary>
-      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise
-      /// throws an <see cref="OptionNoneException"/> if <see cref="IsNone"/> == <see
-      /// langword="true"/> or an <see cref="OptionFailureException"/> if <see cref="IsFailure"/> ==
-      /// <see langword="true"/>, both with the formatted message <paramref name="msg"/> using the
-      /// message arguments <paramref name="args"/>.
+      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise throws an <see cref="OptionNoneException"/> if <see cref="IsNone"/>
+      /// == <see langword="true"/> or an <see cref="OptionFailureException"/> if <see cref="IsFailure"/> == <see langword="true"/>, both with the formatted message
+      /// <paramref name="msg"/> using the message arguments <paramref name="args"/>.
       /// </summary>
       /// <exception cref="OptionNoneException"/>
       /// <exception cref="OptionFailureException"/>
       public TValue OrThrow( string msg, params string[] args ) =>
          IsSome ? _value : ThrowNotSome( string.Format( msg, args ) );
 
-      /// <summary>
-      /// Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise
-      /// throws the exception <paramref name="e"/>.
-      /// </summary>
-      /// <param name="e">
-      /// The desired exception if this instance has no value (with or without failure).
-      /// </param>
+      /// <summary> Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise throws the exception <paramref name="e"/>. </summary>
+      /// <param name="e"> The desired exception if this instance has no value (with or without failure). </param>
       /// <exception cref="Exception"/>
       public TValue OrThrow( Exception e ) => IsSome ? _value : throw e;
 
       /// <summary>
-      /// Writes this instance's value into the <see langword="out"/> parameter <paramref
-      /// name="value"/> and returns <see langword="true"/> if <see cref="IsSome"/> == <see
-      /// langword="true"/>, otherwise <paramref name="value"/> will be set to the <see
-      /// langword="default"/> value of <typeparamref name="TValue"/> and the method returns <see langword="false"/>.
+      /// Writes this instance's value into the <see langword="out"/> parameter <paramref name="value"/> and returns <see langword="true"/> if <see cref="IsSome"/>
+      /// == <see langword="true"/>, otherwise <paramref name="value"/> will be set to the <see langword="default"/> value of <typeparamref name="TValue"/> and the
+      /// method returns <see langword="false"/>.
       /// </summary>
       /// <param name="value"><see langword="out"/> parameter for this instance's value.</param>
       /// <remarks>Not particularly functional, but a concession to typical .NET methods.</remarks>
@@ -355,10 +275,7 @@ namespace SIEDA.Monadic
 
       #region Accessing Failure
 
-      /// <summary>
-      /// Returns this instance's "failed" value if <see cref="IsFailure"/> == <see
-      /// langword="true"/>, otherwise throws a <see cref="OptionNoFailureException"/>.
-      /// </summary>
+      /// <summary> Returns this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>, otherwise throws a <see cref="OptionNoFailureException"/>. </summary>
       /// <exception cref="OptionNoFailureException"/>
       public Exception FailureOrThrow() =>
          IsFailure ? _failure : throw new OptionNoFailureException( typeof( TValue ), typeof( Exception ) );
@@ -367,9 +284,7 @@ namespace SIEDA.Monadic
 
       #region Converters
 
-      /// <summary>
-      /// Converts this instance into a <see cref="Maybe{TValue}"/>.
-      /// </summary>
+      /// <summary> Converts this instance into a <see cref="Maybe{TValue}"/>. </summary>
       /// <returns>
       /// <see cref="Maybe{TValue}.Some(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/>
       /// for this instance and <see cref="Maybe{TValue}.None"/> otherwise, thus *LOSING* the
@@ -377,71 +292,48 @@ namespace SIEDA.Monadic
       /// </returns>
       public Maybe<TValue> ToMaybe() => IsSome ? Maybe<TValue>.Some( _value ) : Maybe<TValue>.None;
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="Failable{TValue, Exception}"/>.
-      /// </summary>
-      /// <param name="failureOnNone">
-      /// An object representing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
-      /// </param>
+      /// <summary> Converts this instance into an appropriate <see cref="Failable{TValue, Exception}"/>. </summary>
+      /// <param name="failureOnNone"> An object representing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/> </param>
       /// <returns>
-      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
-      /// langword="true"/> for this instance, otherwise <see cref="Failable{TValue,
-      /// TFail}.Failure(TFail)"/> containing <paramref name="failureOnNone"/> if <see cref="IsNone"/>
-      /// == <see langword="true"/> or this instance's "failed" value if <see cref="IsFailure"/> ==
-      /// <see langword="true"/>.
+      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for this instance,
+      /// otherwise <see cref="Failable{TValue, TFail}.Failure(TFail)"/> containing <paramref name="failureOnNone"/> if <see cref="IsNone"/>
+      /// == <see langword="true"/> or this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>.
       /// </returns>
       public Failable<TValue, Exception> ToFailable( Exception failureOnNone ) =>
          IsSome
             ? Failable<TValue, Exception>.Success( _value )
             : Failable<TValue, Exception>.Failure( IsFailure ? _failure : failureOnNone );
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="EFailable{TValue}"/>.
-      /// </summary>
-      /// <param name="failureOnNone">
-      /// An object representing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
-      /// </param>
+      /// <summary> Converts this instance into an appropriate <see cref="EFailable{TValue}"/>. </summary>
+      /// <param name="failureOnNone"> An object representing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/> </param>
       /// <returns>
-      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see
-      /// langword="true"/> for this instance, otherwise <see cref="EFailable{TValue}.Failure(Exception)"/>
-      /// containing <paramref name="failureOnNone"/> if <see cref="IsNone"/>
-      /// == <see langword="true"/> or this instance's "failed" value if <see cref="IsFailure"/> ==
-      /// <see langword="true"/>.
+      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for this instance, otherwise 
+      /// <see cref="EFailable{TValue}.Failure(Exception)"/> containing <paramref name="failureOnNone"/> if <see cref="IsNone"/> == <see langword="true"/>
+      /// or this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>.
       /// </returns>
       public EFailable<TValue> ToEFailable( Exception failureOnNone ) =>
          IsSome
             ? EFailable<TValue>.Success( _value )
             : EFailable<TValue>.Failure( IsFailure ? _failure : failureOnNone );
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="Failable{TValue, Exception}"/>.
-      /// </summary>
-      /// <param name="funcForNone">
-      /// A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
-      /// </param>
+      /// <summary> Converts this instance into an appropriate <see cref="Failable{TValue, Exception}"/>. </summary>
+      /// <param name="funcForNone"> A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/> </param>
       /// <returns>
-      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
-      /// langword="true"/> for this instance, otherwise <see cref="Failable{TValue,
-      /// TFail}.Failure(TFail)"/> containing the result of <paramref name="funcForNone"/> if
-      /// <see cref="IsNone"/> == <see langword="true"/> or this instance's "failed" value if
-      /// <see cref="IsFailure"/> == <see langword="true"/>.
+      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for this instance, otherwise
+      /// <see cref="Failable{TValue, TFail}.Failure(TFail)"/> containing the result of <paramref name="funcForNone"/> if <see cref="IsNone"/>
+      /// == <see langword="true"/> or this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>.
       /// </returns>
       public Failable<TValue, Exception> ToFailable( Func<Exception> funcForNone ) =>
          IsSome
             ? Failable<TValue, Exception>.Success( _value )
             : Failable<TValue, Exception>.Failure( IsFailure ? _failure : funcForNone() );
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="EFailable{TValue}"/>.
-      /// </summary>
-      /// <param name="funcForNone">
-      /// A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
-      /// </param>
+      /// <summary> Converts this instance into an appropriate <see cref="EFailable{TValue}"/>. </summary>
+      /// <param name="funcForNone"> A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/> </param>
       /// <returns>
-      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see
-      /// langword="true"/> for this instance, otherwise <see cref="EFailable{TValue}.Failure(Exception)"/>
-      ///containing the result of <paramref name="funcForNone"/> if <see cref="IsNone"/> == <see langword="true"/>
-      ///or this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>.
+      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for this instance, otherwise
+      /// <see cref="EFailable{TValue}.Failure(Exception)"/> containing the result of <paramref name="funcForNone"/> if <see cref="IsNone"/>
+      /// == <see langword="true"/> or this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>.
       /// </returns>
       public EFailable<TValue> ToEFailable( Func<Exception> funcForNone ) =>
          IsSome
@@ -456,9 +348,7 @@ namespace SIEDA.Monadic
       public Option<TValue, Exception> ToOption() => IsSome ? Option<TValue, Exception>.Some( _value )
          : IsFailure ? Option<TValue, Exception>.Failure( _failure ) : Option<TValue, Exception>.None;
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="Validation{TFail}"/>. />.
-      /// </summary>
+      /// <summary> Converts this instance into an appropriate <see cref="Validation{TFail}"/>. </summary>
       /// <returns>
       /// <see cref="Validation{TFail}.Success"/> if <see cref="IsFailure"/> == <see langword="false"/>, thus *LOSING* a
       /// "successful value" or "no value" state of this instance. If <see cref="IsFailure"/> == <see langword="true"/>, this method returns
@@ -469,9 +359,7 @@ namespace SIEDA.Monadic
             ? Validation<Exception>.Failure( _failure )
             : Validation<Exception>.Success;
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="EValidation"/>. />.
-      /// </summary>
+      /// <summary> Converts this instance into an appropriate <see cref="EValidation"/>. </summary>
       /// <returns>
       /// <see cref="EValidation.Success"/> if <see cref="IsSome"/> == <see langword="true"/>, thus *LOSING* a
       /// "successful value" of this instance. If <see cref="IsNone"/> == <see langword="true"/>, <paramref name="failureOnNone"/>
@@ -483,9 +371,7 @@ namespace SIEDA.Monadic
             ? EValidation.Success
             : EValidation.Failure( IsFailure ? _failure : failureOnNone );
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="EValidation"/>. />.
-      /// </summary>
+      /// <summary> Converts this instance into an appropriate <see cref="EValidation"/>. </summary>
       /// <param name="funcForNone">
       /// A function constructing a "failure", used in case <see cref="IsNone"/> == <see langword="true"/>
       /// </param>

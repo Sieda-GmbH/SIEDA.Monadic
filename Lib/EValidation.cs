@@ -31,9 +31,7 @@ namespace SIEDA.Monadic
       /// Creates an appropriate <see cref="EValidation"/> wrapping either an exception thrown by <paramref name="toExecute"/> or simply being <see cref="Success"/>.
       /// </summary>
       /// <param name="toExecute">Function executed and wrapped by this monadic instance.</param>
-      /// <exception cref="ValidationFromWrappedConstructionException">
-      /// if <paramref name="toExecute"/> == <see langword="null"/>.
-      /// </exception>
+      /// <exception cref="ValidationFromWrappedConstructionException"> if <paramref name="toExecute"/> == <see langword="null"/>. </exception>
       public static EValidation Wrapping<U>( Func<U> toExecute )
       {
          if( ReferenceEquals( toExecute, null ) )
@@ -55,9 +53,7 @@ namespace SIEDA.Monadic
       /// Creates an appropriate <see cref="EValidation"/> wrapping either an exception thrown by <paramref name="toExecute"/> or simply being <see cref="Success"/>.
       /// </summary>
       /// <param name="toExecute">Function executed and wrapped by this monadic instance.</param>
-      /// <exception cref="ValidationFromWrappedConstructionException">
-      /// if <paramref name="toExecute"/> == <see langword="null"/>.
-      /// </exception>
+      /// <exception cref="ValidationFromWrappedConstructionException"> if <paramref name="toExecute"/> == <see langword="null"/>. </exception>
       public static EValidation Wrapping( Action toExecute )
       {
          if( ReferenceEquals( toExecute, null ) )
@@ -75,18 +71,11 @@ namespace SIEDA.Monadic
          }
       }
 
-      /// <summary>
-      /// The <see cref="EValidation"/> with a "successful" outcome.
-      /// </summary>
+      /// <summary> The <see cref="EValidation"/> with a "successful" outcome. </summary>
       public static readonly EValidation Success = new EValidation( VldType.Success, default );
 
-      /// <summary>
-      /// Creates a <see cref="EValidation"/> with a <paramref name="failure"/>-value, which
-      /// must not be <see langword="null"/>.
-      /// </summary>
-      /// <exception cref="ValidationFailureConstructionException">
-      /// if <paramref name="failure"/> == <see langword="null"/>.
-      /// </exception>
+      /// <summary> Creates a <see cref="EValidation"/> with a <paramref name="failure"/>-value, which must not be <see langword="null"/>. </summary>
+      /// <exception cref="ValidationFailureConstructionException"> if <paramref name="failure"/> == <see langword="null"/>. </exception>
       public static EValidation Failure( Exception failure )
       {
          if( ReferenceEquals( failure, null ) )
@@ -109,22 +98,15 @@ namespace SIEDA.Monadic
       /// <summary> Returns an appropriate <see cref="VldType"/> for this instance, useful in case you want to use a switch-case.</summary>
       public VldType Enum { get => _type; }
 
-      /// <summary>
-      /// <see langword="true"/>, if this instance is a "success".
-      /// </summary>
+      /// <summary> <see langword="true"/>, if this instance is a "success". </summary>
       public bool IsSuccess { get => _type == VldType.Success; }
 
-      /// <summary>
-      /// <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>.
-      /// </summary>
+      /// <summary> <see langword="true"/>, if this instance is a "failure", aka has a value of type <see cref="Exception"/>. </summary>
       public bool IsFailure { get => _type == VldType.Failure; }
       #endregion Properties
 
       #region Accessing Failure
-      /// <summary>
-      /// Returns this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>,
-      /// otherwise throws a <see cref="ValidationNoFailureException"/>.
-      /// </summary>
+      /// <summary> Returns this instance's "failed" value if <see cref="IsFailure"/> == <see langword="true"/>, otherwise throws a <see cref="ValidationNoFailureException"/>. </summary>
       /// <exception cref="ValidationNoFailureException"/>
       public Exception FailureOrThrow() =>
          IsFailure ? _failure : throw new ValidationNoFailureException( typeof( Exception ) );
@@ -133,8 +115,7 @@ namespace SIEDA.Monadic
 
       #region Mapping
       /// <summary>
-      /// Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/>
-      /// and returning a <see cref="EValidation"/> created from the result.
+      /// <para>Maps this instance by using its "failed" value (if any) as an argument for <paramref name="func"/> and returning a <see cref="EValidation"/> created from the result.</para>
       /// <para><paramref name="func"/> is only called if <see cref="IsFailure"/> == <see langword="true"/>.</para>
       /// <para>Otherwise, this instance is left untouched.</para>
       /// </summary>
@@ -156,34 +137,18 @@ namespace SIEDA.Monadic
 
       #region Converters
 
-      /// <summary>
-      /// Converts this instance into an appropriate <see cref="Validation{Exception}"/>.
-      /// </summary>
-      /// <returns>
-      /// <see cref="Validation{Exception}"/>.
-      /// </returns>
+      /// <summary> Converts this instance into an appropriate <see cref="Validation{Exception}"/>. </summary>
+      /// <returns> <see cref="Validation{Exception}"/>. </returns>
       public Validation<Exception> ToValidation() =>
          IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
 
-      /// <summary>
-      /// Converts this instance into a <see cref="EOption{Object}"/>, which is either a
-      /// failure or empty (but never defined).
-      /// </summary>
-      /// <returns>
-      /// <see cref="EOption{Object}"/> with its some-type being 'object' and its failure-type
-      /// being <see cref="Exception"/>.
-      /// </returns>
+      /// <summary> Converts this instance into a <see cref="EOption{Object}"/>, which is either a failure or empty (but never defined). </summary>
+      /// <returns> <see cref="EOption{Object}"/> with its some-type being 'object' and its failure-type being <see cref="Exception"/>. </returns>
       public EOption<object> ToEOption() =>
          IsSuccess ? EOption<object>.None : EOption<object>.Failure( _failure );
 
-      /// <summary>
-      /// Converts this instance into a <see cref="Option{Object, Exception}"/>, which is either a
-      /// failure or empty (but never defined).
-      /// </summary>
-      /// <returns>
-      /// <see cref="Option{Object, Exception}"/> with its some-type being 'object' and its failure-type
-      /// being <see cref="Exception"/>.
-      /// </returns>
+      /// <summary> Converts this instance into a <see cref="Option{Object, Exception}"/>, which is either a failure or empty (but never defined). </summary>
+      /// <returns> <see cref="Option{Object, Exception}"/> with its some-type being 'object' and its failure-type being <see cref="Exception"/>. </returns>
       public Option<object, Exception> ToOption() =>
          IsSuccess ? Option<object, Exception>.None : Option<object, Exception>.Failure( _failure );
 
@@ -191,10 +156,7 @@ namespace SIEDA.Monadic
 
       #region Object
 
-      /// <summary>
-      /// Custom implementation of <see cref="object.ToString()"/>, wrapping the corresponding call
-      /// to this instance's value, be it a "success" or a "failure".
-      /// </summary>
+      /// <summary> Custom implementation of <see cref="object.ToString()"/>, wrapping the corresponding call to this instance's value, be it a "success" or a "failure". </summary>
       public override string ToString() =>
          IsSuccess
          ? $"[EValidation.Success]"
@@ -202,9 +164,8 @@ namespace SIEDA.Monadic
 
 
       /// <summary>
-      /// <para>Returns <see langword="true"/> iff <see cref="IsSuccess"/> returns the same boolean for
-      /// both objects and both instances reference the same <see cref="Exception"/> internally.
-      /// being <see langword="false"/>.</para>
+      /// <para>Returns <see langword="true"/> iff <see cref="IsSuccess"/> returns the same boolean for both objects and both instances reference the same
+      /// <see cref="Exception"/> internally being <see langword="false"/>.</para>
       /// <para>Supports cross-class checks with <see cref="Validation{Exception}"/> following the same semantics as above!</para>
       /// </summary>
       public override bool Equals( object obj ) =>
@@ -216,8 +177,7 @@ namespace SIEDA.Monadic
             && ( IsSuccess || _failure == otherV.FailureOrThrow() ) );
 
       /// <summary>
-      /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this
-      /// instance's value, be it a "success" or a "failure".
+      /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this instance's value, be it a "success" or a "failure".
       /// </summary>
       public override int GetHashCode() => IsSuccess ? int.MaxValue : _failure.GetHashCode();
 
