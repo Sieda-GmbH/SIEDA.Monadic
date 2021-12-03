@@ -429,6 +429,40 @@ namespace SIEDA.Monadic
             : Failable<TValue, TFail>.Failure( IsFailure ? _failure : funcForNone() );
 
       /// <summary>
+      /// Converts this instance into a <see cref="Failable{TValue, TFail}"/> without treating <see cref="None"/> as a failure.
+      /// </summary>
+      /// <param name="funcForNone">
+      /// A function producing a "Success", used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance or the result of <paramref name="funcForNone"/> if
+      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="Failable{TValue,
+      /// TFail}.Failure(TFail)"/> containing this instance's "failed" value.
+      /// </returns>
+      public Failable<TValue, TFail> OrToFailable( Func<TValue> funcForNone ) =>
+         IsSome
+            ? Failable<TValue, TFail>.Success( IsNone ? funcForNone() : _value )
+            : Failable<TValue, TFail>.Failure(  _failure );
+
+      /// <summary>
+      /// Converts this instance into a <see cref="Failable{TValue, TFail}"/> without treating <see cref="None"/> as a failure.
+      /// </summary>
+      /// <param name="orValue">
+      /// An alternative value used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance or <paramref name="orValue"/> if
+      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="Failable{TValue,
+      /// TFail}.Failure(TFail)"/> containing this instance's "failed" value.
+      /// </returns>
+      public Failable<TValue, TFail> OrToFailable( TValue orValue ) =>
+         IsSome
+            ? Failable<TValue, TFail>.Success( IsNone ? orValue : _value )
+            : Failable<TValue, TFail>.Failure( _failure );
+
+      /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="EFailable{TValue}"/>.</para>
       /// <para>Note that any "failed" value this instance might have is lost in the conversion
       ///       and the exception given via <paramref name="exc"/> is used instead.</para>
