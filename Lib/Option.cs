@@ -392,6 +392,8 @@ namespace SIEDA.Monadic
       /// </returns>
       public Maybe<TValue> ToMaybe() => IsSome ? Maybe<TValue>.Some( _value ) : Maybe<TValue>.None;
 
+      #region ToFailable & OrToFailable
+
       /// <summary>
       /// Converts this instance into an appropriate <see cref="Failable{TValue, TFail}"/>.
       /// </summary>
@@ -431,36 +433,40 @@ namespace SIEDA.Monadic
       /// <summary>
       /// Converts this instance into a <see cref="Failable{TValue, TFail}"/> without treating <see cref="None"/> as a failure.
       /// </summary>
-      /// <param name="funcForNone">
-      /// A function producing a "Success", used in case <see cref="IsNone"/> == <see langword="true"/>
-      /// </param>
-      /// <returns>
-      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
-      /// langword="true"/> for this instance or the result of <paramref name="funcForNone"/> if
-      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="Failable{TValue,
-      /// TFail}.Failure(TFail)"/> containing this instance's "failed" value.
-      /// </returns>
-      public Failable<TValue, TFail> OrToFailable( Func<TValue> funcForNone ) =>
-         IsSome
-            ? Failable<TValue, TFail>.Success( IsNone ? funcForNone() : _value )
-            : Failable<TValue, TFail>.Failure(  _failure );
-
-      /// <summary>
-      /// Converts this instance into a <see cref="Failable{TValue, TFail}"/> without treating <see cref="None"/> as a failure.
-      /// </summary>
       /// <param name="orValue">
       /// An alternative value used in case <see cref="IsNone"/> == <see langword="true"/>
       /// </param>
       /// <returns>
       /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
       /// langword="true"/> for this instance or <paramref name="orValue"/> if
-      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="Failable{TValue,
-      /// TFail}.Failure(TFail)"/> containing this instance's "failed" value.
+      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="Failable{TValue, TFail}.Failure(TFail)"/>
+      /// containing this instance's "failed" value.
       /// </returns>
       public Failable<TValue, TFail> OrToFailable( TValue orValue ) =>
          IsSome
             ? Failable<TValue, TFail>.Success( IsNone ? orValue : _value )
             : Failable<TValue, TFail>.Failure( _failure );
+
+      /// <summary>
+      /// Converts this instance into a <see cref="Failable{TValue, TFail}"/> without treating <see cref="None"/> as a failure.
+      /// </summary>
+      /// <param name="funcForNone">
+      /// A function producing a "Success", used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance or the result of <paramref name="funcForNone"/> if
+      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="Failable{TValue, TFail}.Failure(TFail)"/>
+      /// containing this instance's "failed" value.
+      /// </returns>
+      public Failable<TValue, TFail> OrToFailable( Func<TValue> funcForNone ) =>
+         IsSome
+            ? Failable<TValue, TFail>.Success( IsNone ? funcForNone() : _value )
+            : Failable<TValue, TFail>.Failure(  _failure );
+
+      #endregion ToFailable & OrToFailable
+
+      #region ToEFailable & OrToEFailable
 
       /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="EFailable{TValue}"/>.</para>
@@ -496,6 +502,49 @@ namespace SIEDA.Monadic
             return EFailable<TValue>.Failure( e );
          }
       }
+
+      /// <summary>
+      /// Converts this instance into an <see cref="EFailable{TValue}"/> without treating <see cref="None"/> as a failure.
+      /// </summary>
+      /// <param name="orValue">
+      /// An alternative value used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="excOnFailure">
+      /// An object representing a "failure", used in case <see cref="IsFailure"/> == <see langword="true"/>
+      /// </param>
+      /// <returns>
+      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance or <paramref name="orValue"/> if
+      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="EFailable{TValue}.Failure(Exception)"/>
+      /// containing <paramref name="excOnFailure"/>.
+      /// </returns>
+      public EFailable<TValue> OrToEFailable( TValue orValue, Exception excOnFailure ) =>
+         IsSome
+            ? EFailable<TValue>.Success( IsNone ? orValue : _value )
+            : EFailable<TValue>.Failure( excOnFailure );
+
+      /// <summary>
+      /// Converts this instance into an <see cref="EFailable{TValue}"/> without treating <see cref="None"/> as a failure.
+      /// </summary>
+      /// <param name="funcForNone">
+      /// A function producing a "Success", used in case <see cref="IsNone"/> == <see langword="true"/>
+      /// </param>
+      /// <param name="funcForFailure">
+      /// A function producing a "failure", used in case <see cref="IsFailure"/> == <see langword="true"/> and
+      /// called with the result of <see cref="FailureOrThrow"/>.
+      /// </param>
+      /// <returns>
+      /// <see cref="EFailable{TValue}.Success(TValue)"/> if <see cref="IsSome"/> == <see
+      /// langword="true"/> for this instance or the result of <paramref name="funcForNone"/> if
+      /// <see cref="IsNone"/> == <see langword="true"/>, otherwise <see cref="EFailable{TValue}.Failure(Exception)"/>
+      /// containing the result of <paramref name="funcForFailure"/>.
+      /// </returns>
+      public EFailable<TValue> OrToEFailable( Func<TValue> funcForNone, Func<TFail, Exception> funcForFailure ) =>
+         IsSome
+            ? EFailable<TValue>.Success( IsNone ? funcForNone() : _value )
+            : EFailable<TValue>.Failure( funcForFailure( _failure ) );
+
+      #endregion ToEFailable & OrToEFailable
 
       /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="Validation{TFail}"/>. </para>
