@@ -743,10 +743,10 @@ namespace SIEDA.MonadicTests
       public void ConvertToFailable_None()
       {
          var option = Option<int, string>.None;
-         var failable = option.ToEFailable( new ArgumentException("msg") );
+         var failable = option.ToFailable( "msg" );
 
          Assert.That( failable.IsFailure, Is.True );
-         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo("msg") );
+         Assert.That( failable.FailureOrThrow(), Is.EqualTo( "msg" ) );
       }
 
       [Test]
@@ -780,6 +780,72 @@ namespace SIEDA.MonadicTests
 
          Assert.That( failable.IsFailure, Is.True );
          Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "Some wird zu Failable.Some konvertiert" )]
+      public void OrConvertToFailable_Some()
+      {
+         var option = Option<int, string>.Some( 123 );
+         var failable = option.OrToFailable( 456 );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( 123 ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu Failable.Failure konvertiert" )]
+      public void OrConvertToFailable_Failure()
+      {
+         var option = Option<int, string>.Failure( "msg" );
+         var failable = option.OrToFailable( 456 );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow(), Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "None wird zu Failable.Success mit übergebenem Wert konvertiert" )]
+      public void OrConvertToFailable_None()
+      {
+         var option = Option<int, string>.None;
+         var failable = option.OrToFailable( 456 );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( 456 ) );
+      }
+
+      [Test]
+      [Description( "Some wird zu EFailable.Success konvertiert" )]
+      public void OrConvertToEFailable_Some()
+      {
+         var option = Option<int, string>.Some( 123 );
+         var failable = option.OrToEFailable( 456, new ArgumentException( "msg" ) );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( 123 ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu EFailable.Failure konvertiert" )]
+      public void OrConvertToEFailable_Failure()
+      {
+         var option = Option<int, string>.Failure( "notMsg" );
+         EFailable<int> failable = option.OrToEFailable( 456, new ArgumentException( "msg" ) );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "None wird zu EFailable.Success mit übergebenem Wert konvertiert" )]
+      public void OrConvertToEFailable_None()
+      {
+         var option = Option<int, string>.None;
+         var failable = option.OrToEFailable( 456, new ArgumentException( "msg" ) );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( 456 ) );
       }
 
       [Test]

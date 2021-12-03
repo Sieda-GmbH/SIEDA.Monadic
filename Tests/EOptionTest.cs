@@ -778,6 +778,39 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      [Description( "Some wird zu Failable.Some konvertiert" )]
+      public void OrConvertToFailable_Some()
+      {
+         var eoption = EOption<int>.Some( 123 );
+         var failable = eoption.OrToFailable( 456 );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( 123 ) );
+      }
+
+      [Test]
+      [Description( "Failure wird zu Failable.Failure konvertiert" )]
+      public void OrConvertToFailable_Failure()
+      {
+         var eoption = EOption<int>.Failure( new ArgumentException( "msg" ) );
+         var failable = eoption.OrToFailable( 456 );
+
+         Assert.That( failable.IsFailure, Is.True );
+         Assert.That( failable.FailureOrThrow().Message, Is.EqualTo( "msg" ) );
+      }
+
+      [Test]
+      [Description( "None wird zu Failable.Success mit übergebenem Wert konvertiert" )]
+      public void OrConvertToFailable_None()
+      {
+         var eoption = EOption<int>.None;
+         var failable = eoption.OrToFailable( 123 );
+
+         Assert.That( failable.IsSuccess, Is.True );
+         Assert.That( failable.OrThrow, Is.EqualTo( 123 ) );
+      }
+
+      [Test]
       [Description( "Some wird zu Option.Some konvertiert" )]
       public void ConvertToOption_Some()
       {

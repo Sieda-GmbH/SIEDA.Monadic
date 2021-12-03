@@ -443,7 +443,7 @@ namespace SIEDA.Monadic
       /// containing this instance's "failed" value.
       /// </returns>
       public Failable<TValue, TFail> OrToFailable( TValue orValue ) =>
-         IsSome
+         IsNotFailure
             ? Failable<TValue, TFail>.Success( IsNone ? orValue : _value )
             : Failable<TValue, TFail>.Failure( _failure );
 
@@ -460,7 +460,7 @@ namespace SIEDA.Monadic
       /// containing this instance's "failed" value.
       /// </returns>
       public Failable<TValue, TFail> OrToFailable( Func<TValue> funcForNone ) =>
-         IsSome
+         IsNotFailure
             ? Failable<TValue, TFail>.Success( IsNone ? funcForNone() : _value )
             : Failable<TValue, TFail>.Failure(  _failure );
 
@@ -519,7 +519,7 @@ namespace SIEDA.Monadic
       /// containing <paramref name="excOnFailure"/>.
       /// </returns>
       public EFailable<TValue> OrToEFailable( TValue orValue, Exception excOnFailure ) =>
-         IsSome
+         IsNotFailure
             ? EFailable<TValue>.Success( IsNone ? orValue : _value )
             : EFailable<TValue>.Failure( excOnFailure );
 
@@ -540,7 +540,7 @@ namespace SIEDA.Monadic
       /// containing the result of <paramref name="funcForFailure"/>.
       /// </returns>
       public EFailable<TValue> OrToEFailable( Func<TValue> funcForNone, Func<TFail, Exception> funcForFailure ) =>
-         IsSome
+         IsNotFailure
             ? EFailable<TValue>.Success( IsNone ? funcForNone() : _value )
             : EFailable<TValue>.Failure( funcForFailure( _failure ) );
 
