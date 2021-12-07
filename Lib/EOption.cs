@@ -29,6 +29,29 @@ namespace SIEDA.Monadic
       /// <summary> Empty instance, no value present, failure absent. </summary>
       public static readonly EOption<TValue> None = new EOption<TValue>( OptType.None, default, default );
 
+      /// <summary>
+      /// Creates an appropriate <see cref="EFailable{TValue}"/> wrapping the result of <paramref name="toExecute"/> or the exception that method threw.
+      /// </summary>
+      /// <param name="toExecute">Function executed and wrapped by this monadic instance.</param>
+      /// <exception cref="OptionFromWrappedConstructionException">
+      /// if <paramref name="toExecute"/> == <see langword="null"/>.
+      /// </exception>
+      public static EOption<TValue> Wrapping( Func<Maybe<TValue>> toExecute )
+      {
+         if( ReferenceEquals( toExecute, null ) )
+         {
+            throw new OptionFromWrappedConstructionException( typeValue: typeof( TValue ) );
+         }
+         try
+         {
+            return toExecute().ToEOption();
+         }
+         catch( Exception e )
+         {
+            return Failure( e );
+         }
+      }
+
       /// <summary> Creates an <see cref="EOption{TValue}"/> with value <paramref name="value"/>. </summary>
       /// <exception cref="OptionSomeConstructionException"> if <paramref name="value"/> == <see langword="null"/>. </exception>
       public static EOption<TValue> Some( TValue value )
