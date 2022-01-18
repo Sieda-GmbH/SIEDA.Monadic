@@ -33,7 +33,7 @@
       <NoWarn>CS1591,IDE0011,IDE0063</NoWarn>
       
       <!-- for details, see LICENSE-file in this repository -->
-      <Copyright>Copyright © 2020-2021 SIEDA GmbH Kaiserslautern</Copyright>
+      <Copyright>Copyright © 2020-2022 SIEDA GmbH Kaiserslautern</Copyright>
 
       <!-- signing compiled output -->
       <SignAssembly>true</SignAssembly>
