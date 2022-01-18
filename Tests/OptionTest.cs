@@ -376,6 +376,80 @@ namespace SIEDA.MonadicTests
 
       #endregion Subtypes
 
+      #region Flatten
+      [Test]
+      public void Flatten_Some()
+      {
+         var a = Option<string, int>.Some( "hallo" );
+         var b = Option<Option<string, int>, int>.Some( Option<string, int>.Some( "hallo" ) );
+         var c = Option<Option<string, int>, int>.Some( Option<string, int>.None );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_None()
+      {
+         var a = Option<string, int>.None;
+         var b = Option<Option<string, int>, int>.Some( Option<string, int>.None );
+         var c = Option<Option<string, int>, int>.Some( Option<string, int>.Failure( 42 ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_Failure()
+      {
+         var a = Option<string, int>.Failure( 42 );
+         var b = Option<Option<string, int>, int>.Some( Option<string, int>.Failure( 42 ) );
+         var c = Option<Option<string, int>, int>.Some( Option<string, int>.None );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_DifferentFailType_Some()
+      {
+         var a = Option<string, int>.Some( "hallo" );
+         var b = Option<Option<string, string>, int>.Some( Option<string, string>.Some( "hallo" ) );
+         var c = Option<Option<string, string>, int>.Some( Option<string, string>.None );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_DifferentFailType_None()
+      {
+         var a = Option<string, int>.None;
+         var b = Option<Option<string, string>, int>.Some( Option<string, string>.None );
+         var c = Option<Option<string, string>, int>.Some( Option<string, string>.Failure( "error" ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_DifferentFailType_Failure()
+      {
+         var a = Option<string, int>.Failure( 42 );
+         var b = Option<Option<string, string>, int>.Some( Option<string, string>.Failure( "error" ) );
+         var c = Option<Option<string, string>, int>.Some( Option<string, string>.None );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.Not.EqualTo( c ) );
+      }
+      #endregion Flatten
+
       #region Map and Nesting
       [Test]
       [Description( "Die Map-Operation wird auf Erfolge angewendet." )]

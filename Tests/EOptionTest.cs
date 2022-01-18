@@ -425,9 +425,45 @@ namespace SIEDA.MonadicTests
 
          Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );
       }
-
-
       #endregion Subtypes
+
+      #region Flatten
+      [Test]
+      public void Flatten_Some()
+      {
+         var a = EOption<string>.Some( "hallo" );
+         var b = EOption<EOption<string>>.Some( EOption<string>.Some( "hallo" ) );
+         var c = EOption<EOption<string>>.Some( EOption<string>.None );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_None()
+      {
+         var a = EOption<string>.None;
+         var b = EOption<EOption<string>>.Some( EOption<string>.None );
+         var c = EOption<EOption<string>>.Some( EOption<string>.Failure( new Exception("") ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_Failure()
+      {
+         var a = EOption<string>.Failure( new Exception( "" ) );
+         var b = EOption<EOption<string>>.Some( a ); //use same instance so that Exception.Equals() returns true
+         var c = EOption<EOption<string>>.Some( EOption<string>.None );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+      #endregion Flatten
 
       #region Map and Nesting
       [Test]

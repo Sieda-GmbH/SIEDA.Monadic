@@ -319,6 +319,32 @@ namespace SIEDA.MonadicTests
 
       #endregion Subtypes
 
+      #region Flatten
+      [Test]
+      public void Flatten_Some()
+      {
+         var a = EFailable<string>.Success( "hallo" );
+         var b = EFailable<EFailable<string>>.Success( EFailable<string>.Success( "hallo" ) );
+         var c = EFailable<EFailable<string>>.Success( EFailable<string>.Failure( new Exception( "" ) ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_Failure()
+      {
+         var a = EFailable<string>.Failure( new Exception( "" ) );
+         var b = EFailable<EFailable<string>>.Success( a ); //use same instance so that Exception.Equals() returns true
+         var c = EFailable<EFailable<string>>.Success( EFailable<string>.Success( "whatever" ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+      #endregion Flatten
+
       #region Map and Nesting
       [Test]
       [Description( "Die Map-Operation wird auf Erfolge angewendet." )]

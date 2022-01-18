@@ -110,6 +110,34 @@ namespace SIEDA.Monadic
 
       #region Converters
 
+      //no 'ToMaybe()', that really makes no sense for this class!
+
+      /// <summary>
+      /// Converts this instance into a <see cref="Failable{TValue, TFail}"/>, which is then either a failure if
+      /// <see cref="IsSuccess"/> == <see langword="false"/> or a success containing <paramref name="valueOnSuccess"/>
+      /// otherwise.
+      /// </summary>
+      /// <param name="valueOnSuccess"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>.
+      public Failable<T, TFail> ToFailable<T>( T valueOnSuccess ) => IsSuccess ? Failable<T, TFail>.Success( valueOnSuccess ) : Failable<T, TFail>.Failure( _error );
+
+      /// <summary>
+      /// Converts this instance into a <see cref="EFailable{TValue}"/>, which is then either a failure containing <paramref name="error"/> if
+      /// <see cref="IsSuccess"/> == <see langword="false"/> or a success containing <paramref name="valueOnSuccess"/>
+      /// otherwise.
+      /// </summary>
+      /// <param name="valueOnSuccess"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>
+      /// <param name="error"> value to employ in case <see cref="IsSuccess"/> == <see langword="false"/>. </param>
+      public EFailable<T> ToEFailable<T>( T valueOnSuccess, Exception error ) => IsSuccess ? EFailable<T>.Success( valueOnSuccess ) : EFailable<T>.Failure( error );
+
+      /// <summary>
+      /// Converts this instance into a <see cref="EFailable{TValue}"/>, which is then either a failure containing the result of <paramref name="func"/> if
+      /// <see cref="IsSuccess"/> == <see langword="false"/> or a success containing <paramref name="valueOnSuccess"/>
+      /// otherwise.
+      /// </summary>
+      /// <param name="valueOnSuccess"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>
+      /// <param name="func"> function computing the value to employ in case <see cref="IsSuccess"/> == <see langword="false"/>. </param>
+      public EFailable<T> ToEFailable<T>( T valueOnSuccess, Func<TFail, Exception> func ) => IsSuccess ? EFailable<T>.Success( valueOnSuccess ) : EFailable<T>.Failure( func( _error ) );
+
       /// <summary>
       /// Converts this instance into a <see cref="Option{Object, TFail}"/>, which is either a
       /// failure or empty (but never defined).

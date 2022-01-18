@@ -291,6 +291,52 @@ namespace SIEDA.MonadicTests
 
       #endregion Subtypes
 
+      #region Flatten
+      [Test]
+      public void Flatten_Success()
+      {
+         var a = Failable<string, int>.Success( "hallo" );
+         var b = Failable<Failable<string, int>, int>.Success( Failable<string, int>.Success( "hallo" ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+      }
+
+      [Test]
+      public void Flatten_Failure()
+      {
+         var a = Failable<string, int>.Failure( 42 );
+         var b = Failable<Failable<string, int>, int>.Success( Failable<string, int>.Failure( 42 ) );
+         var c = Failable<Failable<string, int>, int>.Success( Failable<string, int>.Success( "whatever" ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.EqualTo( a ) );
+         Assert.That( b.Flatten(), Is.Not.EqualTo( c ) );
+      }
+
+      [Test]
+      public void Flatten_DifferentFailType_Success()
+      {
+         var a = Failable<string, int>.Success( "hallo" );
+         var b = Failable<Failable<string, string>, int>.Success( Failable<string, string>.Success( "hallo" ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.EqualTo( a ) );
+      }
+
+      [Test]
+      public void Flatten_DifferentFailType_Failure()
+      {
+         var a = Failable<string, int>.Failure( 42 );
+         var b = Failable<Failable<string, string>, int>.Success( Failable<string, string>.Failure( "error" ) );
+         var c = Failable<Failable<string, string>, int>.Success( Failable<string, string>.Success( "whatever" ) );
+
+         Assert.That( b, Is.Not.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.EqualTo( a ) );
+         Assert.That( b.Flatten( ( s ) => 42 ), Is.Not.EqualTo( c ) );
+      }
+      #endregion Flatten
+
       #region Map and Nesting
       [Test]
       [Description( "Die Map-Operation wird auf Erfolge angewendet." )]

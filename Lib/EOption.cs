@@ -30,7 +30,7 @@ namespace SIEDA.Monadic
       public static readonly EOption<TValue> None = new EOption<TValue>( OptType.None, default, default );
 
       /// <summary>
-      /// Creates an appropriate <see cref="EFailable{TValue}"/> wrapping the result of <paramref name="toExecute"/> or the exception that method threw.
+      /// Creates an appropriate <see cref="EOption{TValue}"/> wrapping the result of <paramref name="toExecute"/> or the exception that method threw.
       /// </summary>
       /// <param name="toExecute">Function executed and wrapped by this monadic instance.</param>
       /// <exception cref="OptionFromWrappedConstructionException">
@@ -45,6 +45,30 @@ namespace SIEDA.Monadic
          try
          {
             return toExecute().ToEOption();
+         }
+         catch( Exception e )
+         {
+            return Failure( e );
+         }
+      }
+
+      /// <summary>
+      /// <para>Creates an appropriate <see cref="EOption{TValue}"/> wrapping the result of <paramref name="toExecute"/> or the exception that method threw.</para>
+      /// <para>Appropriate, in this context, means that a <see cref="EOption{TValue}.None"/> is returned if <paramref name="toExecute"/> returns <see langword="null"/>, be aware of that!</para>
+      /// </summary>
+      /// <param name="toExecute">Function executed and wrapped by this monadic instance.</param>
+      /// <exception cref="OptionFromWrappedConstructionException">
+      /// if <paramref name="toExecute"/> == <see langword="null"/>.
+      /// </exception>
+      public static EOption<TValue> Wrapping( Func<TValue> toExecute )
+      {
+         if( ReferenceEquals( toExecute, null ) )
+         {
+            throw new OptionFromWrappedConstructionException( typeValue: typeof( TValue ) );
+         }
+         try
+         {
+            return From( toExecute() );
          }
          catch( Exception e )
          {

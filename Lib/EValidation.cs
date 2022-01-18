@@ -137,10 +137,19 @@ namespace SIEDA.Monadic
 
       #region Converters
 
+      //no 'ToMaybe()', that really makes no sense for this class!
+
+      /// <summary>
+      /// Converts this instance into a <see cref="EFailable{TValue}"/>, which is then either a failure containing this instance's failure if
+      /// <see cref="IsSuccess"/> == <see langword="false"/> or a success containing <paramref name="valueOnSuccess"/>
+      /// otherwise.
+      /// </summary>
+      /// <param name="valueOnSuccess"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>
+      public EFailable<T> ToEFailable<T>( T valueOnSuccess ) => IsSuccess ? EFailable<T>.Success( valueOnSuccess ) : EFailable<T>.Failure( _failure );
+
       /// <summary> Converts this instance into an appropriate <see cref="Validation{Exception}"/>. </summary>
       /// <returns> <see cref="Validation{Exception}"/>. </returns>
-      public Validation<Exception> ToValidation() =>
-         IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
+      public Validation<Exception> ToValidation() => IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
 
       /// <summary> Converts this instance into a <see cref="EOption{Object}"/>, which is either a failure or empty (but never defined). </summary>
       /// <returns> <see cref="EOption{Object}"/> with its some-type being 'object' and its failure-type being <see cref="Exception"/>. </returns>
