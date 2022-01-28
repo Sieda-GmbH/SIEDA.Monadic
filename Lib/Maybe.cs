@@ -1,5 +1,5 @@
 ﻿using System;
-using Monadic.SwitchCase;
+using SIEDA.Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
 {

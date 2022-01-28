@@ -2,7 +2,7 @@
 using SIEDA.MonadicTests.HelperClass;
 using NUnit.Framework;
 using SIEDA.Monadic;
-using Monadic.SwitchCase;
+using SIEDA.Monadic.SwitchCase;
 
 namespace SIEDA.MonadicTests
 {

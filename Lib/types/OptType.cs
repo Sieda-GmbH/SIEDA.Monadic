@@ -1,4 +1,4 @@
-﻿namespace Monadic.SwitchCase
+﻿namespace SIEDA.Monadic.SwitchCase
 {
    public enum OptType
    {

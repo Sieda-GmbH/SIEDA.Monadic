@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using Monadic.SwitchCase;
+using SIEDA.Monadic.SwitchCase;
 
 namespace SIEDA.Monadic
 {
