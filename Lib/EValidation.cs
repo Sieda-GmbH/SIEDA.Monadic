@@ -34,10 +34,7 @@ namespace SIEDA.Monadic
       /// <exception cref="ValidationFromWrappedConstructionException"> if <paramref name="toExecute"/> == <see langword="null"/>. </exception>
       public static EValidation Wrapping<U>( Func<U> toExecute )
       {
-         if( ReferenceEquals( toExecute, null ) )
-         {
-            throw new ValidationFromWrappedConstructionException();
-         }
+         if( ReferenceEquals( toExecute, null ) ) throw new ValidationFromWrappedConstructionException();
          try
          {
             toExecute();
@@ -56,10 +53,7 @@ namespace SIEDA.Monadic
       /// <exception cref="ValidationFromWrappedConstructionException"> if <paramref name="toExecute"/> == <see langword="null"/>. </exception>
       public static EValidation Wrapping( Action toExecute )
       {
-         if( ReferenceEquals( toExecute, null ) )
-         {
-            throw new ValidationFromWrappedConstructionException();
-         }
+         if( ReferenceEquals( toExecute, null ) ) throw new ValidationFromWrappedConstructionException();
          try
          {
             toExecute();
@@ -78,11 +72,7 @@ namespace SIEDA.Monadic
       /// <exception cref="ValidationFailureConstructionException"> if <paramref name="failure"/> == <see langword="null"/>. </exception>
       public static EValidation Failure( Exception failure )
       {
-         if( ReferenceEquals( failure, null ) )
-         {
-            throw new ValidationFailureConstructionException( typeFailure: typeof( Exception ) );
-         }
-
+         if( ReferenceEquals( failure, null ) ) throw new ValidationFailureConstructionException( typeFailure: typeof( Exception ) );
          return new EValidation( VldType.Failure, failure );
       }
 
@@ -177,13 +167,30 @@ namespace SIEDA.Monadic
       /// <see cref="Exception"/> internally being <see langword="false"/>.</para>
       /// <para>Supports cross-class checks with <see cref="Validation{Exception}"/> following the same semantics as above!</para>
       /// </summary>
-      public override bool Equals( object obj ) =>
-            ( ( obj is EValidation otherE )
-            && ( IsSuccess == otherE.IsSuccess )
-            && ( IsSuccess || _failure == otherE.FailureOrThrow() ) )
-         || ( ( obj is Validation<Exception> otherV )
-            && ( IsSuccess == otherV.IsSuccess )
-            && ( IsSuccess || _failure == otherV.FailureOrThrow() ) );
+      public override bool Equals( object obj )
+      {
+         if( obj is EValidation otherE )
+         {
+            if( Enum != otherE.Enum ) return false;
+            if( IsSuccess ) return true;
+            else
+            {
+               var otherFail = otherE.FailureOrThrow();
+               return ReferenceEquals( otherFail, _failure );
+            }
+         }
+         else if( obj is Validation<Exception> otherV )
+         {
+            if( Enum != otherV.Enum ) return false;
+            if( IsSuccess ) return true;
+            else
+            {
+               var otherFail = otherV.FailureOrThrow();
+               return ReferenceEquals( otherFail, _failure );
+            }
+         }
+         else return false;
+      }
 
       /// <summary>
       /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this instance's value, be it a "success" or a "failure".

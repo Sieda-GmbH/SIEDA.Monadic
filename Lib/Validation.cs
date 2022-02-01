@@ -20,7 +20,7 @@ namespace SIEDA.Monadic
    {
       #region State
 
-      private readonly TFail _error;
+      private readonly TFail _failure;
       private readonly VldType _type;
 
       #endregion State
@@ -41,17 +41,14 @@ namespace SIEDA.Monadic
       /// </exception>
       public static Validation<TFail> Failure( TFail failure )
       {
-         if( ReferenceEquals( failure, null ) )
-         {
-            throw new ValidationFailureConstructionException( typeFailure: typeof( TFail ) );
-         }
+         if( ReferenceEquals( failure, null ) ) throw new ValidationFailureConstructionException( typeFailure: typeof( TFail ) );
          return new Validation<TFail>( VldType.Failure, failure );
       }
 
       private Validation( VldType vldType, TFail failure )
       {
          _type = vldType;
-         _error = failure;
+         _failure = failure;
       }
 
       #endregion Construction
@@ -79,7 +76,7 @@ namespace SIEDA.Monadic
       /// </summary>
       /// <exception cref="ValidationNoFailureException"/>
       public TFail FailureOrThrow() =>
-         IsFailure ? _error : throw new ValidationNoFailureException( typeof( TFail ) );
+         IsFailure ? _failure : throw new ValidationNoFailureException( typeof( TFail ) );
 
       /// <summary>
       /// Writes this instance's "failed" value into the <see langword="out"/> parameter <paramref
@@ -90,7 +87,7 @@ namespace SIEDA.Monadic
       /// <param name="value"><see langword="out"/> parameter for this instance's "failed" value.</param>
       public bool TryGetFailure( out TFail value )
       {
-         value = IsFailure ? _error : default;
+         value = IsFailure ? _failure : default;
          return IsFailure;
       }
 
@@ -105,7 +102,7 @@ namespace SIEDA.Monadic
       /// </summary>
       /// <typeparam name="TNewFail">The type of the new "failed" value.</typeparam>
       /// <param name="func">The delegate that provides the new failure.</param>
-      public Validation<TNewFail> FailMap<TNewFail>( Func<TFail, TNewFail> func ) => IsSuccess ? Validation<TNewFail>.Success : Validation<TNewFail>.Failure( func( _error ) );
+      public Validation<TNewFail> FailMap<TNewFail>( Func<TFail, TNewFail> func ) => IsSuccess ? Validation<TNewFail>.Success : Validation<TNewFail>.Failure( func( _failure ) );
       #endregion Mapping
 
       #region Converters
@@ -118,7 +115,7 @@ namespace SIEDA.Monadic
       /// otherwise.
       /// </summary>
       /// <param name="valueOnSuccess"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>.
-      public Failable<T, TFail> ToFailable<T>( T valueOnSuccess ) => IsSuccess ? Failable<T, TFail>.Success( valueOnSuccess ) : Failable<T, TFail>.Failure( _error );
+      public Failable<T, TFail> ToFailable<T>( T valueOnSuccess ) => IsSuccess ? Failable<T, TFail>.Success( valueOnSuccess ) : Failable<T, TFail>.Failure( _failure );
 
       /// <summary>
       /// Converts this instance into a <see cref="EFailable{TValue}"/>, which is then either a failure containing <paramref name="error"/> if
@@ -136,7 +133,7 @@ namespace SIEDA.Monadic
       /// </summary>
       /// <param name="valueOnSuccess"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>
       /// <param name="func"> function computing the value to employ in case <see cref="IsSuccess"/> == <see langword="false"/>. </param>
-      public EFailable<T> ToEFailable<T>( T valueOnSuccess, Func<TFail, Exception> func ) => IsSuccess ? EFailable<T>.Success( valueOnSuccess ) : EFailable<T>.Failure( func( _error ) );
+      public EFailable<T> ToEFailable<T>( T valueOnSuccess, Func<TFail, Exception> func ) => IsSuccess ? EFailable<T>.Success( valueOnSuccess ) : EFailable<T>.Failure( func( _failure ) );
 
       /// <summary>
       /// Converts this instance into a <see cref="Option{Object, TFail}"/>, which is either a
@@ -146,7 +143,7 @@ namespace SIEDA.Monadic
       /// <see cref="Option{Object, TFail}"/> with its some-type being 'object' and its failure-type
       /// being <typeparamref name="TFail"/>.
       /// </returns>
-      public Option<object, TFail> ToOption() => IsSuccess ? Option<object, TFail>.None : Option<object, TFail>.Failure( _error );
+      public Option<object, TFail> ToOption() => IsSuccess ? Option<object, TFail>.None : Option<object, TFail>.Failure( _failure );
 
       /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="EOption{TValue}"/>.</para>
@@ -164,7 +161,7 @@ namespace SIEDA.Monadic
       /// <returns><see cref="EOption{Object}.None"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
       /// this instance and <see cref="EOption{Object}.Failure(Exception)"/> containing the result of <paramref name="func"/> applied
       /// to this instance's failure-value otherwise.</returns>
-      public EOption<object> ToEOption( Func<TFail, Exception> func ) => IsSuccess ? EOption<object>.None : EOption<object>.Failure( func( _error ) );
+      public EOption<object> ToEOption( Func<TFail, Exception> func ) => IsSuccess ? EOption<object>.None : EOption<object>.Failure( func( _failure ) );
 
       /// <summary>
       /// <para>Converts this instance into an appropriate <see cref="EValidation"/>.</para>
@@ -182,7 +179,7 @@ namespace SIEDA.Monadic
       /// <returns><see cref="EValidation.Success"/> if <see cref="IsSuccess"/> == <see langword="true"/> for
       /// this instance and <see cref="EValidation.Failure(Exception)"/> containing the result of <paramref name="func"/> applied
       /// to this instance's failure-value otherwise.</returns>
-      public EValidation ToEValidation( Func<TFail, Exception> func ) => IsSuccess ? EValidation.Success : EValidation.Failure( func( _error ) );
+      public EValidation ToEValidation( Func<TFail, Exception> func ) => IsSuccess ? EValidation.Success : EValidation.Failure( func( _failure ) );
 
       #endregion Converters
 
@@ -195,7 +192,7 @@ namespace SIEDA.Monadic
       public override string ToString() =>
          IsSuccess
          ? $"[Validation<{typeof( TFail ).Name}>.Success]"
-         : $"[Validation<{typeof( TFail ).Name}>.Failure: { _error }]";
+         : $"[Validation<{typeof( TFail ).Name}>.Failure: { _failure }]";
 
 
       /// <summary>
@@ -204,19 +201,35 @@ namespace SIEDA.Monadic
       /// langword="true"/> the two instances' "failed" values in case of <see cref="IsSuccess"/>
       /// being <see langword="false"/>.</para>
       /// <para>Respects type, a <see cref="Validation{A}"/> and a <see cref="Validation{B}"/> are never equal!</para>
-      /// <para>Supports cross-class checks with <see cref="EOption{TValue}"/>, calling <see cref="EOption{TValue}.Equals(object)"/>-method.</para>
+      /// <para>Supports cross-class checks with <see cref="EValidation"/>, calling <see cref="EValidation.Equals(object)"/>-method.</para>
       /// </summary>
-      public override bool Equals( object obj ) =>
-            ( ( obj is Validation<TFail> otherV )
-            && ( IsSuccess == otherV.IsSuccess )
-            && ( IsSuccess || _error.Equals( otherV.FailureOrThrow() ) ) )
-         || ( obj is EValidation otherE && otherE.Equals( this ) );
+      public override bool Equals( object obj )
+      {
+         if( obj is Validation<TFail> otherF )
+         {
+            if( Enum != otherF.Enum ) return false;
+            if( IsSuccess ) return true;
+            else
+            {
+               var otherFail = otherF.FailureOrThrow();
+               if( _failure is string _strFail && otherFail is string otherStrFail )
+                  return _strFail.Equals( otherStrFail, StringComparison.Ordinal );
+               else
+                  return _failure.Equals( otherFail );
+            }
+         }
+         else if( obj is EValidation otherE )
+            return otherE.Equals( this ); //only maintain one E-Equals-Implementation!
+         else
+            return false;
+      }
+
 
       /// <summary>
       /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this
       /// instance's value, be it a "success" or a "failure".
       /// </summary>
-      public override int GetHashCode() => IsSuccess ? int.MaxValue : _error.GetHashCode();
+      public override int GetHashCode() => IsSuccess ? int.MaxValue : _failure.GetHashCode();
 
       #endregion Object
    }

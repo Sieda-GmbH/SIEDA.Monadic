@@ -104,7 +104,14 @@ namespace SIEDA.Monadic
       /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/> <c>and</c> the <see cref="object.Equals(object)"/> override of this instance's value
       /// returns <see langword="true"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool Is( TValue value ) => IsSome && _value.Equals( value );
+      public bool Is( TValue value )
+      {
+         if( !IsSome ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return _strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return _value.Equals( value );
+      }
 
       /// <summary> <see cref="Maybe{T}"/>-compatible inequality-check for values. </summary>
       /// <param name="value">Value to check for inequality.</param>
@@ -112,7 +119,14 @@ namespace SIEDA.Monadic
       /// <see langword="true"/> iff <see cref="IsSome"/> == <see langword="true"/> <c>and</c> the
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see langword="false"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool IsNot( TValue value ) => IsSome && !_value.Equals( value );
+      public bool IsNot( TValue value )
+      {
+         if( !IsSome ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return !_strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return !_value.Equals( value );
+      }
 
       /// <summary> Monadic predicate check for values. </summary>
       /// <param name="predicate">The delegate that checks the predicate.</param>
@@ -240,7 +254,7 @@ namespace SIEDA.Monadic
       public override bool Equals( object obj ) =>
          ( obj is Maybe<TValue> other )
          && ( IsSome == other.IsSome )
-         && ( IsNone || _value.Equals( other._value ) );
+         && ( IsNone || Is( other._value ) );
 
       /// <summary>
       /// <para> Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this instance's value if any. </para>

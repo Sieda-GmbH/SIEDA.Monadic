@@ -31,10 +31,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static EFailable<TValue> Wrapping( Func<TValue> toExecute )
       {
-         if( ReferenceEquals( toExecute, null ) )
-         {
-            throw new FailableFromWrappedConstructionException( typeValue: typeof( TValue ) );
-         }
+         if( ReferenceEquals( toExecute, null ) ) throw new FailableFromWrappedConstructionException( typeValue: typeof( TValue ) );
          try
          {
             return Success( toExecute() );
@@ -51,11 +48,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static EFailable<TValue> Success( TValue value )
       {
-         if( ReferenceEquals( value, null ) )
-         {
-            throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
-
+         if( ReferenceEquals( value, null ) ) throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          return new EFailable<TValue>( FlbType.Success, value, default );
       }
 
@@ -68,11 +61,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static EFailable<TValue> Success<T>( T? nullableValue ) where T : struct, TValue
       {
-         if( !nullableValue.HasValue )
-         {
-            throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
-
+         if( !nullableValue.HasValue ) throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          return new EFailable<TValue>( FlbType.Success, nullableValue.Value, default );
       }
 
@@ -85,11 +74,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static EFailable<TValue> Failure( Exception failure )
       {
-         if( ReferenceEquals( failure, null ) )
-         {
-            throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
-
+         if( ReferenceEquals( failure, null ) ) throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          return new EFailable<TValue>( FlbType.Failure, default, failure );
       }
 
@@ -216,7 +201,14 @@ namespace SIEDA.Monadic
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
       /// langword="true"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool Is( TValue value ) => IsSuccess && _value.Equals( value );
+      public bool Is( TValue value )
+      {
+         if( !IsSuccess ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return _strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return _value.Equals( value );
+      }
 
       /// <summary>
       /// Monadic predicate check for "successful" values.
@@ -392,20 +384,35 @@ namespace SIEDA.Monadic
       /// </para>
       /// <para>
       /// - if <see cref="IsSuccess"/> being <see langword="false"/>: result is <see langword="true"/>
-      /// if and only if both instances reference the same <see cref="Exception"/> internally
+      /// if and only if both instances reference the same <see cref="Exception"/>-instance internally
       /// </para>
       /// <para>Respects type, a <see cref="EFailable{A}"/> and a <see cref="EFailable{B}"/> are never equal!</para>
       /// <para>Supports cross-class checks with <see cref="Failable{TValue, Exception}"/> following the same semantics as above!</para>
       /// </summary>
-      public override bool Equals( object obj ) =>
-            ( ( obj is EFailable<TValue> otherEf )
-            && ( IsSuccess == otherEf.IsSuccess )
-            && ( IsFailure || _value.Equals( otherEf.OrThrow() ) )
-            && ( IsSuccess || _failure == otherEf.FailureOrThrow() ) )
-         || ( ( obj is Failable<TValue, Exception> otherF )
-            && ( IsSuccess == otherF.IsSuccess )
-            && ( IsFailure || _value.Equals( otherF.OrThrow() ) )
-            && ( IsSuccess || _failure == otherF.FailureOrThrow() ) );
+      public override bool Equals( object obj )
+      {
+         if( obj is EFailable<TValue> otherE )
+         {
+            if( Enum != otherE.Enum ) return false;
+            if( IsSuccess ) return Is( otherE.OrThrow() );
+            else
+            {
+               var otherFail = otherE.FailureOrThrow();
+               return ReferenceEquals( otherFail, _failure );
+            }
+         }
+         else if( obj is Failable<TValue, Exception> otherF )
+         {
+            if( Enum != otherF.Enum ) return false;
+            if( IsSuccess ) return Is( otherF.OrThrow() );
+            else
+            {
+               var otherFail = otherF.FailureOrThrow();
+               return ReferenceEquals( otherFail, _failure );
+            }
+         }
+         else return false;
+      }
 
       /// <summary>
       /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this

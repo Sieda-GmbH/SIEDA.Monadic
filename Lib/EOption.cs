@@ -38,10 +38,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static EOption<TValue> Wrapping( Func<Maybe<TValue>> toExecute )
       {
-         if( ReferenceEquals( toExecute, null ) )
-         {
-            throw new OptionFromWrappedConstructionException( typeValue: typeof( TValue ) );
-         }
+         if( ReferenceEquals( toExecute, null ) ) throw new OptionFromWrappedConstructionException( typeValue: typeof( TValue ) );
          try
          {
             return toExecute().ToEOption();
@@ -62,10 +59,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static EOption<TValue> Wrapping( Func<TValue> toExecute )
       {
-         if( ReferenceEquals( toExecute, null ) )
-         {
-            throw new OptionFromWrappedConstructionException( typeValue: typeof( TValue ) );
-         }
+         if( ReferenceEquals( toExecute, null ) ) throw new OptionFromWrappedConstructionException( typeValue: typeof( TValue ) );
          try
          {
             return From( toExecute() );
@@ -80,11 +74,7 @@ namespace SIEDA.Monadic
       /// <exception cref="OptionSomeConstructionException"> if <paramref name="value"/> == <see langword="null"/>. </exception>
       public static EOption<TValue> Some( TValue value )
       {
-         if( ReferenceEquals( value, null ) )
-         {
-            throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
-
+         if( ReferenceEquals( value, null ) ) throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          return new EOption<TValue>( OptType.Some, value, default );
       }
 
@@ -92,11 +82,7 @@ namespace SIEDA.Monadic
       /// <exception cref="OptionSomeConstructionException"> if <paramref name="nullableValue"/> == <see langword="null"/> (has no value). </exception>
       public static EOption<TValue> Some<T>( T? nullableValue ) where T : struct, TValue
       {
-         if( !nullableValue.HasValue )
-         {
-            throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
-
+         if( !nullableValue.HasValue ) throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          return new EOption<TValue>( OptType.Some, nullableValue.Value, default );
       }
 
@@ -104,26 +90,20 @@ namespace SIEDA.Monadic
       /// <para> Creates and returns an <see cref="EOption{TValue}"/> with value <paramref name="value"/> if <paramref name="value"/> != <see langword="null"/>. </para>
       /// <para> Returns <see cref="None"/> if <paramref name="value"/> == <see langword="null"/>. </para>
       /// </summary>
-      public static EOption<TValue> From( TValue value ) =>
-         ReferenceEquals( value, null ) ? None : new EOption<TValue>( OptType.Some, value, default );
+      public static EOption<TValue> From( TValue value ) => ReferenceEquals( value, null ) ? None : new EOption<TValue>( OptType.Some, value, default );
 
       /// <summary>
       /// <para> Creates and returns an <see cref="EOption{TValue}"/> with the value of the <see cref="Nullable{T}"/> <paramref name="nullableValue"/> if
       /// <paramref name="nullableValue"/> != <see langword="null"/> (has a value). </para>
       /// <para> Returns <see cref="None"/> if <paramref name="nullableValue"/> == <see langword="null"/> (has no value). </para>
       /// </summary>
-      public static EOption<TValue> From<T>( T? nullableValue ) where T : struct, TValue =>
-          nullableValue.HasValue ? new EOption<TValue>( OptType.Some, nullableValue.Value, default ) : None;
+      public static EOption<TValue> From<T>( T? nullableValue ) where T : struct, TValue => nullableValue.HasValue ? new EOption<TValue>( OptType.Some, nullableValue.Value, default ) : None;
 
       /// <summary> Creates an <see cref="Option{TValue, TFail}"/> with a <paramref name="failure"/>-value, which must not be <see langword="null"/>. </summary>
       /// <exception cref="OptionFailureConstructionException"> if <paramref name="failure"/> == <see langword="null"/>. </exception>
       public static EOption<TValue> Failure( Exception failure )
       {
-         if( ReferenceEquals( failure, null ) )
-         {
-            throw new OptionFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
-
+         if( ReferenceEquals( failure, null ) ) throw new OptionFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
          return new EOption<TValue>( OptType.Failure, default, failure );
       }
 
@@ -218,7 +198,14 @@ namespace SIEDA.Monadic
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
       /// langword="true"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool Is( TValue value ) => IsSome && _value.Equals( value );
+      public bool Is( TValue value )
+      {
+         if( !IsSome ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return _strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return _value.Equals( value );
+      }
 
       /// <summary> <see cref="EOption{TValue}"/>-compatible inequality-check for values. </summary>
       /// <param name="value">Value to check for equality.</param>
@@ -227,7 +214,14 @@ namespace SIEDA.Monadic
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
       /// langword="false"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool IsNot( TValue value ) => IsSome && !_value.Equals( value );
+      public bool IsNot( TValue value )
+      {
+         if( !IsSome ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return !_strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return !_value.Equals( value );
+      }
 
       /// <summary> Monadic predicate check for values. </summary>
       /// <param name="predicate">The delegate that checks the predicate.</param>
@@ -245,28 +239,16 @@ namespace SIEDA.Monadic
       private TValue ThrowNotSome()
       {
          // The return-type is just a hack, this method NEVER returns anything.
-         if( IsFailure )
-         {
-            throw new OptionFailureException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
-         else
-         {
-            throw new OptionNoneException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
-         }
+         if( IsFailure ) throw new OptionFailureException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
+         else throw new OptionNoneException( typeValue: typeof( TValue ), typeFailure: typeof( Exception ) );
       }
 
       private TValue ThrowNotSome( string customMessage )
       {
          // The return-type is just a hack, this method NEVER returns anything.
          #pragma warning disable CS0618 // Type or member is obsolete
-         if( IsFailure )
-         {
-            throw new OptionFailureException( customMessage: customMessage );
-         }
-         else
-         {
-            throw new OptionNoneException( customMessage: customMessage );
-         }
+         if( IsFailure ) throw new OptionFailureException( customMessage: customMessage );
+         else throw new OptionNoneException( customMessage: customMessage );
          #pragma warning restore CS0618
       }
 
@@ -540,17 +522,38 @@ namespace SIEDA.Monadic
       /// <para>Respects type, a <see cref="EOption{A}"/> and a <see cref="EOption{C}"/> are never equal!</para>
       /// <para>Supports cross-class checks with <see cref="Option{TValue, Exception}"/> following the same semantics as above!</para>
       /// </summary>
-      public override bool Equals( object obj ) =>
-            ( ( obj is EOption<TValue> otherE )
-            && ( IsSome == otherE.IsSome )
-            && ( IsNone == otherE.IsNone )
-            && ( IsNotSome || _value.Equals( otherE.OrThrow() ) )
-            && ( IsNotFailure || _failure == otherE.FailureOrThrow() ) )
-         || ( ( obj is Option<TValue, Exception> otherO )
-            && ( IsSome == otherO.IsSome )
-            && ( IsNone == otherO.IsNone )
-            && ( IsNotSome || _value.Equals( otherO.OrThrow() ) )
-            && ( IsNotFailure || _failure == otherO.FailureOrThrow() ) );
+      public override bool Equals( object obj )
+      {
+         if( obj is EOption<TValue> otherE )
+         {
+            if( Enum != otherE.Enum ) return false;
+            switch( Enum )
+            {
+               case OptType.Some: return Is( otherE.OrThrow() );
+               case OptType.Failure:
+               {
+                  var otherFail = otherE.FailureOrThrow();
+                  return ReferenceEquals( otherFail, _failure );
+               }
+               default: return true;
+            }
+         }
+         else if( obj is Option<TValue, Exception> otherO )
+         {
+            if( Enum != otherO.Enum ) return false;
+            switch( Enum )
+            {
+               case OptType.Some: return Is( otherO.OrThrow() );
+               case OptType.Failure:
+               {
+                  var otherFail = otherO.FailureOrThrow();
+                  return ReferenceEquals( otherFail, _failure );
+               }
+               default: return true;
+            }
+         }
+         else return false;
+      }
 
 
       /// <summary>

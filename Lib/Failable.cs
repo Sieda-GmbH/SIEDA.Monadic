@@ -32,11 +32,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static Failable<TValue, TFail> Success( TValue value )
       {
-         if( ReferenceEquals( value, null ) )
-         {
-            throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
-         }
-
+         if( ReferenceEquals( value, null ) ) throw new FailableSuccessConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          return new Failable<TValue, TFail>( FlbType.Success, value, default );
       }
 
@@ -66,11 +62,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static Failable<TValue, TFail> Failure( TFail failure )
       {
-         if( ReferenceEquals( failure, null ) )
-         {
-            throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
-         }
-
+         if( ReferenceEquals( failure, null ) ) throw new FailableFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          return new Failable<TValue, TFail>( FlbType.Failure, default, failure );
       }
 
@@ -190,7 +182,14 @@ namespace SIEDA.Monadic
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
       /// langword="true"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool Is( TValue value ) => IsSuccess && _value.Equals( value );
+      public bool Is( TValue value )
+      {
+         if( !IsSuccess ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return _strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return _value.Equals( value );
+      }
 
       /// <summary>
       /// Monadic predicate check for "successful" values.
@@ -521,12 +520,26 @@ namespace SIEDA.Monadic
       /// <para>Respects type, a <see cref="Failable{A, B}"/> and a <see cref="Failable{C,D}"/> are never equal!</para>
       /// <para>Supports cross-class checks with <see cref="EFailable{TValue}"/>, calling <see cref="EFailable{TValue}.Equals(object)"/>-method.</para>
       /// </summary>
-      public override bool Equals( object obj ) =>
-            ( ( obj is Failable<TValue, TFail> otherF )
-            && ( IsSuccess == otherF.IsSuccess )
-            && ( IsFailure || _value.Equals( otherF.OrThrow() ) )
-            && ( IsSuccess || _failure.Equals( otherF.FailureOrThrow() ) ) )
-         || ( obj is EFailable<TValue> otherE && otherE.Equals( this ) );
+      public override bool Equals( object obj )
+      {
+         if( obj is Failable<TValue, TFail> otherF )
+         {
+            if( Enum != otherF.Enum ) return false;
+            if( IsSuccess ) return Is( otherF.OrThrow() );
+            else
+            {
+               var otherFail = otherF.FailureOrThrow();
+               if( _failure is string _strFail && otherFail is string otherStrFail )
+                  return _strFail.Equals( otherStrFail, StringComparison.Ordinal );
+               else
+                  return _failure.Equals( otherFail );
+            }
+         }
+         else if( obj is EFailable<TValue> otherE )
+            return otherE.Equals( this ); //only maintain one E-Equals-Implementation!
+         else
+            return false;
+      }
 
       /// <summary>
       /// Custom implementation of <see cref="object.GetHashCode()"/>, wrapping a call to this

@@ -43,11 +43,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static Option<TValue, TFail> Some( TValue value )
       {
-         if( ReferenceEquals( value, null ) )
-         {
-            throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
-         }
-
+         if( ReferenceEquals( value, null ) ) throw new OptionSomeConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          return new Option<TValue, TFail>( OptType.Some, value, default );
       }
 
@@ -101,11 +97,7 @@ namespace SIEDA.Monadic
       /// </exception>
       public static Option<TValue, TFail> Failure( TFail failure )
       {
-         if( ReferenceEquals( failure, null ) )
-         {
-            throw new OptionFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
-         }
-
+         if( ReferenceEquals( failure, null ) ) throw new OptionFailureConstructionException( typeValue: typeof( TValue ), typeFailure: typeof( TFail ) );
          return new Option<TValue, TFail>( OptType.Failure, default, failure );
       }
 
@@ -230,7 +222,14 @@ namespace SIEDA.Monadic
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
       /// langword="true"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool Is( TValue value ) => IsSome && _value.Equals( value );
+      public bool Is( TValue value )
+      {
+         if( !IsSome ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return _strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return _value.Equals( value );
+      }
 
 
       /// <summary>
@@ -242,7 +241,14 @@ namespace SIEDA.Monadic
       /// <see cref="object.Equals(object)"/> override of this instance's value returns <see
       /// langword="false"/> for <paramref name="value"/>, otherwise <see langword="false"/>.
       /// </returns>
-      public bool IsNot( TValue value ) => IsSome && !_value.Equals( value );
+      public bool IsNot( TValue value )
+      {
+         if( !IsSome ) return false;
+         if( _value is string _strValue && value is string otherStrValue )
+            return !_strValue.Equals( otherStrValue, StringComparison.Ordinal );
+         else
+            return !_value.Equals( value );
+      }
 
       /// <summary>
       /// Monadic predicate check for values.
@@ -728,13 +734,28 @@ namespace SIEDA.Monadic
       /// <para>Respects type, a <see cref="Option{A, B}"/> and a <see cref="Option{C,D}"/> are never equal!</para>
       /// <para>Supports cross-class checks with <see cref="EOption{TValue}"/>, calling <see cref="EOption{TValue}.Equals(object)"/>-method.</para>
       /// </summary>
-      public override bool Equals( object obj ) =>
-         ( ( obj is Option<TValue, TFail> otherO )
-            && ( IsSome == otherO.IsSome )
-            && ( IsNone == otherO.IsNone )
-            && ( IsNotSome || _value.Equals( otherO.OrThrow() ) )
-            && ( IsNotFailure || _failure.Equals( otherO.FailureOrThrow() ) ) )
-         || ( obj is EOption<TValue> otherE && otherE.Equals( this ) );
+      public override bool Equals( object obj )
+      {
+         if( obj is Option<TValue, TFail> otherO )
+         {
+            if( Enum != otherO.Enum ) return false;
+            switch( Enum )
+            {
+               case OptType.Some: return Is( otherO.OrThrow() );
+               case OptType.Failure:
+               {
+                  var otherFail = otherO.FailureOrThrow();
+                  if( _failure is string _strFail && otherFail is string otherStrFail )
+                     return _strFail.Equals( otherStrFail, StringComparison.Ordinal );
+                  else
+                     return _failure.Equals( otherFail );
+               }
+               default: return true;
+            }
+         }
+         else if( obj is EOption<TValue> otherE ) return otherE.Equals( this ); //only maintain one E-Equals-Implementation!
+         else return false;
+      }
 
       /// <summary>
       /// <para>
