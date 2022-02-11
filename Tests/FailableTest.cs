@@ -388,6 +388,16 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      [Description( "FlatMap hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void FlatMapToDifferentType()
+      {
+         var one = Failable<int, bool>.Success( 1 );
+         Failable<string, bool> onePlusOne = one.FlatMap( i => Failable<string, bool>.Success( $"{i}+1=2" ) );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
+      [Test]
       [Description( "Die MapFailure-Operation wird auf Fehlschläge angewendet." )]
       public void MapFailure_Failure()
       {

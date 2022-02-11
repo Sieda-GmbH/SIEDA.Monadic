@@ -438,6 +438,16 @@ namespace SIEDA.MonadicTests
          Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
       }
 
+      [Test]
+      [Description( "FlatMap hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void FlatMapToDifferentType()
+      {
+         var one = EFailable<int>.Success( 1 );
+         EFailable<string> onePlusOne = one.FlatMap( i => EFailable<string>.Success( $"{i}+1=2" ) );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
       #endregion Map and Nesting
 
       #region Is

@@ -370,6 +370,16 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      [Description( "FlatMap hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void FlatMapToDifferentType()
+      {
+         var one = Maybe<int>.Some( 1 );
+         Maybe<string> onePlusOne = one.FlatMap( i => Maybe<string>.Some( $"{i}+1=2" ) );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
+      [Test]
       [Description( "Verschachtelte Fallunterscheidungen." )]
       public void NestingInOrValueComplex()
       {

@@ -500,6 +500,16 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      [Description( "FlatMap hat keine Probleme mit Typveränderung, weder zur Lauf- noch zur Compilezeit." )]
+      public void FlatMapToDifferentType()
+      {
+         var one = Option<int, bool>.Some( 1 );
+         Option<string, bool> onePlusOne = one.FlatMap( i => Option<string, bool>.Some( $"{i}+1=2" ) );
+
+         Assert.That( onePlusOne.OrThrow(), Is.EqualTo( "1+1=2" ) );
+      }
+
+      [Test]
       [Description( "Verschachtelte Fallunterscheidungen mit FlatMap." )]
       public void Map_NestingInFlatMap()
       {
