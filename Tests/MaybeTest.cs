@@ -87,6 +87,22 @@ namespace SIEDA.MonadicTests
          Assert.That( testValue.Enum, Is.EqualTo( MybType.Some ) );
       }
 
+      [Test]
+      [Description( "Nesting-Ebenen werden beachtet." )]
+      public void Nesting()
+      {
+         var someInnerSome = Maybe<Maybe<int>>.Some( Maybe<int>.Some( 123 ) );
+         var someInnerNone = Maybe<Maybe<int>>.Some( Maybe<int>.None );
+         var none = Maybe<Maybe<int>>.None;
+
+         Assert.That( someInnerSome.IsSome, Is.True );
+         Assert.That( someInnerNone.IsSome, Is.True );
+         Assert.That( someInnerSome.OrThrow().IsSome, Is.True );
+         Assert.That( someInnerNone.OrThrow().IsSome, Is.False );
+         Assert.That( none.IsNone, Is.True );
+      }
+
+
       #endregion Construction
 
       #region ToString

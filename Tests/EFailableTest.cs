@@ -24,6 +24,7 @@ namespace SIEDA.MonadicTests
          var testValue = EFailable<object>.Success( new object() );
 
          Assert.That( testValue.IsSuccess, Is.True );
+         Assert.That( testValue.IsFailure, Is.False );
          Assert.That( testValue.Enum, Is.EqualTo(FlbType.Success ) );
       }
 
@@ -37,8 +38,8 @@ namespace SIEDA.MonadicTests
       public void ConstructFailure_ErrorNotNull()
       {
          var testValue = EFailable<object>.Failure( new ArgumentException() );
-
          Assert.That( testValue.IsSuccess, Is.False );
+         Assert.That( testValue.IsFailure, Is.True );
       }
 
       [Test]
@@ -46,6 +47,7 @@ namespace SIEDA.MonadicTests
       {
          var testValue = EFailable<object>.Wrapping( () => new ArgumentException() );
          Assert.That( testValue.IsSuccess, Is.True );
+         Assert.That( testValue.IsFailure, Is.False );
       }
 
       [Test]
@@ -53,8 +55,25 @@ namespace SIEDA.MonadicTests
       {
          var testValue = EFailable<object>.Wrapping( () => throw new ArgumentException() );
          Assert.That( testValue.IsSuccess, Is.False );
+         Assert.That( testValue.IsFailure, Is.True );
       }
 
+      [Test]
+      [Description( "Nesting-Ebenen werden beachtet." )]
+      public void Nesting()
+      {
+         var successInnerSuccess = EFailable<EFailable<int>>.Success( EFailable<int>.Success( 123 ) );
+         var successInnerFail = EFailable<EFailable<int>>.Success( EFailable<int>.Failure( new ArgumentException() ) );
+         var failureInnerSuccess = EFailable<EFailable<int>>.Failure( new ArgumentException() );
+         var failureInnerFail = EFailable<EFailable<int>>.Failure( new ArgumentException() );
+
+         Assert.That( successInnerSuccess.IsSuccess, Is.True );
+         Assert.That( successInnerFail.IsSuccess, Is.True );
+         Assert.That( successInnerSuccess.OrThrow().IsSuccess, Is.True );
+         Assert.That( successInnerFail.OrThrow().IsSuccess, Is.False );
+         Assert.That( failureInnerSuccess.IsSuccess, Is.False );
+         Assert.That( failureInnerFail.IsSuccess, Is.False );
+      }
       #endregion Construction
 
       #region ToString

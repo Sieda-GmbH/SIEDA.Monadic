@@ -96,6 +96,34 @@ namespace SIEDA.MonadicTests
          Assert.That( x.IsFailure, Is.False );
       }
 
+
+      [Test]
+      [Description( "Nesting-Ebenen werden beachtet." )]
+      public void Nesting()
+      {
+         var someInnerSome = Option<Option<int, string>, string>.Some( Option<int, string>.Some( 123 ) );
+         var someInnerNone = Option<Option<int, string>, string>.Some( Option<int, string>.None );
+         var someInnerFail = Option<Option<int, string>, string>.Some( Option<int, string>.Failure( "hallo" ) );
+         var failureInnerSome = Option<int, Option<int, string>>.Failure( Option<int, string>.Some( 123 ) );
+         var failureInnerNone = Option<int, Option<int, string>>.Failure( Option<int, string>.None );
+         var failureInnerFail = Option<int, Option<int, string>>.Failure( Option<int, string>.Failure( "hallo" ) );
+         var none = Option<int, Option<int, string>>.None;
+
+         Assert.That( someInnerSome.IsSome, Is.True );
+         Assert.That( someInnerNone.IsSome, Is.True );
+         Assert.That( someInnerFail.IsSome, Is.True );
+         Assert.That( someInnerSome.OrThrow().IsSome, Is.True );
+         Assert.That( someInnerNone.OrThrow().IsNone, Is.True );
+         Assert.That( someInnerFail.OrThrow().IsFailure, Is.True );
+         Assert.That( failureInnerSome.IsFailure, Is.True );
+         Assert.That( failureInnerNone.IsFailure, Is.True );
+         Assert.That( failureInnerFail.IsFailure, Is.True );
+         Assert.That( failureInnerSome.FailureOrThrow().IsSome, Is.True );
+         Assert.That( failureInnerNone.FailureOrThrow().IsNone, Is.True );
+         Assert.That( failureInnerFail.FailureOrThrow().IsFailure, Is.True );
+         Assert.That( none.IsNone, Is.True );
+      }
+
       #endregion Construction
 
       #region ToString

@@ -24,6 +24,7 @@ namespace SIEDA.MonadicTests
          var testValue = Failable<object, object>.Success( new object() );
 
          Assert.That( testValue.IsSuccess, Is.True );
+         Assert.That( testValue.IsFailure, Is.False );
          Assert.That( testValue.Enum, Is.EqualTo( FlbType.Success ) );
       }
 
@@ -39,6 +40,7 @@ namespace SIEDA.MonadicTests
          var testValue = Failable<object, object>.Failure( new object() );
 
          Assert.That( testValue.IsSuccess, Is.False );
+         Assert.That( testValue.IsFailure, Is.True );
       }
 
       [Test]
@@ -52,6 +54,26 @@ namespace SIEDA.MonadicTests
          var x = Failable<Exception, string>.Success( new Exception() );
 
          Assert.That( x.IsSuccess, Is.True );
+         Assert.That( x.IsFailure, Is.False );
+      }
+
+      [Test]
+      [Description( "Nesting-Ebenen werden beachtet." )]
+      public void Nesting()
+      {
+         var successInnerSuccess = Failable<Failable<int, string>, string>.Success( Failable<int, string>.Success( 123 ) );
+         var successInnerFail = Failable<Failable<int, string>, string>.Success( Failable<int, string>.Failure( "hallo" ) );
+         var failureInnerSuccess = Failable<int, Failable<int, string>>.Failure( Failable<int, string>.Success( 123 ) );
+         var failureInnerFail = Failable<int, Failable<int, string>>.Failure( Failable<int, string>.Failure( "hallo" ) );
+
+         Assert.That( successInnerSuccess.IsSuccess, Is.True );
+         Assert.That( successInnerFail.IsSuccess, Is.True );
+         Assert.That( successInnerSuccess.OrThrow().IsSuccess, Is.True );
+         Assert.That( successInnerFail.OrThrow().IsSuccess, Is.False );
+         Assert.That( failureInnerSuccess.IsSuccess, Is.False );
+         Assert.That( failureInnerFail.IsSuccess, Is.False );
+         Assert.That( failureInnerSuccess.FailureOrThrow().IsSuccess, Is.True );
+         Assert.That( failureInnerFail.FailureOrThrow().IsSuccess, Is.False );
       }
 
       #endregion Construction

@@ -96,6 +96,27 @@ namespace SIEDA.MonadicTests
          Assert.That( x.IsFailure, Is.False );
       }
 
+
+      [Test]
+      [Description( "Nesting-Ebenen werden beachtet." )]
+      public void Nesting()
+      {
+         var someInnerSome = EOption<EOption<int>>.Some( EOption<int>.Some( 123 ) );
+         var someInnerNone = EOption<EOption<int>>.Some( EOption<int>.None );
+         var someInnerFail = EOption<EOption<int>>.Some( EOption<int>.Failure( new ArgumentException() ) );
+         var failure = EOption<EOption<int>>.Failure( new ArgumentException() );
+         var none = EOption<EOption<int>>.None;
+
+         Assert.That( someInnerSome.IsSome, Is.True );
+         Assert.That( someInnerNone.IsSome, Is.True );
+         Assert.That( someInnerFail.IsSome, Is.True );
+         Assert.That( someInnerSome.OrThrow().IsSome, Is.True );
+         Assert.That( someInnerNone.OrThrow().IsNone, Is.True );
+         Assert.That( someInnerFail.OrThrow().IsFailure, Is.True );
+         Assert.That( failure.IsFailure, Is.True );
+         Assert.That( none.IsNone, Is.True );
+      }
+
       #endregion Construction
 
       #region ToString
