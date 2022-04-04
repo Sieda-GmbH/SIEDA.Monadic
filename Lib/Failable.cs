@@ -249,14 +249,8 @@ namespace SIEDA.Monadic
       public TValue OrThrow( Exception e ) => IsSuccess ? _value : throw e;
 
       /// <summary>
-      /// <para>
-      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see
-      /// langword="true"/>, otherwise <paramref name="otherwiseFunc"/> applied to the "failed" value.
-      /// </para>
-      /// <para>
-      /// This method is exclusive to <see cref="Failable{TValue, TFail}"/> since it only makes
-      /// sense for this class. Its usage should be carefully considered.
-      /// </para>
+      /// Returns this instance's "successful" value if <see cref="IsSuccess"/> == <see langword="true"/>,
+      /// otherwise <paramref name="otherwiseFunc"/> applied to the "failed" value.
       /// </summary>
       /// <param name="otherwiseFunc">The desired value if this instance represents a "failure".</param>
       public TValue OrUse( Func<TFail, TValue> otherwiseFunc ) => IsSuccess ? _value : otherwiseFunc( _failure );

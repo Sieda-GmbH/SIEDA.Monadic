@@ -288,6 +288,15 @@ namespace SIEDA.Monadic
       public TValue OrThrow( Exception e ) => IsSome ? _value : throw e;
 
       /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSome"/> == <see langword="true"/>,
+      /// otherwise <paramref name="otherwiseFunc"/> applied to a <see cref="EValidation"/>
+      /// which encodes the presence of a "failed" value.
+      /// </summary>
+      /// <param name="otherwiseFunc">The desired value if this instance represents a "failure".</param>
+      public TValue OrUse( Func<EValidation, TValue> otherwiseFunc )
+         => IsSome ? _value : otherwiseFunc( IsNone ? EValidation.Success : EValidation.Failure( _failure ) );
+
+      /// <summary>
       /// Writes this instance's value into the <see langword="out"/> parameter <paramref name="value"/> and returns <see langword="true"/> if <see cref="IsSome"/>
       /// == <see langword="true"/>, otherwise <paramref name="value"/> will be set to the <see langword="default"/> value of <typeparamref name="TValue"/> and the
       /// method returns <see langword="false"/>.
