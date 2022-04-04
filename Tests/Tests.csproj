@@ -11,14 +11,14 @@
    <PropertyGroup>
       <!-- the IMPORTANT ones -->
       <AssemblyName>SIEDA.Monadic.TestSuite</AssemblyName>
-      <TargetFramework>net5.0</TargetFramework>
+      <TargetFramework>net6.0</TargetFramework>
       <IsPackable>false</IsPackable>
 
       <!-- generating C# Documentation -->
       <GenerateDocumentationFile>false</GenerateDocumentationFile>
       
       <!-- for details, see LICENSE-file in this repository -->
-      <Copyright>Copyright © 2020-2021 SIEDA GmbH Kaiserslautern</Copyright>
+      <Copyright>Copyright © 2020-2022 SIEDA GmbH Kaiserslautern</Copyright>
       
       <!-- warnings we are not interested in -->
       <NoWarn>CS1591,IDE0011,IDE0063</NoWarn>
@@ -38,10 +38,10 @@
    #################################################################################################################################-->
 
    <ItemGroup>
-      <!-- external dependencies which we aquire via NuGet -->
-      <PackageReference Include="nunit" Version="3.10.1" />
-      <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+      <!-- external dependencies which we acquire via NuGet -->
+      <PackageReference Include="NUnit" Version="3.13.3" />
+      <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
    </ItemGroup>
    
    <ItemGroup>
