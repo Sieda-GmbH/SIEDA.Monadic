@@ -101,6 +101,12 @@ namespace SIEDA.Monadic
       public Exception FailureOrThrow() =>
          IsFailure ? _failure : throw new ValidationNoFailureException( typeof( Exception ) );
 
+      /// <summary>
+      /// <para>Method exclusive to the E-Variants of all the Monads: Does nothing except throwing the contained exception if <see cref="IsFailure"/> is <see langword="true"/>.</para>
+      /// <para>Use this method with care, exceptions should be wrapped inside monadic concepts for a reason!</para>
+      /// </summary>
+      public void ThrowContainedIfFailed() { if( IsFailure ) throw _failure; }
+
       #endregion Accessing Failure
 
       #region Mapping
