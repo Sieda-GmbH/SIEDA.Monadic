@@ -118,6 +118,14 @@ namespace SIEDA.Monadic
       public Failable<T, TFail> ToFailable<T>( T valueOnSuccess ) => IsSuccess ? Failable<T, TFail>.Success( valueOnSuccess ) : Failable<T, TFail>.Failure( _failure );
 
       /// <summary>
+      /// Converts this instance into a <see cref="Failable{TValue, TFail}"/>, which is then either a failure containing this instance's failure if
+      /// <see cref="IsSuccess"/> == <see langword="false"/> or a success containing the result of <paramref name="func"/>
+      /// otherwise.
+      /// </summary>
+      /// <param name="func"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>
+      public Failable<T, TFail> ToFailable<T>( Func<T> func ) => IsSuccess ? Failable<T, TFail>.Success( func() ) : Failable<T, TFail>.Failure( _failure );
+
+      /// <summary>
       /// Converts this instance into a <see cref="EFailable{TValue}"/>, which is then either a failure containing <paramref name="error"/> if
       /// <see cref="IsSuccess"/> == <see langword="false"/> or a success containing <paramref name="valueOnSuccess"/>
       /// otherwise.

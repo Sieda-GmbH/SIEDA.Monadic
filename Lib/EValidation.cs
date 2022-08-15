@@ -143,6 +143,14 @@ namespace SIEDA.Monadic
       /// <param name="valueOnSuccess"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>
       public EFailable<T> ToEFailable<T>( T valueOnSuccess ) => IsSuccess ? EFailable<T>.Success( valueOnSuccess ) : EFailable<T>.Failure( _failure );
 
+      /// <summary>
+      /// Converts this instance into a <see cref="EFailable{TValue}"/>, which is then either a failure containing this instance's failure if
+      /// <see cref="IsSuccess"/> == <see langword="false"/> or a success containing the result of <paramref name="func"/>
+      /// otherwise.
+      /// </summary>
+      /// <param name="func"> value to employ in case <see cref="IsSuccess"/> == <see langword="true"/>. </param>
+      public EFailable<T> ToEFailable<T>( Func<T> func ) => IsSuccess ? EFailable<T>.Success( func() ) : EFailable<T>.Failure( _failure );
+
       /// <summary> Converts this instance into an appropriate <see cref="Validation{Exception}"/>. </summary>
       /// <returns> <see cref="Validation{Exception}"/>. </returns>
       public Validation<Exception> ToValidation() => IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
