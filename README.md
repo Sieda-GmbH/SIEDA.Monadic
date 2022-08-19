@@ -58,14 +58,29 @@ See [here](https://github.com/Sieda-GmbH/SIEDA.Monadic/blob/master/README.md#e-v
 
 ## Examples:
 
-### Declaring monadic instances:
+### Declaring instances of monadic objects:
 
 ```csharp
-var maybe = Maybe<int>.Some( 1 );
-var validation = Validation<string>.Success();
-var failable = Failable<int, string>.Success( 2 );
-var option = Option<int, string>.Some( 3 );
-``` 
+var maybeA = Maybe<int>.Some( 1 );
+var maybeB = Maybe<int>.None;
+
+var validationA = Validation<string>.Success();
+var validationB = Validation<string>.Failure( "Oh no, something went wrong!" );
+
+var failableA = Failable<float, string>.Success( 2.0f );
+var failableB = Failable<float, string>.Failure( "Oh no, something went wrong!" );
+
+var optionA = Option<long, string>.Some( 3 );
+var optionB = Option<long, string>.None;
+var optionC = Option<long, string>.Failure( "Oh no, something went wrong!" );
+```
+
+For the majority of usecases, you will probably employ the E-Variants, which ends up looking like this for example:
+
+```csharp
+var efailableA = EFailable<float>.Success( 2.0f );
+var efailableB = EFailable<float>.Failure( new Exception( "Oh no, something went wrong!" ) );
+```
 
 ### Leveraging Monadics for API-contracts:
 
@@ -78,7 +93,7 @@ public interface SessionManager
    EValidation EndSession( UserSessionKey key );
 }
 
-//...we can for example leverage this when employing the monadic-based contract in a REST-API endpoint:
+//...we can for example leverage this when employing the monadic-based contract in e.g. REST-API endpoint to write very clean code:
 [HttpPost( "usersession/{sessionId}/do_something" )]
 [Produces( MediaTypeConstants.Application.Json )]
 public ActionResult<ResultOfSomething> ExecuteForExistingUserSession( int sessionId, [FromBody] OtherParams otherParams ) =>
@@ -91,24 +106,43 @@ public ActionResult<ResultOfSomething> ExecuteForExistingUserSession( int sessio
 ```csharp
 public class ClockForTests
 {
-   private Maybe<DateTime> _currentTime;
+   private Maybe<DateTime> _currentTime; //monadic object
 
-   public ClockForTests()
-   {
-      _currentTime = Maybe<DateTime>.None;
-   }
+   //CTOR for real-time clock:
+   public ClockForTests() => _currentTime = Maybe<DateTime>.None;
 
-   public ClockForTests( DateTime definedNow )
-   {
-      _currentTime = Maybe<DateTime>.Some( definedNow );
-   }
-
-   public void SetCurrentTimeTo( DateTime d ) { _currentTime = Maybe<DateTime>.Some( d ); }
-
-   public void SetToRealTime() { _currentTime = Maybe<DateTime>.None; }
-
+   //CTOR for fixed-time instance:
+   public ClockForTests( DateTime definedNow ) => _currentTime = Maybe<DateTime>.Some( definedNow );
+   
+   //accessor-methods for all testsuites to obtain the currently canonical concept of "the current time"
    public DateTime Now => _currentTime.Or( DateTime.Now );
-
    public DateTime UtcNow => _currentTime.Map( d => d.AsUtc() ).Or( DateTime.UtcNow );
+   
+   //setter-methods to set the currently canonical "current time", depending on the testcase's demands
+   public void SetCurrentTimeTo( DateTime d ) => _currentTime = Maybe<DateTime>.Some( d );
+   public void SetToRealTime() => _currentTime = Maybe<DateTime>.None;
 }
 ```
+
+### Stepping into the monadic world from your non-monadic source code:
+```csharp
+var efailable = EFailable<MyOjectReturnedMyFunction>.Wrapping( () => MyFunctionThatEitherReturnsAnObjectOrThrows( ... ) );
+```
+
+### Having clean contracts for your persistence layer (a class wrapping your SQL code):
+```csharp
+namespace Persistence.Layer.of.my.Application
+{
+   public interface IUserProvider
+   {
+      /// <summary>Obtain data based on the <paramref name="id"/>.</summary>
+      /// <returns>
+      /// <para>* <see cref="EOption{UserData}.Some(UserData)"/> containing the data identified by <paramref name="id"/>.</para>
+      /// <para>* <see cref="EOption{UserData}.None"/> if no data exists on the database. </para>
+      /// <para>* <see cref="EOption{UserData}.Failure(System.Data.SqlClient.SqlException)"/> if any technical problem occurred (e.g. connection loss). </para>
+      /// </returns>
+      EOption<UserData> GetUserData( User id );
+   }
+}
+```
+
