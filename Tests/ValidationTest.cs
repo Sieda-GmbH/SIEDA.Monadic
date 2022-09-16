@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using SIEDA.Monadic;
+using SIEDA.MonadicTests.HelperClass;
 
 namespace SIEDA.MonadicTests
 {
@@ -30,7 +31,6 @@ namespace SIEDA.MonadicTests
 
          Assert.That( testValue.IsSuccess, Is.False );
       }
-
       #endregion Construction
 
       #region ToString
@@ -120,6 +120,31 @@ namespace SIEDA.MonadicTests
          Assert.That( x.Equals( y ), Is.False );
       }
 
+      [Test]
+      [Description( "Validations zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Success-Fall!" )]
+      public void DifferentInheritedType_Success()
+      {
+         var x = Validation<MyExceptionWithTypicalEquals>.Success;
+         var y = Validation<MySubexceptionWithTypicalValueBasedEquals>.Success;
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Validations zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Failure-Fall!" )]
+      public void DifferentInheritedType_Some()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyExceptionWithTypicalEquals( sameText );
+         var b = new MySubexceptionWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = Validation<MyExceptionWithTypicalEquals>.Failure( a );
+         var y = Validation<MySubexceptionWithTypicalValueBasedEquals>.Failure( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
       #endregion Equals
 
       #region Accessing Value

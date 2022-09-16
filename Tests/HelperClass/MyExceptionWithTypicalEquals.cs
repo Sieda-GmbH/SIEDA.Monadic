@@ -1,30 +1,26 @@
-﻿namespace SIEDA.MonadicTests.HelperClass
+﻿using System;
+
+namespace SIEDA.MonadicTests.HelperClass
 {
-   public class MyClass
+   public class MyExceptionWithTypicalEquals : Exception
    {
       public string Text { get; private set; }
 
-      public MyClass()
+      public MyExceptionWithTypicalEquals()
       {
          Text = "Text";
       }
 
-      public MyClass( string text )
+      public MyExceptionWithTypicalEquals( string text )
       {
          Text = text;
       }
 
       public override bool Equals( object obj )
       {
-         if( ( obj == null ) || !GetType().Equals( obj.GetType() ) )
-         {
-            return false;
-         }
-         else
-         {
-            var p = (MyClass) obj;
+         if( obj is MyExceptionWithTypicalEquals p )
             return ( p.Text.Equals( Text ) );
-         }
+         return false;
       }
 
       public override int GetHashCode() => Text.GetHashCode();

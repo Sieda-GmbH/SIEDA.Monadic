@@ -265,7 +265,47 @@ namespace SIEDA.MonadicTests
          Assert.That( x.Equals( y ), Is.False );
       }
 
+      [Test]
+      [Description( "Options zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im None-Fall!" )]
+      public void DifferentInheritedType_None()
+      {
+         var x = Option<MyClassWithTypicalValueBasedEquals, MyExceptionWithTypicalEquals>.None;
+         var y = Option<MySubclassWithTypicalValueBasedEquals, MySubexceptionWithTypicalValueBasedEquals>.None;
 
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Options zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Failure-Fall!" )]
+      public void DifferentInheritedType_Failure()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyExceptionWithTypicalEquals( sameText );
+         var b = new MySubexceptionWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = Option<MyClassWithTypicalValueBasedEquals, MyExceptionWithTypicalEquals>.Failure( a );
+         var y = Option<MySubclassWithTypicalValueBasedEquals, MySubexceptionWithTypicalValueBasedEquals>.Failure( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Options zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Some-Fall!" )]
+      public void DifferentInheritedType_Success()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyClassWithTypicalValueBasedEquals( sameText );
+         var b = new MySubclassWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = Option<MyClassWithTypicalValueBasedEquals, MyExceptionWithTypicalEquals>.Some( a );
+         var y = Option<MySubclassWithTypicalValueBasedEquals, MySubexceptionWithTypicalValueBasedEquals>.Some( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
       #endregion Equals
 
       #region Accessing Value
@@ -337,10 +377,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithDirectSubtype_Some()
       {
-         var myClass = new MyClass();
-         var mySubclass = new MySubclass();
+         var myClass = new MyClassWithTypeBasedEquals();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = Option<MyClass, Exception>.Some( myClass );
+         var underTest = Option<MyClassWithTypeBasedEquals, Exception>.Some( myClass );
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( myClass ) );
@@ -349,9 +389,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithDirectSubtype_None()
       {
-         var mySubclass = new MySubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = Option<MyClass, Exception>.None;
+         var underTest = Option<MyClassWithTypeBasedEquals, Exception>.None;
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -360,9 +400,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithDirectSubtype_Failure()
       {
-         var mySubclass = new MySubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = Option<MyClass, Exception>.Failure( new ArgumentException( "irrelevant" ) );
+         var underTest = Option<MyClassWithTypeBasedEquals, Exception>.Failure( new ArgumentException( "irrelevant" ) );
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -371,10 +411,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelSubtype_Some()
       {
-         var mySubclass = new MySubclass();
-         var myOtherSubclass = new MyOtherSubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = Option<MyClass, Exception>.Some( mySubclass );
+         var underTest = Option<MyClassWithTypeBasedEquals, Exception>.Some( mySubclass );
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -383,9 +423,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelSubtype_None()
       {
-         var myOtherSubclass = new MyOtherSubclass();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = Option<MyClass, Exception>.None;
+         var underTest = Option<MyClassWithTypeBasedEquals, Exception>.None;
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );
@@ -394,9 +434,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelSubtype_Failure()
       {
-         var myOtherSubclass = new MyOtherSubclass();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = Option<MyClass, Exception>.Failure( new ArgumentException( "irrelevant" ) );
+         var underTest = Option<MyClassWithTypeBasedEquals, Exception>.Failure( new ArgumentException( "irrelevant" ) );
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );

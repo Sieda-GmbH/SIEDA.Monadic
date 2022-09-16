@@ -293,10 +293,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithSubtype_Success()
       {
-         var myClass = new MyClass();
-         var mySubclass = new MySubclass();
+         var myClass = new MyClassWithTypeBasedEquals();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = EFailable<MyClass>.Success( myClass );
+         var underTest = EFailable<MyClassWithTypeBasedEquals>.Success( myClass );
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( myClass ) );
@@ -305,9 +305,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithSubtype_Failure()
       {
-         var mySubclass = new MySubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = EFailable<MyClass>.Failure( new ArgumentException( "irrelevant" ) );
+         var underTest = EFailable<MyClassWithTypeBasedEquals>.Failure( new ArgumentException( "irrelevant" ) );
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -316,10 +316,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelType_Success()
       {
-         var mySubclass = new MySubclass();
-         var myOtherSubclass = new MyOtherSubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = EFailable<MyClass>.Success( mySubclass );
+         var underTest = EFailable<MyClassWithTypeBasedEquals>.Success( mySubclass );
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -328,14 +328,45 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelType_Failure()
       {
-         var myOtherSubclass = new MyOtherSubclass();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = EFailable<MyClass>.Failure( new ArgumentException( "irrelevant" ) );
+         var underTest = EFailable<MyClassWithTypeBasedEquals>.Failure( new ArgumentException( "irrelevant" ) );
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );
       }
 
+      [Test]
+      [Description( "EFailables zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Failure-Fall!" )]
+      public void DifferentInheritedType_Failure()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyExceptionWithTypicalEquals( sameText );
+         var b = new MySubexceptionWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = EFailable<int>.Failure( a );
+         var y = EFailable<int>.Failure( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "EFailables zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Success-Fall!" )]
+      public void DifferentInheritedType_Success()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyClassWithTypicalValueBasedEquals( sameText );
+         var b = new MySubclassWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = EFailable<MyClassWithTypicalValueBasedEquals>.Success( a );
+         var y = EFailable<MySubclassWithTypicalValueBasedEquals>.Success( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
       #endregion Subtypes
 
       #region Flatten

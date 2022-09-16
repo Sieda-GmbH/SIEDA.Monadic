@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using SIEDA.Monadic;
+using SIEDA.MonadicTests.HelperClass;
 
 namespace SIEDA.MonadicTests
 {
@@ -123,6 +124,22 @@ namespace SIEDA.MonadicTests
          Assert.That( bValid, Is.Not.EqualTo( bEValid ) );
 
          Assert.That( aEValid, Is.Not.EqualTo( bValid ) ); //sanity-check
+      }
+
+      [Test]
+      [Description( "EValidations mit unterschiedlichen Exceptiontypen sind unterschiedlich, auch bei Subtypen im Failure-Fall!" )]
+      public void Equals_Validation_DifferentType_SubtypeCase()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyExceptionWithTypicalEquals( sameText );
+         var b = new MySubexceptionWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = EValidation.Failure( a );
+         var y = EValidation.Failure( b );
+
+         Assert.That( x.Equals( y ), Is.False );
       }
       #endregion Equals
 

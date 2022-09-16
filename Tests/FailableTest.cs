@@ -188,6 +188,38 @@ namespace SIEDA.MonadicTests
          Assert.That( x.Equals( y ), Is.False );
       }
 
+      [Test]
+      [Description( "Failables zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Failure-Fall!" )]
+      public void DifferentInheritedType_Failure()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyClassWithTypicalValueBasedEquals( sameText );
+         var b = new MySubclassWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = Failable<int, MyClassWithTypicalValueBasedEquals>.Failure( a );
+         var y = Failable<int, MySubclassWithTypicalValueBasedEquals>.Failure( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Failables zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Success-Fall!" )]
+      public void DifferentInheritedType_Success()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyClassWithTypicalValueBasedEquals( sameText );
+         var b = new MySubclassWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = Failable<MyClassWithTypicalValueBasedEquals, int>.Success( a );
+         var y = Failable<MySubclassWithTypicalValueBasedEquals, int>.Success( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
       #endregion Equals
 
       #region Accessing Value
@@ -268,10 +300,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithSubtype_Success()
       {
-         var myClass = new MyClass();
-         var mySubclass = new MySubclass();
+         var myClass = new MyClassWithTypeBasedEquals();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = Failable<MyClass, Exception>.Success( myClass );
+         var underTest = Failable<MyClassWithTypeBasedEquals, Exception>.Success( myClass );
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( myClass ) );
@@ -280,9 +312,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithSubtype_Failure()
       {
-         var mySubclass = new MySubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = Failable<MyClass, Exception>.Failure( new ArgumentException( "irrelevant" ) );
+         var underTest = Failable<MyClassWithTypeBasedEquals, Exception>.Failure( new ArgumentException( "irrelevant" ) );
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -291,10 +323,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelType_Success()
       {
-         var mySubclass = new MySubclass();
-         var myOtherSubclass = new MyOtherSubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = Failable<MyClass, Exception>.Success( mySubclass );
+         var underTest = Failable<MyClassWithTypeBasedEquals, Exception>.Success( mySubclass );
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -303,9 +335,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelType_Failure()
       {
-         var myOtherSubclass = new MyOtherSubclass();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = Failable<MyClass, Exception>.Failure( new ArgumentException( "irrelevant" ) );
+         var underTest = Failable<MyClassWithTypeBasedEquals, Exception>.Failure( new ArgumentException( "irrelevant" ) );
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );

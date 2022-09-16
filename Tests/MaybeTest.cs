@@ -203,6 +203,32 @@ namespace SIEDA.MonadicTests
          Assert.That( x.Equals( y ), Is.False );
       }
 
+      [Test]
+      [Description( "Maybes zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im None-Fall!" )]
+      public void DifferentInheritedType_None()
+      {
+         var x = Maybe<MyClassWithTypicalValueBasedEquals>.None;
+         var y = Maybe<MySubclassWithTypicalValueBasedEquals>.None;
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
+      [Test]
+      [Description( "Maybes zu unterschiedlichen Typen sind unterschiedlich, auch bei Subtypen im Some-Fall!" )]
+      public void DifferentInheritedType_Some()
+      {
+         var sameText = "ANY_VALUE";
+         var a = new MyClassWithTypicalValueBasedEquals( sameText );
+         var b = new MySubclassWithTypicalValueBasedEquals( sameText, 123 );
+         Assert.That( a.Equals( b ), Is.True, "TEST-SETUP IS BROKEN!" );
+         Assert.That( b.Equals( a ), Is.True, "TEST-SETUP IS BROKEN!" );
+
+         var x = Maybe<MyClassWithTypicalValueBasedEquals>.Some( a );
+         var y = Maybe<MySubclassWithTypicalValueBasedEquals>.Some( b );
+
+         Assert.That( x.Equals( y ), Is.False );
+      }
+
       #endregion Equals
 
       #region Accessing Value
@@ -247,10 +273,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithDirectSubtype_Some()
       {
-         var myClass = new MyClass();
-         var mySubclass = new MySubclass();
+         var myClass = new MyClassWithTypeBasedEquals();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = Maybe<MyClass>.Some( myClass );
+         var underTest = Maybe<MyClassWithTypeBasedEquals>.Some( myClass );
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( myClass ) );
@@ -259,9 +285,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithDirectSubtype_None()
       {
-         var mySubclass = new MySubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
 
-         var underTest = Maybe<MyClass>.None;
+         var underTest = Maybe<MyClassWithTypeBasedEquals>.None;
          var actualValue = underTest.Or( mySubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -270,10 +296,10 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelSubtype_Some()
       {
-         var mySubclass = new MySubclass();
-         var myOtherSubclass = new MyOtherSubclass();
+         var mySubclass = new MySubclassWithTypeBasedEquals();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = Maybe<MyClass>.Some( mySubclass );
+         var underTest = Maybe<MyClassWithTypeBasedEquals>.Some( mySubclass );
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( mySubclass ) );
@@ -282,9 +308,9 @@ namespace SIEDA.MonadicTests
       [Test]
       public void OrWithParallelSubtype_None()
       {
-         var myOtherSubclass = new MyOtherSubclass();
+         var myOtherSubclass = new MyOtherSubclassWithTypeBasedEquals();
 
-         var underTest = Maybe<MyClass>.None;
+         var underTest = Maybe<MyClassWithTypeBasedEquals>.None;
          var actualValue = underTest.Or( myOtherSubclass );
 
          Assert.That( actualValue, Is.SameAs( myOtherSubclass ) );
