@@ -332,6 +332,11 @@ namespace SIEDA.Monadic
       /// this instance and <see cref="Failable{TValue, Exception}.Failure(Exception)"/> otherwise.</returns>
       public Failable<TValue, Exception> ToFailable() => IsSuccess ? Failable<TValue, Exception>.Success( _value ) : Failable<TValue, Exception>.Failure( _failure );
 
+      /// <summary>Converts this instance into an appropriate <see cref="Failable{TValue, TFail}"/></summary>
+      /// <returns><see cref="Failable{TValue, TFail}.Success(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for this instance
+      /// and <see cref="Failable{TValue, TFail}.Failure(TFail)"/> otherwise, constructed with the help of the <paramref name="convert"/>-function.
+      /// </returns>
+      public Failable<TValue, T> ToFailable<T>( Func<Exception, T> convert ) => IsSuccess ? Failable<TValue, T>.Success( _value ) : Failable<TValue, T>.Failure( convert( _failure ) );
 
       /// <summary>
       /// Converts this instance into an appropriate <see cref="Option{TValue, Exception}"/>.
@@ -341,6 +346,15 @@ namespace SIEDA.Monadic
       /// langword="true"/> for this instance and <see cref="Option{TValue, Exception}.Failure(Exception)"/> otherwise.
       /// </returns>
       public Option<TValue, Exception> ToOption() => IsSuccess ? Option<TValue, Exception>.Some( _value ) : Option<TValue, Exception>.Failure( _failure );
+
+      /// <summary>
+      /// Converts this instance into an appropriate <see cref="Option{TValue, TFail}"/>.
+      /// </summary>
+      /// <returns>
+      /// <see cref="Option{TValue, TFail}.Some(TValue)"/> if <see cref="IsSuccess"/> == <see langword="true"/> for this instance and
+      /// <see cref="Option{TValue, TFail}.Failure(TFail)"/> otherwise, constructed with the help of <paramref name="convert"/>-function.
+      /// </returns>
+      public Option<TValue, T> ToOption<T>( Func<Exception, T> convert ) => IsSuccess ? Option<TValue, T>.Some( _value ) : Option<TValue, T>.Failure( convert( _failure ) );
 
       /// <summary>
       /// Converts this instance into an appropriate <see cref="EOption{TValue}"/>.

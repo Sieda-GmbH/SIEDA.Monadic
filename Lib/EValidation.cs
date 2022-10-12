@@ -155,6 +155,11 @@ namespace SIEDA.Monadic
       /// <returns> <see cref="Validation{Exception}"/>. </returns>
       public Validation<Exception> ToValidation() => IsSuccess ? Validation<Exception>.Success : Validation<Exception>.Failure( _failure );
 
+      /// <summary> Converts this instance into an appropriate <see cref="Validation{Exception}"/>, constructed with the help of the 
+      /// <paramref name="convert"/>-function </summary>.
+      /// <returns> <see cref="Validation{T}"/>. </returns>
+      public Validation<T> ToValidation<T>( Func<Exception, T> convert ) => IsSuccess ? Validation<T>.Success : Validation<T>.Failure( convert( _failure ) );
+
       /// <summary> Converts this instance into a <see cref="EOption{Object}"/>, which is either a failure or empty (but never defined). </summary>
       /// <returns> <see cref="EOption{Object}"/> with its some-type being 'object' and its failure-type being <see cref="Exception"/>. </returns>
       public EOption<object> ToEOption() =>

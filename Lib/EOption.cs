@@ -468,6 +468,14 @@ namespace SIEDA.Monadic
       public Option<TValue, Exception> ToOption() => IsSome ? Option<TValue, Exception>.Some( _value )
          : IsFailure ? Option<TValue, Exception>.Failure( _failure ) : Option<TValue, Exception>.None;
 
+      /// <summary> Converts this instance into an appropriate <see cref="Option{TValue, Exception}"/>. </summary>
+      /// <returns><see cref="Option{TValue, Exception}.Some(TValue)"/> if <see cref="IsSome"/> == <see langword="true"/> for this instance,
+      /// <see cref="Option{TValue, Exception}.None"/> if <see cref="IsNone"/> == <see langword="true"/> for this instance and
+      /// <see cref="Option{TValue, Exception}.Failure(Exception)"/> containing this instance's "failure" (constructed with the help of
+      /// the <paramref name="convert"/>-function) if <see cref="IsFailure"/> == <see langword="true"/> for this instance.</returns>
+      public Option<TValue, T> ToOption<T>( Func<Exception, T> convert ) => IsSome ? Option<TValue, T>.Some( _value )
+         : IsFailure ? Option<TValue, T>.Failure( convert( _failure ) ) : Option<TValue, T>.None;
+
       /// <summary> Converts this instance into an appropriate <see cref="Validation{TFail}"/>. </summary>
       /// <returns>
       /// <see cref="Validation{TFail}.Success"/> if <see cref="IsFailure"/> == <see langword="false"/>, thus *LOSING* a
