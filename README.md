@@ -124,9 +124,10 @@ public class ClockForTests
 }
 ```
 
-### Stepping into the monadic world from your non-monadic source code:
+### Stepping into the monadic world from your non-monadic, exception-throwing source code:
 ```csharp
-var efailable = EFailable<MyOjectReturnedMyFunction>.Wrapping( () => MyFunctionThatEitherReturnsAnObjectOrThrows( ... ) );
+var efailable = EFailable<MyObject>.Wrapping( () => MyFunctionThatEitherReturnsAnObjectOrThrows( ... ) );
+var evalidation = EValidation.Wrapping( () => MyFunctionThatMayThrow( ... ) );
 ```
 
 ### Having clean contracts for your persistence layer (a class wrapping your SQL code):
