@@ -324,6 +324,17 @@ namespace SIEDA.Monadic
       /// </summary>
       public void ThrowContainedIfFailed() { if( IsFailure ) throw _failure; }
 
+      /// <summary>
+      /// <para>Method exclusive to this class: Throws the contained exception if <see cref="IsFailure"/> is <see langword="true"/>,
+      /// otherwise it converts this instance into a <see cref="Maybe{TValue}"/> using the <see cref="ToMaybe"/>-method.</para>
+      /// <para>Use this method with care, exceptions should be wrapped inside monadic concepts for a reason!</para>
+      /// </summary>
+      public Maybe<TValue> ThrowContainedOrReturnMaybe()
+      {
+         if( IsFailure ) throw _failure;
+         return ToMaybe();
+      }
+
       #endregion Accessing Failure
 
       #region Converters
