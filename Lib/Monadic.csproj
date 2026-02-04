@@ -52,16 +52,19 @@
       <Title>SIEDA.Monadic</Title>
       <Authors>SIEDA Systemhaus für intelligente EDV-Anwendungen GmbH</Authors>
       <Description>Implements several functional Monadic Types in C#, enabling better API- and contract-design</Description>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
       <RepositoryUrl>https://github.com/Sieda-GmbH/SIEDA.Monadic</RepositoryUrl>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageIcon>logo.png</PackageIcon>
       <RepositoryType>git</RepositoryType>
+      <PackageTags>monad;monadic;endofunctor;functional;option;failable;maybe;some;none;validation</PackageTags>
        <!-- display no weird dialogs to prevent command-line usage. License is still in effect of course! -->
       <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
    </PropertyGroup>
    <ItemGroup>
       <!-- include non-source code files for NuGet-Package -->
       <None Include="..\LICENSE" Pack="true" PackagePath="" />
+      <None Include="..\README.md" Pack="true" PackagePath="" />
       <None Include="..\logo.png" Pack="true" PackagePath="" />
    </ItemGroup>
 
