@@ -11,14 +11,14 @@
    <PropertyGroup>
       <!-- the IMPORTANT ones -->
       <AssemblyName>SIEDA.Monadic.TestSuite</AssemblyName>
-      <TargetFramework>net6.0</TargetFramework>
+      <TargetFramework>net8.0</TargetFramework>
       <IsPackable>false</IsPackable>
 
       <!-- generating C# Documentation -->
       <GenerateDocumentationFile>false</GenerateDocumentationFile>
       
       <!-- for details, see LICENSE-file in this repository -->
-      <Copyright>Copyright © 2020-2022 SIEDA GmbH Kaiserslautern</Copyright>
+      <Copyright>Copyright © 2020-2026 SIEDA GmbH Kaiserslautern</Copyright>
       
       <!-- warnings we are not interested in -->
       <NoWarn>CS1591,IDE0011,IDE0063</NoWarn>
