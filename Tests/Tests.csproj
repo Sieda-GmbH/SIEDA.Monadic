@@ -11,7 +11,7 @@
    <PropertyGroup>
       <!-- the IMPORTANT ones -->
       <AssemblyName>SIEDA.Monadic.TestSuite</AssemblyName>
-      <TargetFramework>net8.0</TargetFramework>
+      <TargetFramework>net10.0</TargetFramework>
       <IsPackable>false</IsPackable>
 
       <!-- generating C# Documentation -->
@@ -39,9 +39,9 @@
 
    <ItemGroup>
       <!-- external dependencies which we acquire via NuGet -->
-      <PackageReference Include="NUnit" Version="3.13.3" />
-      <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+      <PackageReference Include="NUnit" Version="4.6.1" />
+      <PackageReference Include="NUnit3TestAdapter" Version="6.3.1" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.1" />
    </ItemGroup>
    
    <ItemGroup>

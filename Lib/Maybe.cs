@@ -155,6 +155,13 @@ namespace SIEDA.Monadic
       /// <param name="otherwise">The desired value if this instance has no value.</param>
       public TValue Or( TValue otherwise ) => IsSome ? _value : otherwise;
 
+      /// <summary>
+      /// Returns this instance's "successful" value if <see cref="IsSome"/> == <see langword="true"/>,
+      /// otherwise the result of <paramref name="otherwiseFunc"/>.
+      /// </summary>
+      /// <param name="otherwiseFunc">A function computing the desired value if this instance has no value.</param>
+      public TValue OrUse( Func<TValue> otherwiseFunc ) => IsSome ? _value : otherwiseFunc();
+
       /// <summary> Returns this instance's value if <see cref="IsSome"/> == <see langword="true"/>, otherwise throws a <see cref="MaybeNoneException"/>. </summary>
       /// <exception cref="MaybeNoneException"/>
       public TValue OrThrow() => IsSome ? _value : throw new MaybeNoneException( typeValue: typeof( TValue ) );

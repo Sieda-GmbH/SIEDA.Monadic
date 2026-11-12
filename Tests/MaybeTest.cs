@@ -252,6 +252,13 @@ namespace SIEDA.MonadicTests
       }
 
       [Test]
+      public void Or_Use_Value()
+      {
+         Assert.That( Maybe<int>.Some( 1 ).OrUse( () => 2 ), Is.EqualTo( 1 ) );
+         Assert.That( Maybe<int>.None.OrUse( () => 2 ), Is.EqualTo( 2 ) );
+      }
+
+      [Test]
       public void NoneOrThrowThrows()
       {
          Assert.Throws<Exception>( () => Maybe<int>.None.OrThrow( new Exception() ) );
